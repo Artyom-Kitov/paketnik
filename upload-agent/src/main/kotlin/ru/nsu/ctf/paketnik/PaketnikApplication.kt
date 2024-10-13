@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class PaketnikApplication
 
 fun main(args: Array<String>) {
-	runApplication<PaketnikApplication>(*args)
+    runApplication<PaketnikApplication>(*args)
 }
