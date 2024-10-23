@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; 
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 function App() {
   return (
@@ -18,5 +18,4 @@ function App() {
   );
 }
 
-export default App;
 export default App;
