@@ -18,4 +18,19 @@ export default [
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   eslintConfigPrettier,
+  {
+    rules:
+    {
+      "no-restricted-exports": ["error", { "restrictDefaultExports": { "direct": true } }],
+      "arrow-parens": ["error", "always"],
+      "@typescript-eslint/no-explicit-any": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "TSEnumDeclaration",
+          "message": "Don't declare enums"
+        }
+      ]
+    }
+  } 
 ];
