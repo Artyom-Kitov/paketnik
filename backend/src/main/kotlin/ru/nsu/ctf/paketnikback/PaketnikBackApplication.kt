@@ -1,4 +1,4 @@
-package ru.nsu.ctf.paketnitkback
+package ru.nsu.ctf.paketnikback
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication

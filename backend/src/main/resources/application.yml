@@ -1,0 +1,12 @@
+spring:
+  application:
+    title: paketnik_back
+    version: 0.0.1
+  data:
+    mongodb:
+      uri: mongodb://paketnik:paketnik123@localhost:27018/paketnik-db?authSource=admin
+      authentication-database: admin
+      database: paketnik-db
+
+server:
+  port: 8081
