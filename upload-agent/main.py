@@ -9,11 +9,36 @@ import os
 import time
 
 import dpkt
+import requests
+import tqdm
 
 
 processed_pcaps = set()
 uploaded_pcaps = set()
 error_pcaps = set()
+
+
+class upload_in_chunks(object):
+    def __init__(self, filename, chunksize=1 << 13):
+        self._filename = filename
+        self._chunksize = chunksize
+        self._totalsize = os.path.getsize(filename)
+        self._readsofar = 0
+
+    def __iter__(self):
+        with open(self._filename, 'rb') as file:
+            while True:
+                data = file.read(self._chunksize)
+                if not data:
+                    sys.stdout.write('\n')
+                    break
+                self._readsofar += len(data)
+                percent = self._readsofar * 1e2 / self._totalsize
+                sys.stdout.write('\r{percent:3.0f}% {filename}'.format(percent=percent, filename=self._filename))
+                yield data
+    
+    def __len__(self):
+        return self._totalsize
 
 
 class ArgumentParser(argparse.ArgumentParser):
@@ -31,8 +56,9 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
         logger.debug(f'{traceback.format_exc()}')
         return False
     else:
-        # TODO: Upload pcap
-        pass
+        with open(path_to_pcap, 'rb') as file:
+            url = f'http://{dst_ip}:{dst_port}'
+            r = requests.post(url, data=upload_in_chunks(path_to_pcap))
     return True
 
 
