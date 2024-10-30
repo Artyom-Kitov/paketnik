@@ -42,10 +42,10 @@ def is_uploaded(path_to_pcap: str):
 
 def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
     try:
-        with open(path_to_pcap.encode('utf-8'), 'rb') as file:
+        with open(path_to_pcap, 'rb') as file:
             pcaps = dpkt.pcap.Reader(file).readpkts()
     except Exception as err:
-        logger.warning(f'File \"{path_to_pcap}\" skipped due to file reading error')
+        logger.warning(f'File \"{path_to_pcap}\" skipped due to file parsing error')
         logger.debug(f'{traceback.format_exc()}')
         return False
     else:
