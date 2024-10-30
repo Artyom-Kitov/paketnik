@@ -6,38 +6,20 @@ import logging
 import traceback
 import datetime
 import os
+import time
 
 import dpkt
-import watchdog.events
-import watchdog.observers
 
 
-class PcapsAutoUploader(watchdog.events.FileSystemEventHandler):
-    def __init__(self, src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
-        self._src_dir = src_dir
-        self._dst_ip = dst_ip
-        self._dst_port = dst_port
-        self._upload_last_pcap = upload_last_pcap
-
-    def on_created(self, event):
-        if event.is_directory:
-            return
-        upload_pcaps(self._src_dir, self._dst_ip, self._dst_port, self._upload_last_pcap)
-
-    def on_moved(self, event):
-        if event.is_directory:
-            return
-        upload_pcaps(self._src_dir, self._dst_ip, self._dst_port, self._upload_last_pcap)
+processed_pcaps = set()
+uploaded_pcaps = set()
+error_pcaps = set()
 
 
 class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
         self.print_help(sys.stderr)
         self.exit(1, None)
-
-
-def is_uploaded(path_to_pcap: str):
-    return False
 
 
 def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
@@ -57,18 +39,28 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
 def upload_pcaps(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
     pcaps = src_dir.glob('*.pcap')
     pcaps = sorted(pcaps, key=lambda x: datetime.datetime.fromtimestamp(os.path.getmtime(x)))
-                   
+    
     if not upload_last_pcap and pcaps:
         last_pcap = pcaps.pop()
-        logger.info(f'File {last_pcap} skipped as last added file')
+        if last_pcap not in processed_pcaps:
+            logger.info(f'File {last_pcap} skipped as last added file')
+            processed_pcaps.add(last_pcap)
 
     count = 0
     for path_to_pcap in pcaps:
-        if is_uploaded(path_to_pcap):
+        if path_to_pcap in processed_pcaps:
             continue
+        processed_pcaps.add(path_to_pcap)
+        
         if upload_pcap(str(path_to_pcap), dst_ip, dst_port):
+            uploaded_pcaps.add(path_to_pcap)
             count += 1
-    logger.info(f'{count} files uploaded')
+        else:
+            error_pcaps.add(path_to_pcap)
+        
+    if count:
+        logger.info(f'{count} pcaps uploaded')
+    return
 
 
 def main(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
@@ -81,21 +73,14 @@ def main(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
     if not src_dir.exists():
         logger.critical(f'Target directory "{src_dir}" does not exists')
         return
-
-    uploader = PcapsAutoUploader(src_dir, dst_ip, dst_port, upload_last_pcap)
-    observer = watchdog.observers.Observer()
-    observer.schedule(uploader, src_dir, recursive=False)
-    observer.start()
-    
-    upload_pcaps(src_dir, dst_ip, dst_port, upload_last_pcap)
     
     try:
-        while observer.is_alive():
-            observer.join(1)
+        while True:
+            upload_pcaps(src_dir, dst_ip, dst_port, upload_last_pcap)
+            time.sleep(1)
     except KeyboardInterrupt:
         logger.info('Shutdown...')
-        observer.stop()
-    observer.join()      
+    return
 
 
 if __name__ == '__main__':
