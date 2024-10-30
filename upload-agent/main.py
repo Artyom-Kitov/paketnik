@@ -7,6 +7,7 @@ import traceback
 import datetime
 import os
 import time
+import base64
 
 import dpkt
 import requests
@@ -34,7 +35,7 @@ class upload_in_chunks(object):
                     break
                 self._readsofar += len(data)
                 percent = self._readsofar * 1e2 / self._totalsize
-                sys.stdout.write('\r{percent:3.0f}% {filename}'.format(percent=percent, filename=self._filename))
+                sys.stdout.write('\r{p:3.0f}% {f}'.format(p=percent, f=self._filename))
                 yield data
     
     def __len__(self):
@@ -58,7 +59,11 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
     else:
         with open(path_to_pcap, 'rb') as file:
             url = f'http://{dst_ip}:{dst_port}'
-            r = requests.post(url, data=upload_in_chunks(path_to_pcap))
+            headers = {'X-File-Name': path_to_pcap.encode('utf-8').hex()}
+            response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers)
+            filename, size = str(response.text).split(':')
+            filename = bytes.fromhex(filename).decode('utf-8')
+            logger.info(f'Server got {size} bytes as file {filename}')
     return True
 
 
