@@ -11,7 +11,6 @@ import base64
 
 import dpkt
 import requests
-import tqdm
 
 
 processed_pcaps = set()
@@ -60,10 +59,25 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
         with open(path_to_pcap, 'rb') as file:
             url = f'http://{dst_ip}:{dst_port}'
             headers = {'X-File-Name': path_to_pcap.encode('utf-8').hex()}
-            response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers)
+            
+            logger.info(f'{path_to_pcap} transfer started')
+            
+            t_start = time.time()
+            try:
+                response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers)
+            except Exception as err:
+                logger.error(f'{path_to_pcap} transfer failed with error')
+                logger.debug(f'{traceback.format_exc()}')
+                return False
+            t_end = time.time()
+            
+            if response.status_code != 200:
+                logger.error(f'{path_to_pcap}: server returned response with error status code ({response.status_code})')
+                return False
+
             filename, size = str(response.text).split(':')
             filename = bytes.fromhex(filename).decode('utf-8')
-            logger.info(f'Server got {size} bytes as file {filename}')
+            logger.info(f'{path_to_pcap} transfer completed in {t_end-t_start} s. Server got {size} bytes')
     return True
 
 
