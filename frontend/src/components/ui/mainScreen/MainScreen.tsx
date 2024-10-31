@@ -1,41 +1,55 @@
 import React from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import "./MainScreen.css";
-const MainScreen: React.FC = () => {
+export function MainScreen() {
   return (
-    <div className="main-screen">
-    <PanelGroup direction="horizontal" className="panel-group">
-      <Panel minSize={97}>
-        <PanelGroup direction="vertical"> 
-          <Panel maxSize={8}>
-            <PanelGroup direction="horizontal" >
-              <Panel defaultSize={50} className="left-top-widget">
-                <h1 className="title">Paketnik</h1>
-              </Panel>
-              <Panel defaultSize={50} className="right-top-widget">
-                <h1 className="title">Right top widget</h1>
-              </Panel>
-            </PanelGroup>
-          </Panel>
-          <Panel minSize={92}>
-            <PanelGroup direction="horizontal" className="right-widget-group">
-              <Panel defaultSize={50} minSize={20} className="left-bottom-widget">
-                <h1 className="streams-title">Streams</h1>
-                Left bottom widget
-              </Panel>
-              <PanelResizeHandle className="resize-handle" />
-              <Panel defaultSize={50} minSize={20} className="right-bottom-widget">
-                Right bottom widget
-              </Panel>
-            </PanelGroup>
-          </Panel>
-        </PanelGroup>
-      </Panel>
-      <Panel minSize={3} className="sidebar">
-      </Panel>
-    </PanelGroup>
+    <div className="bg-[#1e293b]">
+      <PanelGroup direction="horizontal" className="min-h-screen">
+        <Panel minSize={97}>
+          <PanelGroup direction="vertical">
+            <Panel maxSize={9}>
+              <PanelGroup direction="horizontal">
+                <Panel
+                  defaultSize={50}
+                  className="mt-[18px] ml-[11px] mr-[7px]"
+                >
+                  <h1 className="font-bold text-5xl text-white min-h-[69px]">
+                    Paketnik
+                  </h1>
+                </Panel>
+                <Panel
+                  defaultSize={50}
+                  className="bg-[#475569] mt-[18px] ml-[6px] mr-[12px]"
+                >
+                  <h1 className="font-bold text-2xl text-[#E2E8F0] h-[33px] mb-[16px] mt-[15px] ml-[22px]">
+                    PCAP dumps:
+                  </h1>
+                </Panel>
+              </PanelGroup>
+            </Panel>
+            <Panel minSize={91}>
+              <PanelGroup direction="horizontal" className="right-widget-group">
+                <Panel
+                  defaultSize={50}
+                  minSize={20}
+                  className="bg-[#808080] mb-[28px] ml-[11px] mr-[7px]"
+                >
+                  <h1 className="font-bold text-2xl text-white h-[32px] text-right">
+                    Streams
+                  </h1>
+                </Panel>
+                <PanelResizeHandle className="resize-handle" />
+                <Panel
+                  defaultSize={50}
+                  minSize={20}
+                  className="bg-[#475569] mb-[28px] mt-[38px] ml-[6px] mr-[12px]"
+                ></Panel>
+              </PanelGroup>
+            </Panel>
+          </PanelGroup>
+        </Panel>
+        <Panel minSize={3} className="bg-[#475569]"></Panel>
+      </PanelGroup>
     </div>
   );
-};
-
-export default MainScreen;
+}
