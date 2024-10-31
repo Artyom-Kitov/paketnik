@@ -1,6 +1,5 @@
 import React from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import "./MainScreen.css";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
