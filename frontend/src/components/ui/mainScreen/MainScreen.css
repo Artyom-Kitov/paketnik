@@ -1,0 +1,52 @@
+.main-screen {
+  background-color: #1e293b;
+}
+
+.panel-group {
+  min-height: 100vh;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 48px;
+  color: white;
+  min-height: 69px;
+}
+
+.streams-title {
+  font-weight: 700;
+  font-size: 24px;
+  color: white;
+  text-align: right;
+  height: 41px;
+}
+
+
+.left-bottom-widget {
+  background-color: gray;
+  margin-right: 6.5px;
+  margin-bottom: 28px;
+  margin-left:11px
+
+}
+.right-bottom-widget {
+  background-color: lightgray;
+  margin-left: 6.5px;
+  margin-top: 38px;
+  margin-bottom: 28px;
+  margin-right: 12px;
+}
+.left-top-widget {
+  margin-right: 6.5px;
+  margin-top: 18px;
+  margin-left:11px
+}
+.right-top-widget {
+  background-color: #475569;
+  margin-left: 6.5px;
+  margin-top: 18px;
+  margin-right: 12px;
+}
+.sidebar{
+    background-color: #475569;
+}
