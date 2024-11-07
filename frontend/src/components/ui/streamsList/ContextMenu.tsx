@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect} from "react";
 
 type contextMenuProps = {
   top: number;

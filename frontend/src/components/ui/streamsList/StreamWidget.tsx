@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { Stream } from "./Stream";
 
 export type Props = {

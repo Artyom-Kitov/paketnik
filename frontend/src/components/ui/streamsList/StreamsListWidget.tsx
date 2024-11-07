@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { streamData } from "../../../fixtures/streamData";
 import { StreamWidget, Rules } from "./StreamWidget";
 import { ContextMenu } from "./ContextMenu";
