@@ -12,6 +12,9 @@ import base64
 import dpkt
 import requests
 
+PCAPS_LIST_STORAGE = '.storage.txt'
+TIMEOUT = 1
+
 
 class ArgumentParser(argparse.ArgumentParser):
     def error(self, message):
@@ -96,7 +99,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
             
     t_start = time.time()
     try:
-        response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers)
+        response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers, timeout=TIMEOUT)
     except Exception as err:
         logger.error(f'{path_to_pcap} transfer failed with error')
         logger.debug(f'{traceback.format_exc()}')
@@ -145,7 +148,7 @@ def upload_pcaps(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: boo
 
 
 def main(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
-    src_dir = pathlib.Path(src_dir)
+    src_dir = pathlib.Path(src_dir).resolve()
     
     if not src_dir.is_absolute():
         src_dir = pathlib.Path.cwd() / src_dir
@@ -179,6 +182,6 @@ if __name__ == '__main__':
         logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
     logger = logging.getLogger()
 
-    storage = PcapsStorage('.storage.txt')
+    storage = PcapsStorage(PCAPS_LIST_STORAGE)
     
     main(args.src, args.dst_ip, args.dst_port, args.upload_last)
