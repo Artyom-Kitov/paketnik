@@ -31,27 +31,27 @@ class PcapsStorage:
 
         self._load()
 
-    def is_processed(self, pcap: str):
+    def is_processed(self, pcap: str) -> bool:
         return pcap in self._processed
 
-    def is_uploaded(self, pcap: str):
+    def is_uploaded(self, pcap: str) -> bool:
         return pcap in self._uploaded
 
-    def is_failed(self, pcap: str):
+    def is_failed(self, pcap: str) -> bool:
         return pcap in self._failed
 
-    def mark_processed(self, pcap: str):
+    def mark_processed(self, pcap: str) -> None:
         self._processed.add(pcap)
 
-    def mark_uploaded(self, pcap: str):
+    def mark_uploaded(self, pcap: str) -> None:
         self._uploaded.add(pcap)
         with open(self._filepath, 'a') as file:
             file.write(f'{pcap}\n')
 
-    def mark_failed(self, pcap: str):
+    def mark_failed(self, pcap: str) -> None:
         self._failed.add(pcap)
 
-    def _load(self):
+    def _load(self) -> None:
         if not pathlib.Path(self._filepath).exists():
             pathlib.Path(self._filepath).touch()
             return
@@ -83,7 +83,7 @@ class upload_in_chunks(object):
         return self._totalsize
 
 
-def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
+def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
     try:
         with open(path_to_pcap, 'rb') as file:
             pcaps = dpkt.pcap.Reader(file).readpkts()
@@ -116,7 +116,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int):
     return True
 
 
-def upload_pcaps(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
+def upload_pcaps(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool) -> None:
     pcaps = src_dir.glob('*.pcap')
     pcaps = sorted(pcaps, key=lambda x: datetime.datetime.fromtimestamp(os.path.getmtime(x)))
     
@@ -147,7 +147,7 @@ def upload_pcaps(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: boo
     return
 
 
-def main(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool):
+def main(src_dir: str, dst_ip: str, dst_port: int, upload_last_pcap: bool) -> None:
     src_dir = pathlib.Path(src_dir).resolve()
     
     if not src_dir.is_absolute():
