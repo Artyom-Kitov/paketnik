@@ -110,9 +110,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
         logger.error(f'{path_to_pcap}: error status code ({response.status_code})')
         return False
 
-    filename, size = str(response.text).split(':')
-    filename = bytes.fromhex(filename).decode('utf-8')
-    logger.info(f'{path_to_pcap} transfer completed in {t_end-t_start:.3} s. Server got {size} bytes')
+    logger.info(f'{path_to_pcap} transfer completed in {t_end-t_start:.3} s')
     return True
 
 
