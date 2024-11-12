@@ -1,4 +1,4 @@
-package ru.nsu.ctf.paketnikback.domain.document
+package ru.nsu.ctf.paketnikback.domain.entity.contest
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document

@@ -1,4 +1,4 @@
-package ru.nsu.ctf.paketnikback.domain.dto.service
+package ru.nsu.ctf.paketnikback.domain.dto
 
 data class ContestServiceResponse(
     val id: String,
