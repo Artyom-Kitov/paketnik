@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  paketnik-db:
+    container_name: paketnik-mongo
+    image: mongo:8.0
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=paketnik
+      - MONGO_INITDB_ROOT_PASSWORD=paketnik123
+      - MONGO_INITDB_DATABASE=paketnik-db
+      - MONGODB_DB=paketnik-db
+      - MONGODB_USER=paketnik
+      - MONGODB_PASSWORD=paketnik123
+    ports:
+      - "27017:27017"
+
+  paketnik-backend:
+    container_name: paketnik-backend
+    image: paketnik-backend:0.0.1
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27017/paketnik-db?authSource=admin
+    build:
+      context: backend/.
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - paketnik-db
+
+  paketnik-frontend:
+    container_name: paketnik-frontend
+    image: paketnik-frontend:latest
+    ports:
+      - "80:80"
+
+
+
+networks:
+  paketnik-network:
+    driver: bridge
