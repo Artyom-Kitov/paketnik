@@ -1,4 +1,6 @@
-import React from "react";
+import { Input } from "../shadcn/input";
+import { Textarea } from "../shadcn/textarea";
+
 export function RegisteredServiceForm({
   serviceName,
   port,
@@ -22,7 +24,7 @@ export function RegisteredServiceForm({
               <label className="text-white font-semibold text-lg text-xl mb-2 block">
                 Service name:
               </label>
-              <input
+              <Input
                 name="name"
                 type="text"
                 className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
@@ -42,7 +44,7 @@ export function RegisteredServiceForm({
               <label className="text-white font-semibold text-lg text-xl mb-2 block">
                 Service description:
               </label>
-              <textarea
+              <Textarea
                 name="email"
                 className="h-36 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
                 value={serviceDescription}

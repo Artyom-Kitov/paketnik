@@ -1,4 +1,3 @@
-import React from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
 export function MainScreen() {

@@ -1,5 +1,6 @@
-import React from "react";
 import { useState } from "react";
+import { Input } from "../shadcn/input";
+import { Textarea } from "../shadcn/textarea";
 
 export function NewServiceForm({
   serviceName,
@@ -84,7 +85,7 @@ export function NewServiceForm({
                   *
                 </sup>
               </label>
-              <input
+              <Input
                 name="name"
                 type="text"
                 className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
@@ -102,7 +103,7 @@ export function NewServiceForm({
                   *
                 </sup>
               </label>
-              <input
+              <Input
                 name="lname"
                 type="number"
                 className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
@@ -117,7 +118,7 @@ export function NewServiceForm({
               <label className="text-white font-semibold text-xl text-sm mb-2 block">
                 Service description
               </label>
-              <textarea
+              <Textarea
                 name="email"
                 className="h-36 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
                 placeholder="Enter service description"
@@ -134,7 +135,7 @@ export function NewServiceForm({
                   *
                 </sup>
               </label>
-              <input
+              <Input
                 type="color"
                 className="pl-0.5 pr-0.5 h-12 w-20 block border-gray-200 cursor-pointer rounded-md"
                 value={highlightColor}
