@@ -1,7 +1,9 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import Layout from "../sidebar/layout";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
+      <Layout />
       <PanelGroup direction="horizontal" className="min-h-screen">
         <Panel minSize={97}>
           <PanelGroup direction="vertical">
