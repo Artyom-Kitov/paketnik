@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+version: '3.8'
+
+>>>>>>> master
 services:
   paketnik-db:
     container_name: paketnik-mongo
@@ -11,13 +16,13 @@ services:
       - MONGODB_USER=paketnik
       - MONGODB_PASSWORD=paketnik123
     ports:
-      - "27018:27017"
+      - "27017:27017"
 
   paketnik-backend:
     container_name: paketnik-backend
     image: paketnik-backend:0.0.1
     environment:
-      - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27018/paketnik-db?authSource=admin
+      - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27017/paketnik-db?authSource=admin
     build:
       context: backend/.
       dockerfile: Dockerfile
@@ -25,6 +30,12 @@ services:
       - "8081:8081"
     depends_on:
       - paketnik-db
+
+  paketnik-frontend:
+    container_name: paketnik-frontend
+    image: paketnik-frontend:latest
+    ports:
+      - "80:80"
 
 networks:
   paketnik-network:
