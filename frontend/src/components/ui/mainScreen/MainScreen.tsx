@@ -1,6 +1,6 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
-import Layout from "../sidebar/layout";
+import Layout  from "../sidebar/layout";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
