@@ -1,4 +1,5 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
@@ -41,7 +42,9 @@ export function MainScreen() {
                   defaultSize={50}
                   minSize={20}
                   className="bg-[#475569] mb-[28px] mt-[38px] ml-[6px] mr-[12px]"
-                ></Panel>
+                >
+                  <ServiceRegistrationWidget />
+                </Panel>
               </PanelGroup>
             </Panel>
           </PanelGroup>
