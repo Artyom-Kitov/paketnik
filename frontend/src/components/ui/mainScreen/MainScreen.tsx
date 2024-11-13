@@ -4,7 +4,6 @@ import Layout from "../sidebar/layout";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
-      <Layout />
       <PanelGroup direction="horizontal" className="min-h-screen">
         <Panel minSize={97}>
           <PanelGroup direction="vertical">
@@ -51,7 +50,9 @@ export function MainScreen() {
             </Panel>
           </PanelGroup>
         </Panel>
-        <Panel minSize={3} className="bg-[#475569]"></Panel>
+        <Panel minSize={3} className="bg-[#475569]">
+          <Layout/>
+        </Panel>
       </PanelGroup>
     </div>
   );
