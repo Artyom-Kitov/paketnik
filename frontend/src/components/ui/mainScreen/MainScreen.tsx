@@ -1,5 +1,6 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
+import { PcapDampsWidget } from "../pcapDamps/pcapDampsWidget";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
@@ -18,11 +19,12 @@ export function MainScreen() {
                 </Panel>
                 <Panel
                   defaultSize={50}
-                  className="bg-[#475569] mt-[18px] ml-[6px] mr-[12px]"
+                  className="bg-[#475569] flex mt-[18px] ml-[6px] mr-[12px]"
                 >
                   <h1 className="font-bold text-2xl text-[#E2E8F0] h-[33px] mb-[16px] mt-[15px] ml-[22px]">
                     PCAP dumps:
                   </h1>
+                  <PcapDampsWidget/>
                 </Panel>
               </PanelGroup>
             </Panel>
