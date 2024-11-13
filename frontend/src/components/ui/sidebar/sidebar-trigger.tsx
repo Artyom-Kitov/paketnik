@@ -22,5 +22,4 @@ export function CustomSidebarTrigger() {
       </div>
     </SidebarMenuButton>
   );
-  return <button onClick={toggleSidebar}>Toggle Sidebar</button>;
 }
