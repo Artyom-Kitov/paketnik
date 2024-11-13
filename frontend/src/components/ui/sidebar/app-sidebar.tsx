@@ -4,7 +4,6 @@ import {
   Settings,
   FileText,
   CheckSquare,
-  AlignJustify,
 } from "lucide-react";
 
 import {
@@ -16,13 +15,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../shadcn/sidebar";
-
+import { CustomSidebarTrigger } from "./sidebar-trigger";
 const items = [
-  {
-    title: "",
-    url: "#",
-    icon: AlignJustify,
-  },
   {
     title: "Services",
     url: "#",
@@ -57,6 +51,9 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              <SidebarMenuItem className="h-[60px] flex flex-row gap-2 items-center justify-center shrink-0">
+                <CustomSidebarTrigger />
+              </SidebarMenuItem>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title} className="h-[60px]">
                   <SidebarMenuButton asChild className="h-[60px]">
