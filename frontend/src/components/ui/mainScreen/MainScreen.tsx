@@ -1,6 +1,32 @@
-import React from "react";
+import { useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
+import { PcapDumpsWidget } from "../pcapDumps/PcapDumpsWidget";
+import { StreamsListWidget } from "../streamsList/StreamsListWidget";
+import { Sidebar } from "../sidebar/sidebar";
+
 export function MainScreen() {
+  const [isServiceRegistrationWidget, setServiceRegistrationWidget] =
+    useState(false);
+  const [isStreamsListWidget, setStreamsListWidget] = useState(false);
+
+  function setServicesWidgets(visibility: boolean) {
+    setServiceRegistrationWidget(visibility);
+  }
+  function setRulesWidgets() {
+    //TODO()
+  }
+  function setFilesWidgets(visibility: boolean) {
+    setStreamsListWidget(visibility);
+  }
+  function setConfigWidgets() {
+    //TODO()
+  }
+
+  function setLoadPcapWidgets() {
+    //TODO()
+  }
+
   return (
     <div className="bg-[#1e293b]">
       <PanelGroup direction="horizontal" className="min-h-screen">
@@ -18,11 +44,12 @@ export function MainScreen() {
                 </Panel>
                 <Panel
                   defaultSize={50}
-                  className="bg-[#475569] mt-[18px] ml-[6px] mr-[12px]"
+                  className="bg-[#475569] flex mt-[18px] ml-[6px] mr-[12px]"
                 >
                   <h1 className="font-bold text-2xl text-[#E2E8F0] h-[33px] mb-[16px] mt-[15px] ml-[22px]">
                     PCAP dumps:
                   </h1>
+                  <PcapDumpsWidget />
                 </Panel>
               </PanelGroup>
             </Panel>
@@ -31,23 +58,33 @@ export function MainScreen() {
                 <Panel
                   defaultSize={50}
                   minSize={20}
-                  className="bg-[#808080] mb-[28px] ml-[11px] mr-[7px]"
+                  className="mb-[28px] ml-[11px] mr-[7px]"
                 >
-                  <h1 className="font-bold text-2xl text-white h-[32px] text-right">
-                    Streams
-                  </h1>
+                  {isStreamsListWidget ? <StreamsListWidget /> : null}
                 </Panel>
                 <PanelResizeHandle className="resize-handle" />
                 <Panel
                   defaultSize={50}
                   minSize={20}
                   className="bg-[#475569] mb-[28px] mt-[38px] ml-[6px] mr-[12px]"
-                ></Panel>
+                >
+                  {isServiceRegistrationWidget ? (
+                    <ServiceRegistrationWidget />
+                  ) : null}
+                </Panel>
               </PanelGroup>
             </Panel>
           </PanelGroup>
         </Panel>
-        <Panel minSize={3} className="bg-[#475569]"></Panel>
+        <Panel minSize={3} className="bg-[#475569]">
+          <Sidebar
+            setServicesWidgets={setServicesWidgets}
+            setRulesWidgets={setRulesWidgets}
+            setFilesWidgets={setFilesWidgets}
+            setConfigWidgets={setConfigWidgets}
+            setLoadPcapWidgets={setLoadPcapWidgets}
+          />
+        </Panel>
       </PanelGroup>
     </div>
   );

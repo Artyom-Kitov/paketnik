@@ -2,9 +2,9 @@ package ru.nsu.ctf.paketnikback.domain.mapper
 
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
-import ru.nsu.ctf.paketnikback.domain.document.ContestServiceDocument
-import ru.nsu.ctf.paketnikback.domain.dto.service.ContestServiceCreationRequest
-import ru.nsu.ctf.paketnikback.domain.dto.service.ContestServiceResponse
+import ru.nsu.ctf.paketnikback.domain.entity.contest.ContestServiceDocument
+import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceCreationRequest
+import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
 
 @Mapper(componentModel = "spring", imports = [java.util.UUID::class])
 interface ContestServiceMapper {
