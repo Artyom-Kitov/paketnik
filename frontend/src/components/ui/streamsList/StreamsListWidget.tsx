@@ -20,14 +20,15 @@ export const StreamsListWidget = () => {
     setPoints({ top: pageX, left: pageY });
     setShow(true);
   }
+
   return (
-    <div className="w-full h-fit">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-[6px]">
+    <div className="w-full h-full flex flex-col">
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
         Streams
       </div>
-      <div className="w-full h-fit bg-[#475569] p-[7px]">
+      <div className="w-full bg-[#475569] p-[7px] flex-1 overflow-auto">
         <table className="w-full border-collapse">
-          <thead>
+          <thead className="sticky top-0 bg-[#475569] z-10">
             <tr className="h-[50px]">
               <th className="text-xl text-[#e2e8f0] font-bold sticky px-20.45">
                 service
@@ -62,8 +63,8 @@ export const StreamsListWidget = () => {
           </thead>
           <tbody>
             {streams.map((stream) => [
-              <StreamWidget onContextMenu={showContextMenu} data={stream} />,
-              <Rules rules={stream.rules} />,
+              <StreamWidget key={stream.id} onContextMenu={showContextMenu} data={stream} />,
+              <Rules key={stream.id} rules={stream.rules} />,
             ])}
           </tbody>
         </table>

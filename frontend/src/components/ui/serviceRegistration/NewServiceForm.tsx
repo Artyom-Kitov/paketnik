@@ -69,93 +69,70 @@ export function NewServiceForm({
 
   return (
     <div>
-      <h1 className="font-bold text-2xl text-white m-3">
-        Register new service:
-      </h1>
-      <label className="text-red-500 font-semibold text-lg text-xl mb-2 block px-4 whitespace-pre-line">
-        {errorMessage}
-      </label>
-      <div className="max-w-4xl mx-auto font-[sans-serif] p-6">
-        <form>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-white font-semibold text-xl text-sm mb-2 block">
-                Service name
-                <sup className="text-red-400 font-semibold text-xl align-bottom">
-                  *
-                </sup>
-              </label>
-              <Input
-                name="name"
-                type="text"
-                className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
-                placeholder="Enter service name"
-                value={serviceName}
-                onChange={(e) => {
-                  setServiceName(e.target.value);
-                }}
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold text-xl text-sm mb-2 block">
-                Port
-                <sup className="text-red-400 font-semibold text-xl align-bottom">
-                  *
-                </sup>
-              </label>
-              <Input
-                name="lname"
-                type="number"
-                className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
-                placeholder="Enter port"
-                value={port}
-                onChange={(e) => {
-                  setPort(e.target.value);
-                }}
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold text-xl text-sm mb-2 block">
-                Service description
-              </label>
-              <Textarea
-                name="email"
-                className="h-36 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
-                placeholder="Enter service description"
-                value={serviceDescription}
-                onChange={(e) => {
-                  setServiceDescription(e.target.value);
-                }}
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold text-xl text-sm mb-2 block">
-                Highlight color
-                <sup className="text-red-400 font-semibold text-xl align-bottom">
-                  *
-                </sup>
-              </label>
-              <Input
-                type="color"
-                className="pl-0.5 pr-0.5 h-12 w-20 block border-gray-200 cursor-pointer rounded-md"
-                value={highlightColor}
-                onChange={(e) => {
-                  setHighlightColor(e.target.value);
-                }}
-              />
-            </div>
-          </div>
-          <div className="!mt-12">
-            <button
-              type="button"
-              className="py-3.5 px-7 text-sm font-semibold tracking-wider rounded-md text-white bg-[#0F172A] hover:bg-[#5273bf] focus:outline-none"
-              onClick={registerService}
-            >
-              Register
-            </button>
-          </div>
-        </form>
-      </div>
+      <h3 className="text-lg font-semibold mb-4">Register New Service</h3>
+      {errorMessage && (
+        <div className="text-red-400 mb-4 whitespace-pre-line">{errorMessage}</div>
+      )}
+      <form className="space-y-3">
+        <div>
+          <label className="block text-sm mb-1">
+            Service Name
+            <span className="text-red-400 ml-1">*</span>
+          </label>
+          <Input
+            type="text"
+            className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+            placeholder="Enter service name"
+            value={serviceName}
+            onChange={(e) => setServiceName(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">
+            Port
+            <span className="text-red-400 ml-1">*</span>
+          </label>
+          <Input
+            type="number"
+            className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+            placeholder="Enter port"
+            value={port}
+            onChange={(e) => setPort(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Service Description</label>
+          <Textarea
+            className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+            placeholder="Enter service description"
+            value={serviceDescription}
+            onChange={(e) => setServiceDescription(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">
+            Highlight Color
+            <span className="text-red-400 ml-1">*</span>
+          </label>
+          <Input
+            type="color"
+            className="w-20 h-10 p-1 rounded bg-[#1e293b] border border-[#4a5568]"
+            value={highlightColor}
+            onChange={(e) => setHighlightColor(e.target.value)}
+          />
+        </div>
+
+        <button
+          type="button"
+          className="bg-[#4a5568] px-4 py-2 rounded hover:bg-[#2d3748] transition-colors"
+          onClick={registerService}
+        >
+          Register Service
+        </button>
+      </form>
     </div>
   );
 }

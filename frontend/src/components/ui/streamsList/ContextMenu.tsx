@@ -1,16 +1,9 @@
-import { useEffect } from "react";
-
-type contextMenuProps = {
+type ContextMenuProps = {
   top: number;
   left: number;
 };
 
-export const ContextMenu = ({ top, left }: contextMenuProps) => {
-  useEffect(() => {
-    console.log(top);
-    console.log(left);
-  });
-
+export const ContextMenu = ({ top, left }: ContextMenuProps) => {
   return (
     <div
       onClick={(e) => {

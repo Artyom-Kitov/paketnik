@@ -14,53 +14,39 @@ export function RegisteredServiceForm({
 }) {
   return (
     <div>
-      <h1 className="font-bold text-2xl text-white m-3">
-        Registered service info:
-      </h1>
-      <div className="max-w-4xl mx-auto font-[sans-serif] p-6">
-        <form>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="text-white font-semibold text-lg text-xl mb-2 block">
-                Service name:
-              </label>
-              <Input
-                name="name"
-                type="text"
-                className="h-12 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
-                placeholder="Enter service name"
-                value={serviceName}
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold text-lg text-xl mb-2 block">
-                Port:
-              </label>
-              <label className="text-white font-semibold text-lg text-3xl mb-2 block">
-                {port}
-              </label>
-            </div>
-            <div>
-              <label className="text-white font-semibold text-lg text-xl mb-2 block">
-                Service description:
-              </label>
-              <Textarea
-                name="email"
-                className="h-36 bg-[#F1F5F9] w-full text-gray-800 text-xl px-4 py-3.5 rounded-md outline-[#5273bf] transition-all"
-                value={serviceDescription}
-              />
-            </div>
-            <div>
-              <label className="text-white font-semibold text-lg text-xl mb-2 block">
-                Highlight color:
-              </label>
-              <div
-                className="box-border bg-[--color] border-gray-200 h-12 w-20 p-4 border-4 rounded-md"
-                style={{ "--color": highlightColor } as React.CSSProperties}
-              ></div>
-            </div>
-          </div>
-        </form>
+      <h3 className="text-lg font-semibold mb-4">Registered Service Info</h3>
+      <div className="space-y-3">
+        <div>
+          <label className="block text-sm mb-1">Service Name</label>
+          <Input
+            type="text"
+            className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+            value={serviceName}
+            readOnly
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Port</label>
+          <div className="text-lg">{port}</div>
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Service Description</label>
+          <Textarea
+            className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+            value={serviceDescription}
+            readOnly
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1">Highlight Color</label>
+          <div
+            className="w-20 h-10 rounded border border-[#4a5568]"
+            style={{ backgroundColor: highlightColor }}
+          ></div>
+        </div>
       </div>
     </div>
   );
