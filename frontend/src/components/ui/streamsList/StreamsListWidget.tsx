@@ -22,7 +22,9 @@ export const StreamsListWidget = () => {
   }
   return (
     <div className="w-full h-fit">
-      <div className="text-right text-[#fff] text-2xl font-bold">Streams</div>
+      <div className="text-right text-[#fff] text-2xl font-bold mb-[6px]">
+        Streams
+      </div>
       <div className="w-full h-fit bg-[#475569] p-[7px]">
         <table className="w-full border-collapse">
           <thead>
