@@ -4,21 +4,14 @@ import tseslint from "typescript-eslint";
 import pluginReact from "eslint-plugin-react";
 import eslintConfigPrettier from "eslint-config-prettier";
 
-export default [
-  {
-    files: ["**/*.{js,mjs,cjs,ts,jsx,tsx,json}"],
-  },
-  {
-    languageOptions: { globals: globals.browser },
-  },
-  {
-    ignores: ["**/dist/"],
-  },
+const config = [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
   eslintConfigPrettier,
   {
+    files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    languageOptions: { globals: globals.browser },
     rules: {
       "no-restricted-exports": [
         "error",
@@ -34,8 +27,13 @@ export default [
           message: "Don't declare enums",
         },
       ],
-      "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off"
     },
-  },
+  }, {
+    // Note: there should be no other properties in this object
+    ignores: ["dist"]
+  }
 ];
+
+export default config;

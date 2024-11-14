@@ -17,49 +17,36 @@ import {
 } from "../shadcn/sidebar";
 import { CustomSidebarTrigger } from "./sidebar-trigger";
 
-let currentVisibilityFunction: (visibility: boolean) => void;
-let currentWidgets: string = "";
-
 export function AppSidebar({
-  setServicesWidgets,
-  setRulesWidgets,
-  setFilesWidgets,
-  setConfigWidgets,
-  setLoadPcapWidgets,
+  setCurrentWidget,
+  currentWidget,
 }: {
-  setServicesWidgets: (visibility: boolean) => void;
-  setRulesWidgets: (visibility: boolean) => void;
-  setFilesWidgets: (visibility: boolean) => void;
-  setConfigWidgets: (visibility: boolean) => void;
-  setLoadPcapWidgets: (visibility: boolean) => void;
+  setCurrentWidget: (widget: string) => void;
+  currentWidget: string;
 }) {
   const items = [
     {
       title: "Services",
-      setVisibilityFunction: setServicesWidgets,
       icon: Server,
     },
     {
       title: "Rules",
-      setVisibilityFunction: setRulesWidgets,
       icon: CheckSquare,
     },
     {
       title: "Files",
-      setVisibilityFunction: setFilesWidgets,
       icon: FileText,
     },
     {
       title: "Config",
-      setVisibilityFunction: setConfigWidgets,
       icon: Settings,
     },
     {
       title: "Load PCAP",
-      setVisibilityFunction: setLoadPcapWidgets,
       icon: Download,
     },
   ];
+
   return (
     <Sidebar side={"right"} collapsible="icon">
       <SidebarContent>
@@ -73,22 +60,11 @@ export function AppSidebar({
                 <SidebarMenuItem
                   key={item.title}
                   className="h-[60px]"
-                  onClick={(event: React.MouseEvent<HTMLElement>) => {
-                    event.preventDefault();
-                    if (currentWidgets == "") {
-                      currentVisibilityFunction = item.setVisibilityFunction;
-                      currentWidgets = item.title;
-                      currentVisibilityFunction(true);
+                  onClick={() => {
+                    if (currentWidget === item.title) {
+                      setCurrentWidget("");
                     } else {
-                      if (currentWidgets == item.title) {
-                        currentVisibilityFunction(false);
-                        currentWidgets = "";
-                      } else {
-                        currentVisibilityFunction(false);
-                        currentVisibilityFunction = item.setVisibilityFunction;
-                        currentWidgets = item.title;
-                        currentVisibilityFunction(true);
-                      }
+                      setCurrentWidget(item.title);
                     }
                   }}
                 >

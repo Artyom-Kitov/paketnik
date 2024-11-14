@@ -1,89 +1,91 @@
 import { useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
-import { PcapDumpsWidget } from "../pcapDumps/PcapDumpsWidget";
 import { StreamsListWidget } from "../streamsList/StreamsListWidget";
 import { Sidebar } from "../sidebar/sidebar";
+import { RulesWidget } from "../widgets/RulesWidget";
+import { ConfigWidget } from "../widgets/ConfigWidget";
+import { FilesWidget } from "../widgets/FilesWidget";
+import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
+import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
+
+// Temporary mock data for StreamInfoWidget
+const mockStreamData = {
+  id: 1,
+  srcIp: "192.168.1.1",
+  dstIp: "192.168.1.2",
+  headers: {
+    ethernet: {
+      srcMac: "00:00:00:00:00:00",
+      destMac: "00:00:00:00:00:00"
+    },
+    ip: {
+      srcIp: "192.168.1.1",
+      destIp: "192.168.1.2"
+    },
+    tcp: {
+      srcPort: 80,
+      destPort: 443,
+      sequenceNumber: 1234,
+      ackNumber: 5678,
+      payload: "Sample payload"
+    }
+  }
+};
 
 export function MainScreen() {
-  const [isServiceRegistrationWidget, setServiceRegistrationWidget] =
-    useState(false);
-  const [isStreamsListWidget, setStreamsListWidget] = useState(false);
+  const [currentWidget, setCurrentWidget] = useState<string>("");
 
-  function setServicesWidgets(visibility: boolean) {
-    setServiceRegistrationWidget(visibility);
-  }
-  function setRulesWidgets() {
-    //TODO()
-  }
-  function setFilesWidgets(visibility: boolean) {
-    setStreamsListWidget(visibility);
-  }
-  function setConfigWidgets() {
-    //TODO()
-  }
-
-  function setLoadPcapWidgets() {
-    //TODO()
-  }
+  const renderCurrentWidget = () => {
+    switch (currentWidget) {
+      case "Services":
+        return <ServiceRegistrationWidget />;
+      case "Rules":
+        return <RulesWidget />;
+      case "Files":
+        return <FilesWidget />;
+      case "Config":
+        return <ConfigWidget />;
+      case "Load PCAP":
+        return <LoadPcapWidget />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="bg-[#1e293b]">
       <PanelGroup direction="horizontal" className="min-h-screen">
         <Panel minSize={97}>
           <PanelGroup direction="vertical">
-            <Panel maxSize={9}>
-              <PanelGroup direction="horizontal">
-                <Panel
-                  defaultSize={50}
-                  className="mt-[18px] ml-[11px] mr-[7px]"
-                >
-                  <h1 className="font-bold text-5xl text-white min-h-[69px]">
-                    Paketnik
-                  </h1>
-                </Panel>
-                <Panel
-                  defaultSize={50}
-                  className="bg-[#475569] flex mt-[18px] ml-[6px] mr-[12px]"
-                >
-                  <h1 className="font-bold text-2xl text-[#E2E8F0] h-[33px] mb-[16px] mt-[15px] ml-[22px]">
-                    PCAP dumps:
-                  </h1>
-                  <PcapDumpsWidget />
-                </Panel>
-              </PanelGroup>
+            <Panel maxSize={5} className="mt-[12px] ml-[11px] mr-[12px]">
+              <h1 className="font-bold text-3xl text-white min-h-[30px]">
+                Paketnik
+              </h1>
             </Panel>
             <Panel minSize={91}>
               <PanelGroup direction="horizontal" className="right-widget-group">
-                <Panel
-                  defaultSize={50}
-                  minSize={20}
-                  className="mb-[28px] ml-[11px] mr-[7px]"
-                >
-                  {isStreamsListWidget ? <StreamsListWidget /> : null}
+                <Panel defaultSize={currentWidget ? 33 : 50} minSize={20} className="mb-[28px] ml-[11px] mr-[7px]">
+                  <StreamsListWidget />
                 </Panel>
                 <PanelResizeHandle className="resize-handle" />
-                <Panel
-                  defaultSize={50}
-                  minSize={20}
-                  className="bg-[#475569] mb-[28px] mt-[38px] ml-[6px] mr-[12px]"
-                >
-                  {isServiceRegistrationWidget ? (
-                    <ServiceRegistrationWidget />
-                  ) : null}
+                <Panel defaultSize={currentWidget ? 33 : 50} minSize={20} className="mb-[28px] ml-[6px] mr-[7px]">
+                  <StreamInfoWidget data={mockStreamData} />
                 </Panel>
+                {currentWidget && (
+                  <>
+                    <PanelResizeHandle className="resize-handle" />
+                    <Panel defaultSize={33} minSize={20} className="mb-[28px] ml-[6px] mr-[24px]">
+                      {renderCurrentWidget()}
+                    </Panel>
+                  </>
+                )}
               </PanelGroup>
             </Panel>
           </PanelGroup>
         </Panel>
-        <Panel minSize={3} className="bg-[#475569]">
-          <Sidebar
-            setServicesWidgets={setServicesWidgets}
-            setRulesWidgets={setRulesWidgets}
-            setFilesWidgets={setFilesWidgets}
-            setConfigWidgets={setConfigWidgets}
-            setLoadPcapWidgets={setLoadPcapWidgets}
-          />
+        <Panel minSize={3} className="bg-[#475569] ml-[12px]">
+          <Sidebar setCurrentWidget={setCurrentWidget} currentWidget={currentWidget} />
         </Panel>
       </PanelGroup>
     </div>

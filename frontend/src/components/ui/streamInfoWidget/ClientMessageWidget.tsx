@@ -1,5 +1,5 @@
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
-import { PiDotsSixBold } from "react-icons/pi";
 
 type ClientMessageWidgetProps = {
   data: {
@@ -17,7 +17,7 @@ type ClientMessageWidgetProps = {
   };
 };
 
-const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
+export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
   const [height, setHeight] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
   const [initialMousePosition, setInitialMousePosition] = useState(0);
@@ -41,7 +41,7 @@ const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
   };
 
   const handleDoubleClick = () => {
-    setHeight(prevHeight => (prevHeight !== 50 ? 50 : 230));
+    setHeight((prevHeight) => (prevHeight !== 50 ? 50 : 230));
   };
 
   React.useEffect(() => {
@@ -60,7 +60,7 @@ const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
 
   return (
     <div style={{ height }} className="relative bg-[#2d3748] p-4 pl-8 ml-[100px] rounded-lg shadow-md overflow-hidden">
-      <PiDotsSixBold
+      <DotsVerticalIcon
         className="absolute bottom-2 left-2 text-gray-200 cursor-move"
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
@@ -81,4 +81,3 @@ const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
   );
 };
 
-export default ClientMessageWidget;
