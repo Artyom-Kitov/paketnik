@@ -25,6 +25,7 @@ export default [
         { restrictDefaultExports: { direct: true } },
       ],
       "arrow-parens": ["error", "always"],
+      curly: "error",
       "@typescript-eslint/no-explicit-any": "error",
       "no-restricted-syntax": [
         "error",

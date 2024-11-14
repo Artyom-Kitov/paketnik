@@ -14,7 +14,7 @@ type Pcap = {
   name: string;
 };
 
-const PcapDampsWidget = () => {
+const PcapDumpsWidget = () => {
   const [pcaps, setPcaps] = useState<Pcap[]>([]);
   const [selectedItemId, setId] = useState<number>(-1);
 
@@ -23,11 +23,12 @@ const PcapDampsWidget = () => {
   }, []);
 
   function deletePcap(idToRemove: number) {
-    if (selectedItemId != -1)
+    if (selectedItemId != -1) {
       setPcaps((state) => state.filter((item) => item.id !== idToRemove));
+    }
   }
 
-  function analyzePcap(idToRemove: number) {}
+  // function analyzePcap(idToRemove: number) {}
 
   const onSelectedItem = (value: string) => {
     setId(parseInt(value));
@@ -46,15 +47,13 @@ const PcapDampsWidget = () => {
         </SelectContent>
       </Select>
       <Button
-        onClick={(event) => {
-          analyzePcap(selectedItemId);
-        }}
         className="ml-[22px]"
       >
         Analyze
       </Button>
       <Button
         onClick={(event) => {
+          event.preventDefault();
           deletePcap(selectedItemId);
         }}
         variant="destructive"
@@ -66,4 +65,4 @@ const PcapDampsWidget = () => {
   );
 };
 
-export { PcapDampsWidget };
+export { PcapDumpsWidget };

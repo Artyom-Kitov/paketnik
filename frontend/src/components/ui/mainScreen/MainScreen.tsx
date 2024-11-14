@@ -1,6 +1,6 @@
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
-import { PcapDampsWidget } from "../pcapDamps/PcapDampsWidget";
+import { PcapDumpsWidget } from "../pcapDumps/PcapDumpsWidget";
 export function MainScreen() {
   return (
     <div className="bg-[#1e293b]">
@@ -24,7 +24,7 @@ export function MainScreen() {
                   <h1 className="font-bold text-2xl text-[#E2E8F0] h-[33px] mb-[16px] mt-[15px] ml-[22px]">
                     PCAP dumps:
                   </h1>
-                  <PcapDampsWidget/>
+                  <PcapDumpsWidget />
                 </Panel>
               </PanelGroup>
             </Panel>
