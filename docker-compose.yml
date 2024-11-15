@@ -1,8 +1,5 @@
-<<<<<<< HEAD
-=======
 version: '3.8'
 
->>>>>>> master
 services:
   paketnik-db:
     container_name: paketnik-mongo
