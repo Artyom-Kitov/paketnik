@@ -9,8 +9,8 @@ class MinioConfig {
     @Bean
     fun minioClient(): MinioClient {
         return MinioClient.builder()
-            .endpoint("http://localhost:9000") 
-            .credentials("YOUR_ACCESS_KEY", "YOUR_SECRET_KEY")
+            .endpoint("http://localhost:9000")
+            .credentials("admin", "password")
             .build()
     }
 }
