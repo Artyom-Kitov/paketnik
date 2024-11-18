@@ -2,10 +2,11 @@ import { Stream } from "./Stream";
 
 export type Props = {
   onContextMenu: (pageX: number, pageY: number) => void;
+  onClick: (id: number) => void;
   data: Stream;
 };
 
-const StreamWidget = ({ data, onContextMenu }: Props) => {
+const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
   const stream = data;
   return (
     <tr
@@ -13,7 +14,11 @@ const StreamWidget = ({ data, onContextMenu }: Props) => {
         e.preventDefault();
         onContextMenu(e.pageY, e.pageX);
       }}
-      className="h-[50px] bg-[#1e293b] border-t-2 border-[#ccc]"
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(stream.id);
+      }}
+      className="h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc]"
     >
       <th className="text-xl text-[#fff] font-bold bg-[#FF4081]">
         {stream.serviceName}
