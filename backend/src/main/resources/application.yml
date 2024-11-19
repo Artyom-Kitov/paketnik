@@ -4,7 +4,7 @@ spring:
     version: 0.0.1
   data:
     mongodb:
-      uri: mongodb://paketnik:paketnik123@localhost:27018/paketnik-db?authSource=admin
+      uri: ${SPRING_DATA_MONGODB_URI}
       authentication-database: admin
       database: paketnik-db
 

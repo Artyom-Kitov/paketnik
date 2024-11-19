@@ -1,8 +1,8 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
 import org.springframework.stereotype.Service
-import ru.nsu.ctf.paketnikback.domain.dto.service.ContestServiceCreationRequest
-import ru.nsu.ctf.paketnikback.domain.dto.service.ContestServiceResponse
+import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceCreationRequest
+import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
 import ru.nsu.ctf.paketnikback.domain.mapper.ContestServiceMapper
 import ru.nsu.ctf.paketnikback.domain.repository.ContestServiceRepository
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
