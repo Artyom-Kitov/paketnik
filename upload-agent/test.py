@@ -9,23 +9,17 @@ import hashlib
 import shutil
 import subprocess
 import signal
+import tempfile
+import requests
 
 from io import BytesIO
-from base64 import b64decode
 
 TEST_DATA_DIR = "test_data"
-
 TEST_FILE_1_CORRECT = "correct_1.pcap"
-
 TEST_FILE_2_CORRECT = "correct_2.pcap"
-
 TEST_FILE_1_INCORRECT = "incorrect_1.pcap"
-
-TEST_DIR = "test_dir"
-
 SCRIPT_TO_RUN = "./upload-agent/main.py"
-
-STANDART_TIMEOUT = 1.5
+STANDARD_TIMEOUT = 1.5
 
 
 def get_file_hash(filename):
@@ -34,34 +28,22 @@ def get_file_hash(filename):
         return hashlib.md5(all_file).digest()
 
 
-def get_filepath_in_test_data_dir(filename: str) -> str:
-    return os.path.abspath("./" + TEST_DATA_DIR + "/" + filename)
-
-
-def get_filepath_in_directory_for_testing(filename: str) -> str:
-    return os.path.abspath("./" + TEST_DIR + "/" + filename)
-
-
-def get_scipt_name() -> str:
+def get_script_path() -> str:
     return os.path.abspath(SCRIPT_TO_RUN)
 
 
-def run_script_in_test_dir(upload_last: bool = True):
-    args = [
-        "python",
-        get_scipt_name(),
-        "./",
-        "localhost",
-        "8080",
-    ]
-    if upload_last:
-        args.append("--upload-last")
-
-    return subprocess.Popen(args, cwd=TEST_DIR)
+def get_test_file_path(filename: str) -> str:
+    return os.path.abspath("./" + TEST_DATA_DIR + "/" + filename)
 
 
 class MockHTTPRequestHandler(BaseHTTPRequestHandler):
-    recieved_data = set()
+    received_data = set()
+
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        self.wfile.write(b"OK")
 
     # определяем метод `do_POST`
     def do_POST(self):
@@ -77,168 +59,193 @@ class MockHTTPRequestHandler(BaseHTTPRequestHandler):
         response.write(str(len(body)).encode("utf-8"))
         self.wfile.write(response.getvalue())
 
-        MockHTTPRequestHandler.recieved_data.add(hashlib.md5(body).digest())
+        MockHTTPRequestHandler.received_data.add(hashlib.md5(body).digest())
 
     def get_received_data():
-        return MockHTTPRequestHandler.recieved_data.copy()
+        return MockHTTPRequestHandler.received_data
 
     def reset_received_data():
-        MockHTTPRequestHandler.recieved_data = set()
-
-
-server_address = ("", 8080)
-httpd = HTTPServer(server_address, MockHTTPRequestHandler)
-
-
-def start_server():
-    httpd.serve_forever()
+        MockHTTPRequestHandler.received_data = set()
 
 
 class TestUploadAgent(unittest.TestCase):
+    PATH_TEST_FILE_1_CORRECT = get_test_file_path(TEST_FILE_1_CORRECT)
+    PATH_TEST_FILE_2_CORRECT = get_test_file_path(TEST_FILE_2_CORRECT)
+    PATH_TEST_FILE_1_INCORRECT = get_test_file_path(TEST_FILE_1_INCORRECT)
 
     def setUp(self):
-        os.mkdir(TEST_DIR)
-        self.thread = threading.Thread(target=start_server)
+        self.httpd = HTTPServer(("", 0), MockHTTPRequestHandler)
+        self.server_address = self.httpd.server_address
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.thread = threading.Thread(target=self.start_server)
         self.thread.start()
+
+        self.wait_for_server_to_start()
+
         return super().setUp()
 
-    def test_upload(self):
+    def wait_for_server_to_start(self):
+        MAX_ATTEMPTS = 10
+        while True:
+            try:
+                response = requests.get(
+                    "http://"
+                    + self.server_address[0]
+                    + ":"
+                    + str(self.server_address[1])
+                )
+                if response is not None and response.status_code == 200:
+                    return
+            finally:
+                sleep(0.1)
+
+            MAX_ATTEMPTS -= 1
+            if MAX_ATTEMPTS == 0:
+                raise Exception("Failed to start server")
+
+    def run_script_in_test_dir(self, upload_last: bool = True) -> subprocess.Popen:
+        args = [
+            "python",
+            get_script_path(),
+            "./",
+            self.server_address[0],
+            str(self.server_address[1]),
+        ]
+        if upload_last:
+            args.append("--upload-last")
+
+        return subprocess.Popen(args, stderr=subprocess.PIPE, cwd=self.temp_dir.name)
+
+    def start_server(self):
+        self.httpd.serve_forever()
+
+    def get_testdir_file_path(self, filename: str) -> str:
+        return self.temp_dir.name + "/" + filename
+
+    def copy_file_to_testdir(self, filename: str):
         shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_1_CORRECT),
+            get_test_file_path(filename),
+            self.get_testdir_file_path(filename),
         )
 
-        p = run_script_in_test_dir(upload_last=True)
 
-        sleep(STANDART_TIMEOUT)
+    def test_upload(self):
+        self.copy_file_to_testdir(TEST_FILE_1_CORRECT)
+
+        p = self.run_script_in_test_dir(upload_last=True)
+
+        sleep(STANDARD_TIMEOUT)
 
         self.assertTrue(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_1_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         MockHTTPRequestHandler.reset_received_data()
 
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_2_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_2_CORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_2_CORRECT)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
 
         self.assertFalse(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_1_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         self.assertTrue(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_2_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_2_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
 
     def test_dont_upload_uploaded(self):
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_1_CORRECT),
-        )
 
-        p = run_script_in_test_dir(upload_last=True)
+        self.copy_file_to_testdir(TEST_FILE_1_CORRECT)
 
-        sleep(STANDART_TIMEOUT)
+        p = self.run_script_in_test_dir(upload_last=True)
+
+        sleep(STANDARD_TIMEOUT)
+
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
 
         self.assertTrue(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_1_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         MockHTTPRequestHandler.reset_received_data()
 
-        p = run_script_in_test_dir(upload_last=True)
+        p = self.run_script_in_test_dir(upload_last=True)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
         self.assertEqual(len(MockHTTPRequestHandler.get_received_data()), 0)
 
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
+        p.stdout.close()
 
     def test_dont_upload_incorrect_file(self):
 
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_1_INCORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_1_INCORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_1_INCORRECT)
 
-        p = run_script_in_test_dir(upload_last=True)
+        p = self.run_script_in_test_dir(upload_last=True)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
         self.assertEqual(len(MockHTTPRequestHandler.get_received_data()), 0)
 
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
 
     def test_dont_upload_newest_without_flag(self):
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_1_CORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_1_CORRECT)
 
         sleep(0.1)
 
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_2_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_2_CORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_2_CORRECT)
 
-        p = run_script_in_test_dir(upload_last=False)
+        p = self.run_script_in_test_dir(upload_last=False)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
 
         self.assertEqual(len(MockHTTPRequestHandler.get_received_data()), 1)
         self.assertTrue(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_1_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
 
     def test_dont_upload_newest_without_flag_while_dir_monitoring(self):
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_1_CORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_1_CORRECT)
 
-        p = run_script_in_test_dir(upload_last=False)
+        p = self.run_script_in_test_dir(upload_last=False)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
 
         self.assertEqual(len(MockHTTPRequestHandler.get_received_data()), 0)
 
-        shutil.copyfile(
-            get_filepath_in_test_data_dir(TEST_FILE_2_CORRECT),
-            get_filepath_in_directory_for_testing(TEST_FILE_2_CORRECT),
-        )
+        self.copy_file_to_testdir(TEST_FILE_2_CORRECT)
 
-        sleep(STANDART_TIMEOUT)
+        sleep(STANDARD_TIMEOUT)
 
         self.assertEqual(len(MockHTTPRequestHandler.get_received_data()), 1)
         self.assertTrue(
-            get_file_hash(get_filepath_in_test_data_dir(TEST_FILE_1_CORRECT))
+            get_file_hash(self.PATH_TEST_FILE_1_CORRECT)
             in MockHTTPRequestHandler.get_received_data()
         )
 
         p.send_signal(signal.SIGINT)
-        p.wait()
+        self.assertTrue(p.wait() == 0)
 
     def tearDown(self):
-        httpd.shutdown()
+        self.httpd.shutdown()
+        self.httpd.server_close()
         self.thread.join()
-        shutil.rmtree(TEST_DIR)
+        self.temp_dir.cleanup()
         MockHTTPRequestHandler.reset_received_data()
 
 
