@@ -5,5 +5,6 @@
 |  |     /  _____  \  |  .  \  |  |____     |  |     |  |\   | |  | |  .  \           |  |_)  |  /  _____  \ |  `----.|  .  \
 | _|    /__/     \__\ |__|\__\ |_______|    |__|     |__| \__| |__| |__|\__\          |______/  /__/     \__\ \______||__|\__\
 
-${application.title} ${application.version}
+${spring.application.title} ${spring.application.version}
 Powered by Spring Boot ${spring-boot.version}
+Swagger here: http://localhost:${server.port}/swagger-ui/index.html

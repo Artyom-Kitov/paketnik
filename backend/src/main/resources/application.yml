@@ -1,6 +1,6 @@
 spring:
   application:
-    title: paketnik_back
+    title: paketnik-back
     version: 0.0.1
   data:
     mongodb:

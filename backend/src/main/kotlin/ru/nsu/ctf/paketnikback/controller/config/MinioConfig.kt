@@ -7,10 +7,9 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 class MinioConfig {
     @Bean
-    fun minioClient(): MinioClient {
-        return MinioClient.builder()
-            .endpoint("http://localhost:9000")
-            .credentials("admin", "password")
-            .build()
-    }
+    fun minioClient(): MinioClient = MinioClient
+        .builder()
+        .endpoint("http://localhost:9000")
+        .credentials("admin", "password")
+        .build()
 }
