@@ -1,6 +1,7 @@
 import { ServiceWidget } from "./ServiceWidget";
 import { getServices } from "../../../api"
 import {useQuery } from '@tanstack/react-query'
+//import {servicesData} from "../../../fixtures/servicesData"
 
 
 
@@ -9,8 +10,22 @@ export const ServicesListWidget = ({
 }: {
   setCurrentWidget: (widget: string) => void;
 }) => {
-  const query = useQuery({ queryKey: ['service'], queryFn: getServices })
+  const { isPending, isError, data, error } = useQuery({ queryKey: ['service'], queryFn: getServices })
 
+  if (isPending){
+    <div className="w-full h-full flex flex-col">
+    <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+      Loading... {data}
+    </div>
+    </div>
+  }
+  else if (isError){
+    <div className="w-full h-full flex flex-col">
+    <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+      Error: {error.message}
+    </div>
+    </div>
+  }
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -47,7 +62,7 @@ export const ServicesListWidget = ({
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
-            {query.data && query.data?.length > 0 && query.data?.map((service) => (
+            { data?.map((service) => (
             <ServiceWidget key={service.id} data={service} />
           ))}
           </tbody>

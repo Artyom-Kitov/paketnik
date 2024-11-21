@@ -10,12 +10,6 @@ export interface Service{
 export async function getServices(): Promise<Service[]> {
     return fetch(host + "/services")
     .then((response) => response.json())
-    .then(({ success, data }) => {
-      if (!success) {
-        throw new Error ('An error occurred while fetching notes');
-      }
-      return data;
-    })
 }
 
 export async function updateService(service: Service): Promise<void>{
