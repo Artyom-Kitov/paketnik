@@ -137,6 +137,12 @@
             <version>1.8.2</version>
             <scope>compile</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>io.pkts</groupId>
+            <artifactId>pkts-core</artifactId>
+            <version>3.0.10</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.MethodArgumentNotValidException
 
 import io.minio.MinioClient
-import io.minio.errors.MinioException
 import io.minio.errors.ErrorResponseException
 import io.minio.StatObjectArgs
 import io.minio.GetObjectArgs
 
-import org.pcap4j.core.Pcaps
+import io.pkts.Pcap
 
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.exception.InternalServerErrorException
