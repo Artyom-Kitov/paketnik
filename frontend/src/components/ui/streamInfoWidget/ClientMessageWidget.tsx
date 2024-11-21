@@ -17,7 +17,9 @@ type ClientMessageWidgetProps = {
   };
 };
 
-export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
+export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({
+  data,
+}) => {
   const [height, setHeight] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
   const [initialMousePosition, setInitialMousePosition] = useState(0);
@@ -59,14 +61,18 @@ export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }
   }, [isResizing]);
 
   return (
-    <div style={{ height }} className="relative bg-[#2d3748] p-4 pl-8 ml-[100px] rounded-lg shadow-md overflow-hidden">
+    <div
+      style={{ height }}
+      className="relative bg-[#2d3748] p-4 pl-8 ml-[100px] rounded-lg shadow-md overflow-hidden"
+    >
       <DotsVerticalIcon
         className="absolute bottom-2 left-2 text-gray-200 cursor-move"
         onMouseDown={handleMouseDown}
         onDoubleClick={handleDoubleClick}
       />
       <h2 className="text-lg font-semibold">
-        POST {data.srcIp}:{data.headers.tcp.srcPort} ➔ {data.dstIp}:{data.headers.tcp.destPort}
+        POST {data.srcIp}:{data.headers.tcp.srcPort} ➔ {data.dstIp}:
+        {data.headers.tcp.destPort}
       </h2>
       <div className="text-sm mt-2 whitespace-normal">
         <p className="font-semibold">Headers:</p>
@@ -80,4 +86,3 @@ export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }
     </div>
   );
 };
-

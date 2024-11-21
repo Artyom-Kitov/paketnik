@@ -28,7 +28,7 @@ services:
   paketnik-frontend:
     container_name: paketnik-frontend
     build:
-      context: ./frontend 
+      context: ./frontend
       dockerfile: Dockerfile
     ports:
       - "80:80"

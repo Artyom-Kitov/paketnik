@@ -63,7 +63,11 @@ export const StreamsListWidget = () => {
           </thead>
           <tbody>
             {streams.map((stream) => [
-              <StreamWidget key={stream.id} onContextMenu={showContextMenu} data={stream} />,
+              <StreamWidget
+                key={stream.id}
+                onContextMenu={showContextMenu}
+                data={stream}
+              />,
               <Rules key={stream.id} rules={stream.rules} />,
             ])}
           </tbody>

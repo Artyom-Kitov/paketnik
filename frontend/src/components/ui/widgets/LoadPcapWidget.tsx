@@ -1,4 +1,3 @@
-
 export function LoadPcapWidget() {
   return (
     <div className="w-full h-full flex flex-col">
@@ -21,7 +20,9 @@ export function LoadPcapWidget() {
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <input type="checkbox" id="deep-inspection" />
-                      <label htmlFor="deep-inspection">Deep Packet Inspection</label>
+                      <label htmlFor="deep-inspection">
+                        Deep Packet Inspection
+                      </label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <input type="checkbox" id="extract-files" />
@@ -38,14 +39,19 @@ export function LoadPcapWidget() {
             <div className="bg-[#2d3748] p-4 rounded-lg">
               <h3 className="text-lg font-semibold mb-3">Recent Files</h3>
               <div className="space-y-2">
-                {['recent1.pcap', 'recent2.pcap', 'recent3.pcap'].map((file) => (
-                  <div key={file} className="flex items-center justify-between p-2 bg-[#1e293b] rounded">
-                    <span>{file}</span>
-                    <button className="px-3 py-1 bg-[#4a5568] rounded hover:bg-[#2d3748] transition-colors">
-                      Load
-                    </button>
-                  </div>
-                ))}
+                {["recent1.pcap", "recent2.pcap", "recent3.pcap"].map(
+                  (file) => (
+                    <div
+                      key={file}
+                      className="flex items-center justify-between p-2 bg-[#1e293b] rounded"
+                    >
+                      <span>{file}</span>
+                      <button className="px-3 py-1 bg-[#4a5568] rounded hover:bg-[#2d3748] transition-colors">
+                        Load
+                      </button>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           </div>
@@ -53,4 +59,4 @@ export function LoadPcapWidget() {
       </div>
     </div>
   );
-} 
+}
