@@ -4,11 +4,10 @@ import org.springframework.stereotype.Component
 import ru.nsu.ctf.paketnikback.app.config.AppConfig
 
 @Component
-class ConfigVerifier(private val appConfig: AppConfig) {
-    
-    fun getConfig() : AppConfig {
-        return appConfig
-    }
+class ConfigVerifier(
+    private val appConfig: AppConfig,
+) {
+    fun getConfig(): AppConfig = appConfig
 
     fun printConfigValues() {
         println("FLAG_REGEX: ${appConfig.flagRegex}")

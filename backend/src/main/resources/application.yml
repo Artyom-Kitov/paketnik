@@ -12,7 +12,7 @@ server:
   port: 8081
 
 app:
-  flag-regex: "${FLAG_REGEX:}"
-  host-addr: "${HOST_ADDR:}"
-  start-time: "${START_TIME:}"
-  round-ticks: "${ROUND_TICKS:0}"
+  flag-regex: ${FLAG_REGEX:}
+  host-addr: ${HOST_ADDR:}
+  start-time: ${START_TIME:}
+  round-ticks: ${ROUND_TICKS:0}

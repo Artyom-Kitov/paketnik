@@ -1,38 +1,41 @@
 package ru.nsu.ctf.paketnikback.app.config
 
-import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.ConstructorBinding
+import java.time.LocalTime
 
 @ConfigurationProperties("app")
-data class AppConfig @ConstructorBinding constructor(
-    val flagRegex: String?,
-    val hostAddr: String?,
-    val startTime: String?,
-    val roundTicks: Int?
+class AppConfig @ConstructorBinding constructor(
+    flagRegex: String,
+    hostAddr: String,
+    startTime: String,
+    val roundTicks: Int
 ) {
-    @PostConstruct
-    fun validate() {
-        flagRegex?.let {
-            
-        }
+    val flagRegex: Regex? = if (flagRegex.isNotEmpty()) Regex.fromLiteral(flagRegex) else null
+    val hostAddr: String?
+    val startTime: LocalTime
 
-        hostAddr?.let {
-            if (!it.matches(Regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\d{1,2})?\$"))) {
-                throw IllegalArgumentException("Невалидное значение опции HOST_ADDR: $it")
-            }
+    init {
+        require(hostAddr.isEmpty() || hostAddr.matches(Regex(HOST_ADDR_REGEX))) {
+            "Невалидное значение опции HOST_ADDR: $hostAddr"
         }
-
-        startTime?.let {
-            if (!it.matches(Regex("^([01]\\d|2[0-3]):([0-5]\\d)\$"))) {
-                throw IllegalArgumentException("Невалидное значение опции START_TIME: $it")
-            }
+        this.hostAddr = hostAddr.ifEmpty { null }
+        require(startTime.isEmpty() || startTime.matches(Regex(START_TIME_REGEX))) {
+            "Невалидное значение опции START_TIME: $startTime"
         }
-
-        roundTicks?.let {
-            if (it < 0) {
-                throw IllegalArgumentException("Невалидное значение опции ROUND_TICKS: $it")
-            }
+        if (startTime.isEmpty()) {
+            this.startTime = LocalTime.now()
+        } else {
+            val (hour, minute) = startTime.split(":").map { it.toInt() }
+            this.startTime = LocalTime.of(hour, minute)
         }
+        require(roundTicks >= 0) {
+            "Невалидное значение опции ROUND_TICKS: $roundTicks"
+        }
+    }
+    
+    companion object {
+        private const val HOST_ADDR_REGEX = "^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\d{1,2})?\$"
+        private const val START_TIME_REGEX = "^([01]\\d|2[0-3]):([0-5]\\d)\$"
     }
 }
