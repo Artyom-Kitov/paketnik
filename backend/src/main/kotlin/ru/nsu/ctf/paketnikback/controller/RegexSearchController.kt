@@ -21,6 +21,7 @@ import ru.nsu.ctf.paketnikback.exception.InternalServerErrorException
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchRequest
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchResponse
 import ru.nsu.ctf.paketnikback.utils.logger
+import ru.nsu.ctf.paketnikback.utils.RegexSearchPcapHandler
 
 @RestController
 @RequestMapping("/search")
@@ -67,9 +68,20 @@ class RegexSearchController(
                 .build()
         )
         
-        // file -> pcap4j -> pcap -> ...
+        val pcap : Pcap? = try {
+            Pcap.openStream(file)
+        } catch (e: IOException) {
+            throw InternalServerErrorException("ERR: Error while file opening")
+        }
+        
+        val handler = RegexSearchPcapHandler(regex)
+        
+        pcap.loop(handler)
+        pcap.close()
+        
+        result.matches = handler.getMatches()
 
-        if (result.matches.isEmpty) {
+        if (result.matches.isEmpty()) {
             log.info("DATA_NOT_FOUND")
         } else {
             log.info("SEARCH_SUCCESS")
