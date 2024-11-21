@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { Input } from "../shadcn/input";
 import { Textarea } from "../shadcn/textarea";
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { postService, Service} from "../../../api"
+
+
+
 
 export function NewServiceForm({
   serviceName,
@@ -26,6 +31,16 @@ export function NewServiceForm({
 }) {
   const [errorMessage, setErrorMessage] = useState("");
 
+  const queryClient = useQueryClient()
+
+  const mutation = useMutation({
+    mutationFn: postService,
+    onSuccess: () => {
+      setIsRegistered(true)
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+    
   const getIsDataValid = () => {
     return (
       getIsServiceNameValid() &&
@@ -45,7 +60,8 @@ export function NewServiceForm({
 
   const registerService = () => {
     if (getIsDataValid()) {
-      setIsRegistered(true);
+      const service: Service = {id:"0", name: serviceName, hexColor: highlightColor, port: Number(port)}
+      mutation.mutate(service)
     } else {
       let errorString: string = "Data is incorrect!\n";
       if (!getIsServiceNameValid()) {

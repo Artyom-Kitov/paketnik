@@ -1,22 +1,16 @@
-import { useEffect, useState } from "react";
-import { servicesData } from "../../../fixtures/servicesData";
 import { ServiceWidget } from "./ServiceWidget";
-import { Service } from "./Service";
+import { getServices } from "../../../api"
+import {useQuery } from '@tanstack/react-query'
+
+
 
 export const ServicesListWidget = ({
   setCurrentWidget,
 }: {
   setCurrentWidget: (widget: string) => void;
 }) => {
-  const [streams, setStream] = useState<Service[]>([]);
-  const [show, setShow] = useState(false);
+  const query = useQuery({ queryKey: ['service'], queryFn: getServices })
 
-  useEffect(() => {
-    const handleClick = () => setShow(false);
-    window.addEventListener("click", handleClick);
-    setStream(servicesData);
-    return () => window.removeEventListener("click", handleClick);
-  }, []);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -53,13 +47,12 @@ export const ServicesListWidget = ({
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
-            {streams.map((stream) => [
-              <ServiceWidget key={stream.id} data={stream} />,
-            ])}
+            {query.data && query.data?.length > 0 && query.data?.map((service) => (
+            <ServiceWidget key={service.id} data={service} />
+          ))}
           </tbody>
         </table>
       </div>
-      {show}
     </div>
   );
 };
