@@ -19,7 +19,9 @@ type ServerMessageWidgetProps = {
   };
 };
 
-export const ServerMessageWidget: React.FC<ServerMessageWidgetProps> = ({ data }) => {
+export const ServerMessageWidget: React.FC<ServerMessageWidgetProps> = ({
+  data,
+}) => {
   const [height, setHeight] = useState(230);
   const [isResizing, setIsResizing] = useState(false);
   const [initialMousePosition, setInitialMousePosition] = useState(0);
@@ -61,7 +63,10 @@ export const ServerMessageWidget: React.FC<ServerMessageWidgetProps> = ({ data }
   }, [isResizing]);
 
   return (
-    <div style={{ height }} className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden">
+    <div
+      style={{ height }}
+      className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden"
+    >
       <DotsHorizontalIcon
         className="absolute bottom-2 left-2 text-gray-200 cursor-move"
         onMouseDown={handleMouseDown}
@@ -82,4 +87,3 @@ export const ServerMessageWidget: React.FC<ServerMessageWidgetProps> = ({ data }
     </div>
   );
 };
-
