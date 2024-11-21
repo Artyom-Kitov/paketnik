@@ -6,7 +6,7 @@ import io.pkts.packet.Packet
 import io.pkts.packet.PCapPacket
 
 class RegexSearchPcapHandler : PacketHandler {
-    private var matches : mutableListOf<Triple<Int, String, Int>>()
+    private var matches = mutableListOf<Triple<Int, String, Int>>()
     private var regex : Regex
     private var packetsCounter : Int = 0
     
