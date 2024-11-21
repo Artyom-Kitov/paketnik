@@ -71,7 +71,9 @@ export function NewServiceForm({
     <div>
       <h3 className="text-lg font-semibold mb-4">Register New Service</h3>
       {errorMessage && (
-        <div className="text-red-400 mb-4 whitespace-pre-line">{errorMessage}</div>
+        <div className="text-red-400 mb-4 whitespace-pre-line">
+          {errorMessage}
+        </div>
       )}
       <form className="space-y-3">
         <div>
