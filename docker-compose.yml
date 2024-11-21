@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   paketnik-db:
     container_name: paketnik-mongo
@@ -17,7 +15,6 @@ services:
 
   paketnik-backend:
     container_name: paketnik-backend
-    image: paketnik-backend:0.0.1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27017/paketnik-db?authSource=admin
     build:
@@ -30,7 +27,9 @@ services:
 
   paketnik-frontend:
     container_name: paketnik-frontend
-    image: paketnik-frontend:latest
+    build:
+      context: ./frontend 
+      dockerfile: Dockerfile
     ports:
       - "80:80"
 
