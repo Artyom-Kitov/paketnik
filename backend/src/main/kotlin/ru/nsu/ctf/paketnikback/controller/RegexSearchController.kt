@@ -74,7 +74,7 @@ class RegexSearchController(
             throw InternalServerErrorException("ERR: Error while file opening")
         }
         
-        val handler = RegexSearchPcapHandler(regex)
+        var handler = RegexSearchPcapHandler(regex)
         
         pcap.loop(handler)
         pcap.close()
