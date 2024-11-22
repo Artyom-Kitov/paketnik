@@ -26,7 +26,6 @@ export const StreamsListWidget = () => {
 
   function onClick(id: number) {
     setCurrentStreamId(id);
-    console.log(id);
   }
 
   return (

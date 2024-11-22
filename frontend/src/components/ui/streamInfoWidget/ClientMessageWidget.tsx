@@ -1,20 +1,9 @@
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
+import { Stream } from "../streamsList/Stream";
 
 type ClientMessageWidgetProps = {
-  data: {
-    srcIp: string;
-    dstIp: string;
-    headers: {
-      tcp: {
-        srcPort: number;
-        destPort: number;
-        sequenceNumber: number;
-        ackNumber: number;
-        payload: string;
-      };
-    };
-  };
+  data: Stream,
 };
 
 export const ClientMessageWidget: React.FC<ClientMessageWidgetProps> = ({ data }) => {
