@@ -1,30 +1,29 @@
 import { ServiceWidget } from "./ServiceWidget";
-import { getServices } from "../../../api"
-import {useQuery } from '@tanstack/react-query'
-//import {servicesData} from "../../../fixtures/servicesData"
-
-
+import { getServices } from "../../../api";
+import { useQuery } from "@tanstack/react-query";
 
 export const ServicesListWidget = ({
   setCurrentWidget,
 }: {
   setCurrentWidget: (widget: string) => void;
 }) => {
-  const { isPending, isError, data, error } = useQuery({ queryKey: ['service'], queryFn: getServices })
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["service"],
+    queryFn: getServices,
+  });
 
-  if (isPending){
+  if (isPending) {
     <div className="w-full h-full flex flex-col">
-    <div className="text-right text-[#fff] text-2xl font-bold mb-2">
-      Loading... {data}
-    </div>
-    </div>
-  }
-  else if (isError){
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+        Loading... {data}
+      </div>
+    </div>;
+  } else if (isError) {
     <div className="w-full h-full flex flex-col">
-    <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
-      Error: {error.message}
-    </div>
-    </div>
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+        Error: {error.message}
+      </div>
+    </div>;
   }
 
   return (
@@ -62,9 +61,9 @@ export const ServicesListWidget = ({
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
-            { data?.map((service) => (
-            <ServiceWidget key={service.id} data={service} />
-          ))}
+            {data?.map((service) => (
+              <ServiceWidget key={service.id} data={service} />
+            ))}
           </tbody>
         </table>
       </div>

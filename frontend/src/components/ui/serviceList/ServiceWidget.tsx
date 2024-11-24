@@ -1,11 +1,10 @@
-import { Service } from "./Service";
+import { Service } from "../../../api";
 
 export type Props = {
-  data: Service;
+  service: Service;
 };
 
-const ServiceWidget = ({ data }: Props) => {
-  const service = data;
+const ServiceWidget = ({ service }: Props) => {
   return (
     <tr
       onContextMenu={(e) => {

@@ -30,7 +30,7 @@ export function NewServiceForm({
 
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const registerServiceMutation = useMutation({
     mutationFn: postService,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["service"] });
@@ -62,7 +62,7 @@ export function NewServiceForm({
         hexColor: highlightColor,
         port: Number(port),
       };
-      mutation.mutate(service);
+      registerServiceMutation.mutate(service);
       setIsRegistered(true);
     } else {
       let errorString: string = "Data is incorrect!\n";
