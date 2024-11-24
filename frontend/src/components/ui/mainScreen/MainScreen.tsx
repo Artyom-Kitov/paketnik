@@ -57,7 +57,6 @@ export function MainScreen() {
                   minSize={20}
                   className="mb-[28px] ml-[6px] mr-[7px]"
                 >
-
                   <StreamInfoWidget />
                 </Panel>
                 {currentWidget && (
