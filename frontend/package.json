@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
+    "format:check": "npx prettier . --check",
     "preview": "vite preview"
   },
   "dependencies": {
