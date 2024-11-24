@@ -40,11 +40,12 @@ async function fetchData<Type>(
       body: JSON.stringify(body),
     };
   }
-  return (await fetch(host + path, options)
-    .then((response) => response.json())
-    .then(({ success }) => {
-      if (!success) {
-        throw new Error("An error occured");
-      }
-    })) as Type;
+  try {
+    return (await fetch(host + path, options)).json() as Type;
+  } catch (error) {
+    const errorMessage: string =
+      "An error occured: " + (error as Error).message;
+    console.log(errorMessage);
+    throw new Error(errorMessage);
+  }
 }
