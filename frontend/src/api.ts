@@ -12,27 +12,15 @@ export async function getServices(): Promise<Service[]> {
 }
 
 export async function updateService(service: Service): Promise<void> {
-  return await fetchData(
-    host + "/services/",
-    "PUT",
-    JSON.stringify(service),
-  );
+  return await fetchData(host + "/services/", "PUT", JSON.stringify(service));
 }
 
 export async function deleteService(id: string): Promise<void> {
-  return await fetchData(
-    host + "/service/" + id,
-    "DELETE",
-    "",
-  );
+  return await fetchData(host + "/service/" + id, "DELETE", "");
 }
 
 export async function postService(service: Service): Promise<void> {
-  return await fetchData(
-    host + "/services",
-    "POST",
-    JSON.stringify(service),
-  );
+  return await fetchData(host + "/services", "POST", JSON.stringify(service));
 }
 
 async function fetchData(
@@ -42,7 +30,7 @@ async function fetchData(
 ): Promise<void> {
   return await fetch(path, {
     method: method,
-    headers:{
+    headers: {
       "Content-Type": "application/json",
     },
     body: body,
