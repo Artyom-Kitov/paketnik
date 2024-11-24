@@ -62,7 +62,7 @@ export const ServicesListWidget = ({
           </thead>
           <tbody>
             {data?.map((service) => (
-              <ServiceWidget key={service.id} data={service} />
+              <ServiceWidget key={service.id} service={service} />
             ))}
           </tbody>
         </table>
