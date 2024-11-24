@@ -33,16 +33,12 @@ export async function postService(service: Service): Promise<void> {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      name: service.name,
-      hexColor: service.hexColor,
-      port: service.port,
-    }),
+    body: JSON.stringify(service),
   });
 }
 
 async function fetchData(input: string, init: RequestInit): Promise<void> {
-  return fetch(input, init)
+  return await fetch(input, init)
     .then((response) => response.json())
     .then(({ success }) => {
       if (!success) {
