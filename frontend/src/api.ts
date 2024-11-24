@@ -29,21 +29,22 @@ async function fetchData<Type>(
   body: Service | string,
 ): Promise<Type> {
   let options = {};
-  if(method == "GET" || method == "DELETE"){
-    options = {method: method}
-  } else{
-    options = {    
+  if (method == "GET" || method == "DELETE") {
+    options = { method: method };
+  } else {
+    options = {
       method: method,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(body),}
+      body: JSON.stringify(body),
+    };
   }
-  return await fetch(host + path, options)
+  return (await fetch(host + path, options)
     .then((response) => response.json())
     .then(({ success }) => {
       if (!success) {
         throw new Error("An error occured");
       }
-    }) as Type;
+    })) as Type;
 }
