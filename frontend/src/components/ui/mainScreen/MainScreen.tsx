@@ -8,6 +8,7 @@ import { ConfigWidget } from "../widgets/ConfigWidget";
 import { FilesWidget } from "../widgets/FilesWidget";
 import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
 import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
+import { ServicesListWidget } from "../serviceList/ServicesListWidget";
 
 export function MainScreen() {
   const [currentWidget, setCurrentWidget] = useState<string>("");
@@ -15,6 +16,8 @@ export function MainScreen() {
   const renderCurrentWidget = () => {
     switch (currentWidget) {
       case "Services":
+        return <ServicesListWidget setCurrentWidget={setCurrentWidget} />;
+      case "ServiceRegistation":
         return <ServiceRegistrationWidget />;
       case "Rules":
         return <RulesWidget />;
