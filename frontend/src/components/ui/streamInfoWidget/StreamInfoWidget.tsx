@@ -1,23 +1,12 @@
-import { useEffect, useState } from "react";
 import { ServerMessageWidget } from "./ServerMessageWidget";
 import { ClientMessageWidget } from "./ClientMessageWidget";
 import { currentStreamId } from "../streamsList/selectedStream";
 import { streamData } from "../../../fixtures/streamData";
 import { useAtomValue } from "jotai";
-import { Stream } from "../streamsList/Stream";
 
 export const StreamInfoWidget = () => {
-  const [stream, setStream] = useState<Stream | null>(null);
   const streamId = useAtomValue(currentStreamId);
-
-  useEffect(() => {
-    for (const s of streamData) {
-      if (s.id == streamId) {
-        setStream(s);
-        break;
-      }
-    }
-  });
+  const stream = streamData.find(s=>s.id == streamId);
 
   return (
     <div className="w-full h-full flex flex-col">
