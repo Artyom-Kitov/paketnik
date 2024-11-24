@@ -8,32 +8,7 @@ import { ConfigWidget } from "../widgets/ConfigWidget";
 import { FilesWidget } from "../widgets/FilesWidget";
 import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
 import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
-
 import { ServicesListWidget } from "../serviceList/ServicesListWidget";
-
-// Temporary mock data for StreamInfoWidget
-const mockStreamData = {
-  id: 1,
-  srcIp: "192.168.1.1",
-  dstIp: "192.168.1.2",
-  headers: {
-    ethernet: {
-      srcMac: "00:00:00:00:00:00",
-      destMac: "00:00:00:00:00:00",
-    },
-    ip: {
-      srcIp: "192.168.1.1",
-      destIp: "192.168.1.2",
-    },
-    tcp: {
-      srcPort: 80,
-      destPort: 443,
-      sequenceNumber: 1234,
-      ackNumber: 5678,
-      payload: "Sample payload",
-    },
-  },
-};
 
 export function MainScreen() {
   const [currentWidget, setCurrentWidget] = useState<string>("");
@@ -82,7 +57,8 @@ export function MainScreen() {
                   minSize={20}
                   className="mb-[28px] ml-[6px] mr-[7px]"
                 >
-                  <StreamInfoWidget data={mockStreamData} />
+
+                  <StreamInfoWidget />
                 </Panel>
                 {currentWidget && (
                   <>
