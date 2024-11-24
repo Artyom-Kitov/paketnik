@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 
 export const StreamInfoWidget = () => {
   const streamId = useAtomValue(currentStreamId);
-  const stream = streamData.find(s=>s.id == streamId);
+  const stream = streamData.find((s)=>s.id == streamId);
 
   return (
     <div className="w-full h-full flex flex-col">
