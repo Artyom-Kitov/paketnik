@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 
 export const StreamInfoWidget = () => {
   const streamId = useAtomValue(currentStreamId);
-  const stream = streamData.find((s)=>s.id == streamId);
+  const stream = streamData.find((s) => s.id == streamId);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -16,29 +16,17 @@ export const StreamInfoWidget = () => {
       {stream && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="max-h-[700px] overflow-auto space-y-4">
-            <ServerMessageWidget
-              data={stream}
-            />
+            <ServerMessageWidget data={stream} />
 
-            <ClientMessageWidget
-              data={stream}
-            />
+            <ClientMessageWidget data={stream} />
 
-            <ServerMessageWidget
-              data={stream}
-            />
+            <ServerMessageWidget data={stream} />
 
-            <ClientMessageWidget
-              data={stream}
-            />
+            <ClientMessageWidget data={stream} />
 
-            <ServerMessageWidget
-              data={stream}
-            />
+            <ServerMessageWidget data={stream} />
 
-            <ClientMessageWidget
-              data={stream}
-            />
+            <ClientMessageWidget data={stream} />
           </div>
         </div>
       )}
