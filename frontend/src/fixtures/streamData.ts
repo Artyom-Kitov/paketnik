@@ -25,8 +25,8 @@ export const streamData = [
         ttl: 64,
         protocol: "TCP",
         headerChecksum: "0x1A2B",
-        srcIp: "10.10.16.6",
-        destIp: "10.10.10.2",
+        srcIp: "192.168.0.1",
+        destIp: "192.168.0.2",
       },
       tcp: {
         srcPort: 51058,
@@ -43,7 +43,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 2,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -86,7 +86,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 3,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -129,7 +129,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 4,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -172,7 +172,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 5,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -215,7 +215,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 6,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -258,7 +258,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 7,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -301,7 +301,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 8,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -344,7 +344,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 9,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
@@ -387,7 +387,7 @@ export const streamData = [
     },
   },
   {
-    id: 1,
+    id: 10,
     serviceName: "sheetty",
     srcIp: "10.10.16.6",
     srcPort: 51058,
