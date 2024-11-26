@@ -37,14 +37,12 @@ class RegexSearchController(
 
         val filename = request.filename
         
-        try {
-            val regex = Regex(request.regex)
+        val regex = try {
+            Regex(request.regex)
         } catch (e: Exception) {
-            throw MethodArgumentNotValidException("ERR: Regex ${request.regex} not valid: ${e.message}")
+            throw IllegalArgumentException("ERR: Invalid regex '${request.regex}': ${e.message}")
         }
 
-        val regex = Regex(request.regex)
-        
         try {
             val stat = minioClient.statObject(
                 StatObjectArgs.builder()
@@ -68,25 +66,24 @@ class RegexSearchController(
                 .build()
         )
         
-        val pcap : Pcap? = try {
-            Pcap.openStream(file)
-        } catch (e: IOException) {
-            throw InternalServerErrorException("ERR: Error while file opening")
-        }
-        
         var handler = RegexSearchPcapHandler(regex)
         
-        pcap.loop(handler)
-        pcap.close()
+        try {
+            Pcap.openStream(file).use { pcap ->
+                pcap.loop(handler)
+            }
+        } catch (e: IOException) {
+            throw InternalServerErrorException("ERR: Error while file reading")
+        }
         
         result.matches = handler.getMatches()
 
         if (result.matches.isEmpty()) {
             log.info("DATA_NOT_FOUND")
-        } else {
-            log.info("SEARCH_SUCCESS")
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
         }
 
+        log.info("SEARCH_SUCCESS")
         return ResponseEntity(result, HttpStatus.OK)
     }
 }
