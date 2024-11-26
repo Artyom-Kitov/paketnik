@@ -8,30 +8,7 @@ import { ConfigWidget } from "../widgets/ConfigWidget";
 import { FilesWidget } from "../widgets/FilesWidget";
 import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
 import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
-
-// Temporary mock data for StreamInfoWidget
-const mockStreamData = {
-  id: 1,
-  srcIp: "192.168.1.1",
-  dstIp: "192.168.1.2",
-  headers: {
-    ethernet: {
-      srcMac: "00:00:00:00:00:00",
-      destMac: "00:00:00:00:00:00"
-    },
-    ip: {
-      srcIp: "192.168.1.1",
-      destIp: "192.168.1.2"
-    },
-    tcp: {
-      srcPort: 80,
-      destPort: 443,
-      sequenceNumber: 1234,
-      ackNumber: 5678,
-      payload: "Sample payload"
-    }
-  }
-};
+import { ServicesListWidget } from "../serviceList/ServicesListWidget";
 
 export function MainScreen() {
   const [currentWidget, setCurrentWidget] = useState<string>("");
@@ -39,6 +16,8 @@ export function MainScreen() {
   const renderCurrentWidget = () => {
     switch (currentWidget) {
       case "Services":
+        return <ServicesListWidget setCurrentWidget={setCurrentWidget} />;
+      case "ServiceRegistation":
         return <ServiceRegistrationWidget />;
       case "Rules":
         return <RulesWidget />;
@@ -65,17 +44,29 @@ export function MainScreen() {
             </Panel>
             <Panel minSize={91}>
               <PanelGroup direction="horizontal" className="right-widget-group">
-                <Panel defaultSize={currentWidget ? 33 : 50} minSize={20} className="mb-[28px] ml-[11px] mr-[7px]">
+                <Panel
+                  defaultSize={currentWidget ? 33 : 50}
+                  minSize={20}
+                  className="mb-[28px] ml-[11px] mr-[7px]"
+                >
                   <StreamsListWidget />
                 </Panel>
                 <PanelResizeHandle className="resize-handle" />
-                <Panel defaultSize={currentWidget ? 33 : 50} minSize={20} className="mb-[28px] ml-[6px] mr-[7px]">
-                  <StreamInfoWidget data={mockStreamData} />
+                <Panel
+                  defaultSize={currentWidget ? 33 : 50}
+                  minSize={20}
+                  className="mb-[28px] ml-[6px] mr-[7px]"
+                >
+                  <StreamInfoWidget />
                 </Panel>
                 {currentWidget && (
                   <>
                     <PanelResizeHandle className="resize-handle" />
-                    <Panel defaultSize={33} minSize={20} className="mb-[28px] ml-[6px] mr-[24px]">
+                    <Panel
+                      defaultSize={33}
+                      minSize={20}
+                      className="mb-[28px] ml-[6px] mr-[24px]"
+                    >
                       {renderCurrentWidget()}
                     </Panel>
                   </>
@@ -85,7 +76,10 @@ export function MainScreen() {
           </PanelGroup>
         </Panel>
         <Panel minSize={3} className="bg-[#475569] ml-[12px]">
-          <Sidebar setCurrentWidget={setCurrentWidget} currentWidget={currentWidget} />
+          <Sidebar
+            setCurrentWidget={setCurrentWidget}
+            currentWidget={currentWidget}
+          />
         </Panel>
       </PanelGroup>
     </div>
