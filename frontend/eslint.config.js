@@ -28,12 +28,13 @@ const config = [
         },
       ],
       "react/react-in-jsx-scope": "off",
-      "react/prop-types": "off"
+      "react/prop-types": "off",
     },
-  }, {
+  },
+  {
     // Note: there should be no other properties in this object
-    ignores: ["dist"]
-  }
+    ignores: ["dist"],
+  },
 ];
 
 export default config;

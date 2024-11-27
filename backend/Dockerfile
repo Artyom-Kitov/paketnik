@@ -1,16 +1,18 @@
-FROM eclipse-temurin:17-jdk-alpine AS build
+FROM alpine:edge AS build
 
 WORKDIR /app
 
 COPY . .
 
-RUN apk update && apk add --no-cache libpcap-dev
+RUN apk update && apk add --no-cache libpcap-dev openjdk17-jdk
 
 RUN chmod +x mvnw
 
 RUN ./mvnw clean package -DskipTests
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM alpine:edge
+
+RUN apk update && apk add --no-cache libpcap-dev openjdk17-jre
 
 COPY --from=build /app/target/*.jar /app/app.jar
 
