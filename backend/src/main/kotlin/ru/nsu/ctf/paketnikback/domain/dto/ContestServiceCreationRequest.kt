@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.Size
 
 data class ContestServiceCreationRequest(
-    @Size(min = 1, max = 64, message = "Name must be between 1 and 64 characters")
+    @Size(min = 1, max = 64, message = "Name length must be between 1 and 64 characters")
     val name: String,
 
     @Min(1, message = "Port must be at least 1")

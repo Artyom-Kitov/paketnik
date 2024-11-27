@@ -6,11 +6,13 @@ import io.minio.MinioClient
 import io.minio.errors.MinioException
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import ru.nsu.ctf.paketnikback.utils.logger
 
 @Configuration
 class MinioConfig {
     @Bean
     fun minioClient(): MinioClient {
+        val log = logger()
         val client = MinioClient
             .builder()
             .endpoint("http://localhost:9000")
@@ -33,12 +35,12 @@ class MinioConfig {
                         .bucket(bucketName)
                         .build(),
                 )
-                println("Default bucket $bucketName успешно создан")
+                log.info("Default bucket $bucketName успешно создан")
             } else {
-                println("Default bucket $bucketName уже существует")
+                log.warn("Default bucket $bucketName уже существует")
             }
         } catch (e: MinioException) {
-            println("Ошибка при создании default bucket: ${e.message}")
+            log.error("Ошибка при создании default bucket: ${e.message}")
         }
 
         return client
