@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDTO
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDTO
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
+import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
 import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.service.rule.RuleService
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 // ВНИМАНИЕ!
 // При изменении, добавлении или удалении правил необходимо потом обновить метки для всех стримов в соответствии с 
@@ -14,44 +17,39 @@ import ru.nsu.ctf.paketnikback.domain.service.rule.RuleService
 // ВНИМАНИЕ!
 @Service
 class RuleServiceImpl(
-    private val ruleRepository: RuleRepository
+    private val ruleRepository: RuleRepository,
+    private val ruleMapper: RuleMapper
 ): RuleService {
     override fun getAllRules(): List<RuleResponseDTO> {
-        return ruleRepository.findAll().map { it.toResponseDTO() }
+        val ruleDocuments = ruleRepository.findAll()
+        return ruleDocuments.map { ruleMapper.toResponseDTO(ruleMapper.toDomain(it)) }
+    }
+    
+    override fun getAllRulesAsEntity(): List<Rule> {
+        val ruleDocuments = ruleRepository.findAll()
+        return ruleDocuments.map { ruleMapper.toDomain(it) }
     }
 
     override fun createRule(request: RuleRequestDTO): RuleResponseDTO {
-        if (!validateRuleRegex(request)) {
-            throw IllegalArgumentException("Regex is invalid")
-        }
-
-        val rule = Rule(
-            name = request.name,
-            type = request.type,
-            regex = request.regex,
-            scope = request.scope
-        )
-        val savedRule = ruleRepository.save(rule)
-        return savedRule.toResponseDTO()
+        validateRuleRequest(request)
+        
+        val rule = ruleMapper.toDomainFromRequest(request)
+        val savedDocument = ruleRepository.save(ruleMapper.toDocument(rule))
+        
+        return ruleMapper.toResponseDTO(ruleMapper.toDomain(savedDocument))
     }
 
     override fun updateRule(id: String, request: RuleRequestDTO): RuleResponseDTO {
-        val existingRule = ruleRepository.findById(id).orElseThrow {
-            IllegalArgumentException("Rule with ID $id not found") 
+        ruleRepository.findById(id).orElseThrow {
+            IllegalArgumentException("Rule with ID $id not found")
         }
-        
-        if (!validateRuleRegex(request)) {
-            throw IllegalArgumentException("Regex is invalid")
-        }
-        
-        val updatedRule = existingRule.copy(
-            name = request.name,
-            type = request.type,
-            regex = request.regex,
-            scope = request.scope
-        )
-        ruleRepository.save(updatedRule)
-        return updatedRule.toResponseDTO()
+
+        validateRuleRequest(request)
+
+        val updatedRule = ruleMapper.toDomainFromRequest(request).copy(id = id)
+        val savedDocument = ruleRepository.save(ruleMapper.toDocument(updatedRule))
+
+        return ruleMapper.toResponseDTO(ruleMapper.toDomain(savedDocument))
     }
 
     override fun deleteRule(id: String) {
@@ -60,16 +58,16 @@ class RuleServiceImpl(
         }
         ruleRepository.deleteById(id)
     }
-    
-    private fun validateRuleRegex(rule: RuleRequestDTO): Boolean {
-        TODO("Not yet implemented")
-    }
 
-    private fun Rule.toResponseDTO() = RuleResponseDTO(
-        id = this.id ?: throw IllegalStateException("Rule ID is null"),
-        name = this.name,
-        type = this.type,
-        regex = this.regex,
-        scope = this.scope
-    )
+    private fun validateRuleRequest(request: RuleRequestDTO) {
+        if (request.name.isBlank()) {
+            throw IllegalArgumentException("Rule name cannot be empty")
+        }
+
+        try {
+            Pattern.compile(request.regex)
+        } catch (e: PatternSyntaxException) {
+            throw IllegalArgumentException("Invalid regex: ${request.regex}")
+        }
+    }
 }
