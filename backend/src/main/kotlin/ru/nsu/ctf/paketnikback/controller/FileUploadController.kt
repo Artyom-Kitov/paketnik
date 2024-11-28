@@ -1,50 +1,50 @@
 package ru.nsu.ctf.paketnikback.controller
 
-import io.minio.BucketExistsArgs
-import io.minio.ListObjectsArgs
-import io.minio.MakeBucketArgs
 import io.minio.MinioClient
-import io.minio.PutObjectArgs
-import io.minio.StatObjectArgs
-import io.minio.errors.MinioException
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.http.HttpStatus
+import io.minio.errors.MinioException
+import io.minio.errors.ErrorResponseException
+import io.minio.BucketExistsArgs
+import io.minio.MakeBucketArgs
+import io.minio.PutObjectArgs
+import io.minio.StatObjectArgs
+import io.minio.ListObjectsArgs
+import io.minio.RemoveObjectArgs
+import io.minio.DownloadObjectArgs
 import org.springframework.web.multipart.MultipartFile
 import java.security.MessageDigest
+
+
 
 @RestController
 @RequestMapping("/minio-api")
 class FileUploadController(
-    private val minioClient: MinioClient,
+    private val minioClient: MinioClient
 ) {
     private var bucketName = "default-bucket"
     private var unknownNum = 1
 
     @PostMapping("/create-bucket")
-    fun setBucketName(@RequestPart("New-Bucket-Name") name: String): ResponseEntity<String> {
+    fun setBucketName(@RequestPart("New-Bucket-Name") name: String):ResponseEntity<String> {
         bucketName = name
         try {
             val found = minioClient.bucketExists(
-                BucketExistsArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .build(),
-            )
+                                BucketExistsArgs.builder()
+                                .bucket(bucketName)
+                                .build())
             if (!found) {
                 minioClient.makeBucket(
-                    MakeBucketArgs
-                        .builder()
-                        .bucket(bucketName)
-                        .build(),
-                )
-                return ResponseEntity("Bucket $name успешно создан", HttpStatus.OK)
+                    MakeBucketArgs.builder()
+                    .bucket(bucketName)
+                    .build())
+                return ResponseEntity("Bucket ${name} успешно создан", HttpStatus.OK)
             }
-            return ResponseEntity("Bucket $name уже существует", HttpStatus.OK)
+            return ResponseEntity("Bucket ${name} уже существует", HttpStatus.OK)
         } catch (e: MinioException) {
-            return ResponseEntity(
-                "Ошибка создания bucket: ${e.message}",
-                HttpStatus.INTERNAL_SERVER_ERROR,
+            return ResponseEntity("Ошибка создания bucket: ${e.message}",
+                HttpStatus.INTERNAL_SERVER_ERROR
             )
         }
     }
@@ -58,10 +58,9 @@ class FileUploadController(
             buckets.forEach { bucket ->
                 val files = mutableListOf<String>()
                 val objects = minioClient.listObjects(
-                    ListObjectsArgs
-                        .builder()
+                    ListObjectsArgs.builder()
                         .bucket(bucket.name())
-                        .build(),
+                        .build()
                 )
 
                 objects.forEach { file ->
@@ -71,10 +70,49 @@ class FileUploadController(
             }
             return ResponseEntity(result, HttpStatus.OK)
         } catch (e: Exception) {
-            return ResponseEntity(
-                mapOf("error" to listOf("Error fetching files: ${e.message}")),
-                HttpStatus.INTERNAL_SERVER_ERROR,
+            return ResponseEntity(mapOf("error" to listOf("Error fetching files: ${e.message}")), HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    @GetMapping("/files/{fileName}")
+    fun downloadFile(@PathVariable fileName: String): ResponseEntity<ByteArray> {
+        return try {
+            val tempFile = createTempFile("minio-download-", "-temp")
+            tempFile.deleteOnExit()
+
+            minioClient.downloadObject(
+                DownloadObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .filename(tempFile.absolutePath)
+                    .build()
             )
+
+            val fileBytes = tempFile.readBytes()
+            ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; fileName=\"$fileName\"")
+                .body(fileBytes)
+        } catch (e: MinioException) {
+            ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body("Error: File not found or failed to download. ${e.message}".toByteArray())
+        }
+    }
+
+    @DeleteMapping("/files/{filename}")
+    fun deleteFile(@PathVariable filename: String): ResponseEntity<String> {
+        return try {
+            minioClient.removeObject(
+                RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(filename)
+                    .build()
+            )
+            ResponseEntity.ok("File $filename successfully deleted.")
+        } catch (e: MinioException) {
+            ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error: Unable to delete file. ${e.message}")
         }
     }
 
@@ -89,7 +127,8 @@ class FileUploadController(
             val fileExtension = getFileExtension(originalFilename)
             val fileName = "$fileHash.$fileExtension"
 
-            if (fileAlreadyExistInMinio(fileName)) {
+            if(fileAlreadyExistInMinio(fileName))
+            {
                 uploadStatus[fileName] = "ERR: File already exists in MinIO"
                 return@forEach
             }
@@ -113,55 +152,53 @@ class FileUploadController(
         return ResponseEntity(uploadStatus, status)
     }
 
+
     @PostMapping("/upload/remote")
     fun uploadRemoteFile(
         @RequestPart("file") file: MultipartFile,
-        @RequestHeader("X-File-Name") fileName: String,
+        @RequestHeader("X-File-Name") fileName: String
     ): ResponseEntity<String> {
+
         val fileHash = calculateFileHashStreaming(file)
         val fileExtension = getFileExtension(fileName)
         val hashFileName = "$fileHash.$fileExtension"
 
-        if (fileAlreadyExistInMinio(hashFileName)) {
+        if(fileAlreadyExistInMinio(hashFileName))
             return ResponseEntity("ERR: File already exists in MinIO", HttpStatus.BAD_REQUEST)
-        }
 
         try {
-            loadFileToMinio(file, hashFileName)
-            return ResponseEntity("OK", HttpStatus.OK)
+                loadFileToMinio(file, hashFileName)
+                return ResponseEntity("OK", HttpStatus.OK)
         } catch (e: MinioException) {
-            return ResponseEntity("ERR: ${e.message}", HttpStatus.BAD_REQUEST)
+                return ResponseEntity("ERR: ${e.message}", HttpStatus.BAD_REQUEST)
         }
     }
 
-    fun fileAlreadyExistInMinio(fileName: String): Boolean {
-        try {
-            minioClient.statObject(
-                StatObjectArgs
-                    .builder()
+    fun fileAlreadyExistInMinio(fileName: String): Boolean{
+         try {
+                minioClient.statObject(
+                StatObjectArgs.builder()
                     .bucket(bucketName)
                     .`object`(fileName)
-                    .build(),
-            )
-            return true
-        } catch (e: MinioException) {
-            return false
-        }
+                    .build())
+                return true
+            } catch (e: MinioException) {
+                return false
+            }
     }
 
-    fun loadFileToMinio(file: MultipartFile, fileName: String) {
+    fun loadFileToMinio(file: MultipartFile, fileName: String){
         try {
-            file.inputStream.use { inputStream ->
-                minioClient.putObject(
-                    PutObjectArgs
-                        .builder()
-                        .bucket(bucketName)
-                        .`object`(fileName)
-                        .stream(inputStream, file.size, -1)
-                        .contentType(file.contentType)
-                        .build(),
-                )
-            }
+                file.inputStream.use { inputStream ->
+                    minioClient.putObject(
+                        PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .`object`(fileName)
+                            .stream(inputStream, file.size, -1)
+                            .contentType(file.contentType)
+                            .build()
+                    )
+                }
         } catch (e: MinioException) {
             throw(e)
         }
@@ -180,5 +217,8 @@ class FileUploadController(
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
-    fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "")
+    fun getFileExtension(fileName: String): String{
+        return fileName.substringAfterLast(".","")
+    }
 }
+
