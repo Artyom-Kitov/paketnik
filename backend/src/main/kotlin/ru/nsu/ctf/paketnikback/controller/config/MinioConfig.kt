@@ -15,8 +15,8 @@ class MinioConfig {
         val log = logger()
         val client = MinioClient
             .builder()
-            .endpoint("http://localhost:9000")
-            .credentials("admin", "password")
+            .endpoint("http://paketnik-minio:9000")
+            .credentials("minioadmin", "minioadmin")
             .build()
 
         val bucketName = "default-bucket"

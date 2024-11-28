@@ -13,10 +13,23 @@ services:
     ports:
       - "27017:27017"
 
+  paketnik-minio:
+    container_name: paketnik-minio
+    image: minio/minio
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    command: server --console-address ":9001" /data
+    volumes:
+      - minio_data:/data
+
   paketnik-backend:
     container_name: paketnik-backend
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27017/paketnik-db?authSource=admin
+      - MINIO_ENDPOINT=http://paketnik-minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
     build:
       context: backend/.
       dockerfile: Dockerfile
@@ -24,6 +37,7 @@ services:
       - "8081:8081"
     depends_on:
       - paketnik-db
+      - paketnik-minio
 
   paketnik-frontend:
     container_name: paketnik-frontend
@@ -36,3 +50,6 @@ services:
 networks:
   paketnik-network:
     driver: bridge
+
+volumes:
+  minio_data:
