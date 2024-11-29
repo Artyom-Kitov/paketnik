@@ -4,19 +4,25 @@ import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.errors.MinioException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.nsu.ctf.paketnikback.utils.logger
 
 @Configuration
-class MinioConfig {
+class MinioConfig(
+    @Value("\${minio.endpoint}") private val endpoint: String,
+    @Value("\${minio.accessKey}") private val accessKey: String,
+    @Value("\${minio.secretKey}") private val secretKey: String,
+) {
+    
     @Bean
     fun minioClient(): MinioClient {
         val log = logger()
         val client = MinioClient
             .builder()
-            .endpoint("http://localhost:9000")
-            .credentials("admin", "password")
+            .endpoint(endpoint)
+            .credentials(accessKey, secretKey)
             .build()
 
         val bucketName = "default-bucket"
