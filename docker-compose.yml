@@ -10,28 +10,58 @@ services:
       - MONGODB_DB=paketnik-db
       - MONGODB_USER=paketnik
       - MONGODB_PASSWORD=paketnik123
-    ports:
-      - "27017:27017"
+    networks:
+      - paketnik-network
+
+  paketnik-minio:
+    container_name: paketnik-minio
+    image: minio/minio:latest
+    command: server /data
+    volumes:
+      - /test_data:/data
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=password
+    networks:
+      - paketnik-network
+
 
   paketnik-backend:
     container_name: paketnik-backend
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://paketnik:paketnik123@paketnik-db:27017/paketnik-db?authSource=admin
+      # - SERVER_SERVLET_CONTEXT_PATH=/api
+      - MINIO_ENDPOINT=http://paketnik-minio:9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password
     build:
       context: backend/.
       dockerfile: Dockerfile
-    ports:
-      - "8081:8081"
     depends_on:
       - paketnik-db
+    networks:
+      - paketnik-network
 
   paketnik-frontend:
     container_name: paketnik-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    networks:
+      - paketnik-network
+
+  nginx-proxy:
+    container_name: paketnik-nginx
+    image: nginx:alpine
     ports:
-      - "80:80"
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - paketnik-backend
+      - paketnik-frontend
+    networks:
+      - paketnik-network
 
 networks:
   paketnik-network:
