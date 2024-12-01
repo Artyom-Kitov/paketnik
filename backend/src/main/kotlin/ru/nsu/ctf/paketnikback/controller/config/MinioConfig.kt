@@ -15,7 +15,6 @@ class MinioConfig(
     @Value("\${minio.accessKey}") private val accessKey: String,
     @Value("\${minio.secretKey}") private val secretKey: String,
 ) {
-    
     @Bean
     fun minioClient(): MinioClient {
         val log = logger()
