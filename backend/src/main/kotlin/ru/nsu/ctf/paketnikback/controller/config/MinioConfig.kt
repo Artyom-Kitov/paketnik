@@ -28,18 +28,13 @@ class MinioConfig(
         val bucketName = "default-bucket"
 
         try {
-            val found = client.bucketExists(
-                BucketExistsArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .build(),
-            )
+            val found =
+                client.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucketName).build(),
+                )
             if (!found) {
                 client.makeBucket(
-                    MakeBucketArgs
-                        .builder()
-                        .bucket(bucketName)
-                        .build(),
+                    MakeBucketArgs.builder().bucket(bucketName).build(),
                 )
                 log.info("Default bucket $bucketName успешно создан")
             } else {
