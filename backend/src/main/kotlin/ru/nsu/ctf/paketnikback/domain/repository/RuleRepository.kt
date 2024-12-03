@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleDocument
 
 @Repository
-interface RuleRepository: MongoRepository<RuleDocument, String>
+interface RuleRepository : MongoRepository<RuleDocument, String>

@@ -28,17 +28,17 @@ import java.util.regex.PatternSyntaxException
 @Service
 class RuleServiceImpl(
     private val ruleRepository: RuleRepository,
-    private val ruleMapper: RuleMapper
-): RuleService {
+    private val ruleMapper: RuleMapper,
+) : RuleService {
     private val log = logger()
-    
+
     override fun getAllRules(): List<RuleResponseDTO> {
         log.info("getting all rules to generate a response")
         val ruleDocuments = ruleRepository.findAll()
         log.info("successfully retrieved ${ruleDocuments.size} rules from MongoDB to generate a response.")
         return ruleDocuments.map { ruleMapper.toResponseDTO(ruleMapper.toDomain(it)) }
     }
-    
+
     override fun getAllRulesAsEntity(): List<Rule> {
         log.info("getting all rules to generate entities")
         val ruleDocuments = ruleRepository.findAll()
