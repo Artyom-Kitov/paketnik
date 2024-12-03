@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 
 @ControllerAdvice
@@ -22,5 +23,11 @@ class ExceptionHandler {
     fun handleEntityNotFoundException(e: EntityNotFoundException): ResponseEntity<String> {
         log.error("entity not found", e)
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+    }
+    
+    @ExceptionHandler(InvalidEntityException::class)
+    fun handleInvalidEntityException(e: InvalidEntityException): ResponseEntity<String> {
+        log.error("invalid entity", e)
+        return ResponseEntity.badRequest().body(e.message)
     }
 }
