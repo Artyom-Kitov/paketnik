@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 
 @ControllerAdvice
@@ -22,6 +23,12 @@ class ClientExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
     }
     
+    @ExceptionHandler(InvalidEntityException::class)
+    fun handleInvalidEntityException(e: InvalidEntityException): ResponseEntity<String> {
+        log.error("invalid entity", e)
+        return ResponseEntity.badRequest().body(e.message)
+    }
+
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
         headers: HttpHeaders,
