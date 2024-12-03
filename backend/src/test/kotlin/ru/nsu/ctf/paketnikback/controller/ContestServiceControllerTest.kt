@@ -1,4 +1,4 @@
-package ru.nsu.ctf.paketnikback
+package ru.nsu.ctf.paketnikback.controller
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
@@ -15,7 +15,7 @@ import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceCreationRequest
 import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 import java.net.URI
-import java.util.UUID
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -36,9 +36,11 @@ private object TestConstants {
 class ContestServiceControllerTest(
     @Autowired val webTestClient: WebTestClient,
 ) {
-    @Autowired private lateinit var service: ContestServiceService
+    @Autowired
+    private lateinit var service: ContestServiceService
 
-    @Autowired private lateinit var webServerAppCtx: ServletWebServerApplicationContext
+    @Autowired
+    private lateinit var webServerAppCtx: ServletWebServerApplicationContext
 
     companion object {
         private val mongoContainer = MongoDBContainer("mongo:4.4.2").apply { 
@@ -104,8 +106,8 @@ class ContestServiceControllerTest(
 
         assertTrue {
             responseResult.name == "1" &&
-                responseResult.port == 1 &&
-                responseResult.hexColor == "#ff0000"
+                    responseResult.port == 1 &&
+                    responseResult.hexColor == "#ff0000"
         }
 
         val servicesAfter = service.getAll()
