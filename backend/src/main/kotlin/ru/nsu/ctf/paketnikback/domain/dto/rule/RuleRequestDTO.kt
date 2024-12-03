@@ -7,5 +7,5 @@ data class RuleRequestDTO(
     val name: String,
     val type: RuleType,
     val regex: String,
-    val scope: ScopeType
+    val scope: ScopeType,
 )

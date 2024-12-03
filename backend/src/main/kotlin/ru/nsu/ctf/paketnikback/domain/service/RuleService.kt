@@ -13,7 +13,10 @@ interface RuleService {
      * @return List of Rules with precompiled regular expressions.
      */
     fun getAllRulesAsEntity(): List<Rule>
+
     fun createRule(request: RuleRequestDTO): RuleResponseDTO
+
     fun updateRule(id: String, request: RuleRequestDTO): RuleResponseDTO
+
     fun deleteRule(id: String)
 }
