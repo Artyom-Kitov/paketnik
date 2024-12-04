@@ -24,7 +24,7 @@ export const RulesTableWidget = () => {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+      <div className="text-left text-[#fff] text-2xl font-bold mb-2">
         Rules
       </div>
       <div className="w-full bg-[#475569] p-[7px] flex-1 overflow-auto">
@@ -52,7 +52,7 @@ export const RulesTableWidget = () => {
           </thead>
           <tbody>
             {data?.map((rule) => (
-              <RuleEntryWidget key={rule.id} data={rule} />
+              <RuleEntryWidget key={rule.id} data={rule}/>
             ))}
           </tbody>
         </table>
