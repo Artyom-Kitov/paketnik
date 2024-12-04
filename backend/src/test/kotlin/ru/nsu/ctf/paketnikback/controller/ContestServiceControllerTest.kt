@@ -82,8 +82,8 @@ class ContestServiceControllerTest(
                 .getAll()
                 .any {
                     it.name == req.name &&
-                            it.port == req.port &&
-                            it.hexColor == req.hexColor
+                        it.port == req.port &&
+                        it.hexColor == req.hexColor
                 },
         )
     }
