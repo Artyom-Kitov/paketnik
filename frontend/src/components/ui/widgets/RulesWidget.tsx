@@ -8,7 +8,7 @@ export function RulesWidget() {
         <div className="space-y-4">
           <div className="bg-[#2d3748] p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">Active Rules</h3>
-            
+
             <ul className="list-disc list-inside space-y-2">
               <li>HTTP Traffic (Port 80)</li>
               <li>HTTPS Traffic (Port 443)</li>

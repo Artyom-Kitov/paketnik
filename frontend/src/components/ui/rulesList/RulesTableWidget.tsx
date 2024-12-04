@@ -24,9 +24,7 @@ export const RulesTableWidget = () => {
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="text-left text-[#fff] text-2xl font-bold mb-2">
-        Rules
-      </div>
+      <div className="text-left text-[#fff] text-2xl font-bold mb-2">Rules</div>
       <div className="w-full bg-[#475569] p-[7px] flex-1 overflow-auto">
         <table className="w-full border-collapse">
           <thead className="sticky top-0 bg-[#475569] z-10">
@@ -34,12 +32,8 @@ export const RulesTableWidget = () => {
               <th className="text-xl text-[#e2e8f0] font-bold sticky">
                 Rule name
               </th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">
-                Type
-              </th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">
-                Scope
-              </th>
+              <th className="text-xl text-[#e2e8f0] font-bold sticky">Type</th>
+              <th className="text-xl text-[#e2e8f0] font-bold sticky">Scope</th>
               <th className="text-xl text-[#e2e8f0] font-bold sticky px-[40px]">
                 Regex
               </th>
@@ -51,9 +45,7 @@ export const RulesTableWidget = () => {
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
-            {data?.map((rule) => (
-              <RuleEntryWidget key={rule.id} data={rule}/>
-            ))}
+            {data?.map((rule) => <RuleEntryWidget key={rule.id} data={rule} />)}
           </tbody>
         </table>
       </div>

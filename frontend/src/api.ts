@@ -65,7 +65,11 @@ async function fetchData<Type>(
     };
   }
   try {
-    return (await fetch(host + path, options)).json() as Type;
+    if (method == "DELETE") {
+      return (await fetch(host + path, options)) as Type;
+    } else {
+      return (await fetch(host + path, options)).json() as Type;
+    }
   } catch (error) {
     const errorMessage: string =
       "An error occured: " + (error as Error).message;
