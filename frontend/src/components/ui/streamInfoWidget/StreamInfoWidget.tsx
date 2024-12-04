@@ -4,9 +4,47 @@ import { currentStreamId } from "../streamsList/selectedStream";
 import { streamData } from "../../../fixtures/streamData";
 import { useAtomValue } from "jotai";
 
-export const StreamInfoWidget = () => {
+type StreamInfoWidgetProps = {
+  searchQuery: string;
+};
+
+type Message = {
+  type: "Server" | "Client";
+} & (typeof streamData)[number];
+
+export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({
+  searchQuery,
+}) => {
   const streamId = useAtomValue(currentStreamId);
-  const stream = streamData.find((s) => s.id == streamId);
+  const stream = streamData.find((s) => s.id === streamId);
+
+  const filterMessages = (messages: Message[]) => {
+    if (!searchQuery) {
+      return messages;
+    }
+
+    try {
+      const regex = new RegExp(searchQuery, "i");
+      return messages.filter((message) =>
+        Object.values(message).some(
+          (value) =>
+            (typeof value === "string" && regex.test(value)) ||
+            (Array.isArray(value) && value.some((item) => regex.test(item))),
+        ),
+      );
+    } catch {
+      return messages;
+    }
+  };
+
+  const filteredMessages: Message[] = stream
+    ? filterMessages([
+        { type: "Server", ...stream },
+        { type: "Client", ...stream },
+        { type: "Server", ...stream },
+        { type: "Client", ...stream },
+      ])
+    : [];
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -16,17 +54,13 @@ export const StreamInfoWidget = () => {
       {stream && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="max-h-[700px] overflow-auto space-y-4">
-            <ServerMessageWidget data={stream} />
-
-            <ClientMessageWidget data={stream} />
-
-            <ServerMessageWidget data={stream} />
-
-            <ClientMessageWidget data={stream} />
-
-            <ServerMessageWidget data={stream} />
-
-            <ClientMessageWidget data={stream} />
+            {filteredMessages.map((message, index) =>
+              message.type === "Server" ? (
+                <ServerMessageWidget key={index} data={message} />
+              ) : (
+                <ClientMessageWidget key={index} data={message} />
+              ),
+            )}
           </div>
         </div>
       )}
