@@ -8,20 +8,28 @@ type StreamInfoWidgetProps = {
   searchQuery: string;
 };
 
+type Message = {
+  type: "Server" | "Client";
+} & (typeof streamData)[number];
+
 export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({
   searchQuery,
 }) => {
   const streamId = useAtomValue(currentStreamId);
-  const stream = streamData.find((s) => s.id == streamId);
+  const stream = streamData.find((s) => s.id === streamId);
 
-  const filterMessages = (messages: any[]) => {
-    if (!searchQuery) return messages;
+  const filterMessages = (messages: Message[]) => {
+    if (!searchQuery) {
+      return messages;
+    }
 
     try {
       const regex = new RegExp(searchQuery, "i");
       return messages.filter((message) =>
         Object.values(message).some(
-          (value) => typeof value === "string" && regex.test(value),
+          (value) =>
+            (typeof value === "string" && regex.test(value)) ||
+            (Array.isArray(value) && value.some((item) => regex.test(item))),
         ),
       );
     } catch {
@@ -29,7 +37,7 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({
     }
   };
 
-  const filteredMessages = stream
+  const filteredMessages: Message[] = stream
     ? filterMessages([
         { type: "Server", ...stream },
         { type: "Client", ...stream },
