@@ -3,7 +3,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistrationWidget";
 import { StreamsListWidget } from "../streamsList/StreamsListWidget";
 import { Sidebar } from "../sidebar/sidebar";
-import { RulesWidget } from "../widgets/RulesWidget";
+import { RulesWidget } from "../rulesList/RulesWidget";
 import { ConfigWidget } from "../widgets/ConfigWidget";
 import { FilesWidget } from "../widgets/FilesWidget";
 import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
