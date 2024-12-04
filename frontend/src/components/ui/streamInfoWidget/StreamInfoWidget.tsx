@@ -8,7 +8,9 @@ type StreamInfoWidgetProps = {
   searchQuery: string;
 };
 
-export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({ searchQuery }) => {
+export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({
+  searchQuery,
+}) => {
   const streamId = useAtomValue(currentStreamId);
   const stream = streamData.find((s) => s.id == streamId);
 
@@ -18,12 +20,12 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({ searchQuery 
     try {
       const regex = new RegExp(searchQuery, "i");
       return messages.filter((message) =>
-        Object.values(message).some((value) =>
-          typeof value === "string" && regex.test(value)
-        )
+        Object.values(message).some(
+          (value) => typeof value === "string" && regex.test(value),
+        ),
       );
     } catch {
-      return messages; 
+      return messages;
     }
   };
 
@@ -49,7 +51,7 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({ searchQuery 
                 <ServerMessageWidget key={index} data={message} />
               ) : (
                 <ClientMessageWidget key={index} data={message} />
-              )
+              ),
             )}
           </div>
         </div>
@@ -57,4 +59,3 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({ searchQuery 
     </div>
   );
 };
-
