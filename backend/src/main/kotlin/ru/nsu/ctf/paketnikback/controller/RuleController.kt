@@ -82,8 +82,5 @@ class RuleController(
         ],
     )
     @DeleteMapping("/{id}")
-    fun deleteRule(@PathVariable id: String): ResponseEntity<Void> {
-        ruleService.deleteRule(id)
-        return ResponseEntity.noContent().build()
-    }
+    fun deleteRule(@PathVariable id: String): ResponseEntity<Unit> = ResponseEntity.ok(ruleService.deleteRule(id))
 }
