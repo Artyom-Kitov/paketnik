@@ -17,7 +17,7 @@ export interface Rule {
 
 export interface Pcap {
   id: string;
-  content: Blob; 
+  content: Blob;
 }
 
 export async function postPcapRemote(pcap: Pcap): Promise<void> {
@@ -25,7 +25,12 @@ export async function postPcapRemote(pcap: Pcap): Promise<void> {
 }
 
 export async function postPcapLocal(pcap: Pcap): Promise<void> {
-  return await fetchData<void>("/minio-api/upload/local", "POST", pcap.content, pcap.id);
+  return await fetchData<void>(
+    "/minio-api/upload/local",
+    "POST",
+    pcap.content,
+    pcap.id,
+  );
 }
 
 export async function postBucket(pcap: Pcap): Promise<void> {
@@ -33,11 +38,17 @@ export async function postBucket(pcap: Pcap): Promise<void> {
 }
 
 export async function getPcap(): Promise<Pcap[]> {
-  const response = await fetchData<{ [key: string]: string[] }>("/minio-api/get-files", "GET", "");
-  const pcapFiles: Pcap[] = Object.values(response).flat().map(fileName => ({
-    id: fileName,
-    content: new Blob() 
-  }));
+  const response = await fetchData<{ [key: string]: string[] }>(
+    "/minio-api/get-files",
+    "GET",
+    "",
+  );
+  const pcapFiles: Pcap[] = Object.values(response)
+    .flat()
+    .map((fileName) => ({
+      id: fileName,
+      content: new Blob(),
+    }));
   return pcapFiles;
 }
 
@@ -77,14 +88,14 @@ async function fetchData<Type>(
   path: string,
   method: string,
   body: Service | Rule | Pcap | string | Blob,
-  fileName?: string
+  fileName?: string,
 ): Promise<Type> {
   let options = {};
   if (method === "GET" || method === "DELETE") {
     options = { method: method };
   } else if (body instanceof Blob) {
     const formData = new FormData();
-    formData.append('files', body, fileName); 
+    formData.append("files", body, fileName);
     options = {
       method: method,
       body: formData,
