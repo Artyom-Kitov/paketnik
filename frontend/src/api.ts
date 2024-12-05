@@ -7,6 +7,30 @@ export interface Service {
   hexColor: string;
 }
 
+export interface Rule {
+  id: string;
+  name: string;
+  type: string;
+  regex: string;
+  scope: string;
+}
+
+export async function getRules(): Promise<Rule[]> {
+  return await fetchData<Rule[]>("/rules", "GET", "");
+}
+
+export async function updateRule(rule: Rule): Promise<void> {
+  return await fetchData<void>("/rules/" + rule.id, "PUT", rule);
+}
+
+export async function deleteRule(id: string): Promise<void> {
+  return await fetchData<void>("/rules/" + id, "DELETE", "");
+}
+
+export async function postRule(rule: Rule): Promise<void> {
+  return await fetchData<void>("/rules", "POST", rule);
+}
+
 export async function getServices(): Promise<Service[]> {
   return await fetchData<Service[]>("/services", "GET", "");
 }
@@ -16,7 +40,7 @@ export async function updateService(service: Service): Promise<void> {
 }
 
 export async function deleteService(id: string): Promise<void> {
-  return await fetchData<void>("/service/" + id, "DELETE", "");
+  return await fetchData<void>("/services/" + id, "DELETE", "");
 }
 
 export async function postService(service: Service): Promise<void> {
@@ -26,7 +50,7 @@ export async function postService(service: Service): Promise<void> {
 async function fetchData<Type>(
   path: string,
   method: string,
-  body: Service | string,
+  body: Service | Rule | string,
 ): Promise<Type> {
   let options = {};
   if (method == "GET" || method == "DELETE") {
@@ -41,7 +65,11 @@ async function fetchData<Type>(
     };
   }
   try {
-    return (await fetch(host + path, options)).json() as Type;
+    if (method == "DELETE") {
+      return (await fetch(host + path, options)) as Type;
+    } else {
+      return (await fetch(host + path, options)).json() as Type;
+    }
   } catch (error) {
     const errorMessage: string =
       "An error occured: " + (error as Error).message;
