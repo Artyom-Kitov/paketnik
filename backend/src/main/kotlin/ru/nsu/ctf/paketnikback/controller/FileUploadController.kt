@@ -8,6 +8,7 @@ import io.minio.PutObjectArgs
 import io.minio.StatObjectArgs
 import io.minio.errors.MinioException
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,12 +18,14 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 import java.security.MessageDigest
 
 @RestController
 @RequestMapping("/minio-api")
 class FileUploadController(
     private val minioClient: MinioClient,
+    private val packetStreamService: PacketStreamService,
 ) {
     private var bucketName = "default-bucket"
     private var unknownNum = 1
@@ -84,7 +87,10 @@ class FileUploadController(
         }
     }
 
-    @PostMapping("/upload/local")
+    @PostMapping(
+        path = ["/upload/local"],
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+    )
     fun uploadLocalFiles(@RequestParam("files") files: List<MultipartFile>): ResponseEntity<Map<String, String>> {
         val uploadStatus = mutableMapOf<String, String>()
 
@@ -171,6 +177,7 @@ class FileUploadController(
         } catch (e: MinioException) {
             throw(e)
         }
+        packetStreamService.createStreamsFromPcap(bucketName, fileName)
     }
 
     fun calculateFileHashStreaming(file: MultipartFile): String {

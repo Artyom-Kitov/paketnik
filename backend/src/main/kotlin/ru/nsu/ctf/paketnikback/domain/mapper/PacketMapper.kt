@@ -9,6 +9,6 @@ import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 @Mapper(componentModel = "spring")
 interface PacketMapper {
     fun streamToResponse(packetStreamDocument: PacketStreamDocument): PacketStreamResponse
-    
+
     fun unallocatedToDto(unallocatedPacketDocument: UnallocatedPacketDocument): UnallocatedPacketDto
 }

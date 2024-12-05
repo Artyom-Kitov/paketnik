@@ -106,8 +106,8 @@ class ContestServiceControllerTest(
 
         assertTrue {
             responseResult.name == "1" &&
-                    responseResult.port == 1 &&
-                    responseResult.hexColor == "#ff0000"
+                responseResult.port == 1 &&
+                responseResult.hexColor == "#ff0000"
         }
 
         val servicesAfter = service.getAll()

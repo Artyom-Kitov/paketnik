@@ -9,6 +9,7 @@ import io.pkts.packet.Packet
 import io.pkts.packet.TCPPacket
 import io.pkts.packet.UDPPacket
 import io.pkts.protocol.Protocol
+import org.springframework.data.mongodb.MongoExpression
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
@@ -44,44 +45,45 @@ final class PacketStreamServiceImpl(
 
     override fun getAllStreams(): List<PacketStreamResponse> {
         val query = Query()
-        query.fields()
+        query
+            .fields()
             .include("id", "srcIp", "dstIp", "srcPort", "dstPort", "pcapId")
-            .exclude("packets")
-        return mongoTemplate.find(query, PacketStreamDocument::class.java)
+        return mongoTemplate
+            .find(query, PacketStreamDocument::class.java)
             .map(packetMapper::streamToResponse)
     }
 
-    override fun getStreamPackets(id: String): List<PacketData> {
-        return packetStreamRepository.findById(id)
-            .orElseThrow { EntityNotFoundException("no such stream with id $id") }
-            .packets
-    }
+    override fun getStreamPackets(id: String): List<PacketData> = packetStreamRepository
+        .findById(id)
+        .orElseThrow { EntityNotFoundException("no such stream with id $id") }
+        .packets
 
-    override fun getUnallocated(): List<UnallocatedPacketDto> {
-        return unallocatedPacketRepository.findAll()
-            .map(packetMapper::unallocatedToDto)
-    }
-    
+    override fun getUnallocated(): List<UnallocatedPacketDto> = unallocatedPacketRepository
+        .findAll()
+        .map(packetMapper::unallocatedToDto)
+
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
         log.info("creating streams with objectId = '$bucketName.$objectName'")
-        minioClient.getObject(
-            GetObjectArgs.builder()
-                .bucket(bucketName)
-                .`object`(objectName)
-                .build()
-        ).use { stream ->
-            val packets = mutableListOf<Packet>()
-            Pcap.openStream(stream).loop { packet ->
-                packets.add(packet)
-                true
+        minioClient
+            .getObject(
+                GetObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .build(),
+            ).use { stream ->
+                val packets = mutableListOf<Packet>()
+                Pcap.openStream(stream).loop { packet ->
+                    packets.add(packet)
+                    true
+                }
+                val packetsData = packets.map(::convertToPacketData)
+                val (tcpPackets, otherPackets) = packetsData.partition { it.protocol == Protocol.TCP.toString() }
+                saveAsStreams(tcpPackets, "$bucketName.$objectName")
+                saveUnallocated(otherPackets) 
             }
-            val packetsData = packets.map(::convertToPacketData)
-            val (tcpPackets, otherPackets) = packetsData.partition { it.protocol == Protocol.TCP.toString() }
-            saveAsStreams(tcpPackets, "$bucketName.$objectName")
-            saveUnallocated(otherPackets)    
-        }
     }
-    
+
     private fun saveAsStreams(packets: List<PacketData>, objectId: String) {
         data class StreamKey(
             val srcIp: String,
@@ -89,34 +91,35 @@ final class PacketStreamServiceImpl(
             val srcPort: Int,
             val dstPort: Int,
         )
-        packets.groupBy { packet ->
-            val ipv4Info = packet.getInfo<IPv4Info>()
-            val tcpInfo = packet.getInfo<TcpInfo>()
-            StreamKey(
-                srcIp = ipv4Info.srcIp,
-                dstIp = ipv4Info.dstIp,
-                srcPort = tcpInfo.srcPort,
-                dstPort = tcpInfo.dstPort,
-            )
-        }.forEach { (stream, packets) -> 
-            val streamDocument = PacketStreamDocument(
-                srcIp = stream.srcIp,
-                dstIp = stream.dstIp,
-                srcPort = stream.srcPort,
-                dstPort = stream.dstPort,
-                pcapId = objectId,
-                packets = packets,
-            )
-            packetStreamRepository.save(streamDocument)
-        }
+        packets
+            .groupBy { packet ->
+                val ipv4Info = packet.getInfo<IPv4Info>()
+                val tcpInfo = packet.getInfo<TcpInfo>()
+                StreamKey(
+                    srcIp = ipv4Info.srcIp,
+                    dstIp = ipv4Info.dstIp,
+                    srcPort = tcpInfo.srcPort,
+                    dstPort = tcpInfo.dstPort,
+                )
+            }.forEach { (stream, packets) -> 
+                val streamDocument = PacketStreamDocument(
+                    srcIp = stream.srcIp,
+                    dstIp = stream.dstIp,
+                    srcPort = stream.srcPort,
+                    dstPort = stream.dstPort,
+                    pcapId = objectId,
+                    packets = packets,
+                )
+                packetStreamRepository.save(streamDocument)
+            }
     }
-    
+
     private fun saveUnallocated(packets: List<PacketData>) {
         packets.forEach { 
             unallocatedPacketRepository.save(UnallocatedPacketDocument(packet = it))
         }
     }
-    
+
     @OptIn(ExperimentalEncodingApi::class)
     private fun convertToPacketData(packet: Packet): PacketData {
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
@@ -131,7 +134,7 @@ final class PacketStreamServiceImpl(
             tags = tags,
         )
     }
-    
+
     private fun readPacketInfo(packet: Packet): List<Pair<PacketInfo, Protocol>> {
         val result = mutableListOf<Pair<PacketInfo, Protocol>>()
         protocolInfoSuppliers.forEach { (protocol, supplier) ->
@@ -139,7 +142,7 @@ final class PacketStreamServiceImpl(
         }
         return result
     }
-    
+
     private companion object Suppliers {
         private val protocolInfoSuppliers = mapOf(
             Protocol.ETHERNET_II to this::readEthernet,
@@ -147,7 +150,7 @@ final class PacketStreamServiceImpl(
             Protocol.TCP to this::readTcp,
             Protocol.UDP to this::readUdp,
         )
-        
+
         private fun readEthernet(packet: Packet): EthernetInfo? {
             val ethernet = packet.getPacket(Protocol.ETHERNET_II) as? MACPacket ?: return null
             return EthernetInfo(
@@ -171,7 +174,7 @@ final class PacketStreamServiceImpl(
                 dstIp = ipv4.destinationIP,
             )
         }
-        
+
         @OptIn(ExperimentalEncodingApi::class)
         private fun readTcp(packet: Packet): TcpInfo? {
             val tcp = packet.getPacket(Protocol.TCP) as? TCPPacket ?: return null
@@ -192,10 +195,10 @@ final class PacketStreamServiceImpl(
                 windowSize = tcp.windowSize,
                 checksum = tcp.checksum,
                 urgentPointer = tcp.urgentPointer,
-                data = Base64.encode(tcp.payload?.array ?: byteArrayOf())
+                data = Base64.encode(tcp.payload?.array ?: byteArrayOf()),
             )
         }
-        
+
         @OptIn(ExperimentalEncodingApi::class)
         private fun readUdp(packet: Packet): UdpInfo? {
             val udp = packet.getPacket(Protocol.UDP) as? UDPPacket ?: return null
@@ -204,7 +207,7 @@ final class PacketStreamServiceImpl(
                 dstPort = udp.destinationPort,
                 length = udp.length,
                 checksum = udp.checksum,
-                data = Base64.encode(udp.payload?.array ?: byteArrayOf())
+                data = Base64.encode(udp.payload?.array ?: byteArrayOf()),
             )
         }
     }

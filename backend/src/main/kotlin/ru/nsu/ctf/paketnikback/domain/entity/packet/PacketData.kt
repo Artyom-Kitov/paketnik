@@ -10,7 +10,5 @@ data class PacketData(
     val info: List<PacketInfo>,
     val tags: List<String>,
 ) {
-    inline fun <reified T : PacketInfo> getInfo(): T {
-        return info.filterIsInstance<T>().first()
-    }
+    inline fun <reified T : PacketInfo> getInfo(): T = info.filterIsInstance<T>().first()
 }

@@ -6,9 +6,9 @@ import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 
 interface PacketStreamService {
     fun getAllStreams(): List<PacketStreamResponse>
-    
+
     fun getStreamPackets(id: String): List<PacketData>
-    
+
     fun getUnallocated(): List<UnallocatedPacketDto>
 
     /**
