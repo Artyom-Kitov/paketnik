@@ -1,6 +1,4 @@
-package ru.nsu.ctf.paketnikback.domain.entity.packet.info
-
-import io.pkts.protocol.Protocol
+package ru.nsu.ctf.paketnikback.domain.entity.packet.layer
 
 data class IPv4Info(
     val version: Byte,
@@ -9,8 +7,7 @@ data class IPv4Info(
     val moreFragments: Boolean,
     val fragmentOffset: Int,
     val ttl: Int,
-    val protocol: String,
     val headerChecksum: Int,
     val srcIp: String,
     val dstIp: String,
-) : PacketInfo(Protocol.IPv4.toString())
+)

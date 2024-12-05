@@ -9,7 +9,6 @@ import io.pkts.packet.Packet
 import io.pkts.packet.TCPPacket
 import io.pkts.packet.UDPPacket
 import io.pkts.protocol.Protocol
-import org.springframework.data.mongodb.MongoExpression
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
@@ -17,11 +16,11 @@ import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
 import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
-import ru.nsu.ctf.paketnikback.domain.entity.packet.info.EthernetInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.info.IPv4Info
-import ru.nsu.ctf.paketnikback.domain.entity.packet.info.PacketInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.info.TcpInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.info.UdpInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.EthernetInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.IPv4Info
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.LayersInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.TcpInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.UdpInfo
 import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.PacketMapper
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
@@ -78,7 +77,7 @@ final class PacketStreamServiceImpl(
                     true
                 }
                 val packetsData = packets.map(::convertToPacketData)
-                val (tcpPackets, otherPackets) = packetsData.partition { it.protocol == Protocol.TCP.toString() }
+                val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
                 saveAsStreams(tcpPackets, "$bucketName.$objectName")
                 saveUnallocated(otherPackets) 
             }
@@ -93,8 +92,8 @@ final class PacketStreamServiceImpl(
         )
         packets
             .groupBy { packet ->
-                val ipv4Info = packet.getInfo<IPv4Info>()
-                val tcpInfo = packet.getInfo<TcpInfo>()
+                val ipv4Info = packet.layers.ipv4 ?: throw IllegalStateException("given packet is not an ip packet")
+                val tcpInfo = packet.layers.tcp ?: throw IllegalStateException("given packet is not a tcp packet")
                 StreamKey(
                     srcIp = ipv4Info.srcIp,
                     dstIp = ipv4Info.dstIp,
@@ -129,28 +128,22 @@ final class PacketStreamServiceImpl(
         return PacketData(
             receivedAt = receivedAt,
             encodedData = encodedData,
-            info = info.map { it.first },
-            protocol = info.map { it.second }.maxBy { it.protocolLayer.ordinal }.toString(),
+            layers = info,
             tags = tags,
         )
     }
 
-    private fun readPacketInfo(packet: Packet): List<Pair<PacketInfo, Protocol>> {
-        val result = mutableListOf<Pair<PacketInfo, Protocol>>()
-        protocolInfoSuppliers.forEach { (protocol, supplier) ->
-            supplier(packet)?.let { result.add(it to protocol) }
-        }
-        return result
+    private fun readPacketInfo(packet: Packet): LayersInfo {
+        val layers = LayersInfo(
+            ethernet = readEthernet(packet),
+            ipv4 = readIPv4(packet),
+            tcp = readTcp(packet),
+            udp = readUdp(packet),
+        )
+        return layers
     }
 
-    private companion object Suppliers {
-        private val protocolInfoSuppliers = mapOf(
-            Protocol.ETHERNET_II to this::readEthernet,
-            Protocol.IPv4 to this::readIPv4,
-            Protocol.TCP to this::readTcp,
-            Protocol.UDP to this::readUdp,
-        )
-
+    private companion object {
         private fun readEthernet(packet: Packet): EthernetInfo? {
             val ethernet = packet.getPacket(Protocol.ETHERNET_II) as? MACPacket ?: return null
             return EthernetInfo(
@@ -169,7 +162,6 @@ final class PacketStreamServiceImpl(
                 moreFragments = ipv4.isMoreFragmentsSet,
                 fragmentOffset = ipv4.fragmentOffset.toInt(),
                 headerChecksum = ipv4.ipChecksum,
-                protocol = ipv4.protocol.name,
                 srcIp = ipv4.sourceIP,
                 dstIp = ipv4.destinationIP,
             )
