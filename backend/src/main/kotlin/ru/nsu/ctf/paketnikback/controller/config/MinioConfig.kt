@@ -12,8 +12,8 @@ import ru.nsu.ctf.paketnikback.utils.logger
 @Configuration
 class MinioConfig(
     @Value("\${minio.endpoint}") private val endpoint: String,
-    @Value("\${minio.accessKey}") private val accessKey: String,
-    @Value("\${minio.secretKey}") private val secretKey: String,
+    @Value("\${minio.access-key}") private val accessKey: String,
+    @Value("\${minio.secret-key}") private val secretKey: String,
 ) {
     @Bean
     fun minioClient(): MinioClient {

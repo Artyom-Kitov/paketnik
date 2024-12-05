@@ -1,49 +1,214 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
+import io.minio.GetObjectArgs
+import io.minio.MinioClient
+import io.pkts.Pcap
+import io.pkts.packet.IPv4Packet
+import io.pkts.packet.MACPacket
+import io.pkts.packet.Packet
+import io.pkts.packet.TCPPacket
+import io.pkts.packet.UDPPacket
+import io.pkts.protocol.Protocol
+import org.springframework.data.mongodb.MongoExpression
 import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
-import ru.nsu.ctf.paketnikback.domain.entity.packet.Packet
-import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStream
+import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
+import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
+import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
+import ru.nsu.ctf.paketnikback.domain.entity.packet.info.EthernetInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.info.IPv4Info
+import ru.nsu.ctf.paketnikback.domain.entity.packet.info.PacketInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.info.TcpInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.info.UdpInfo
 import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
+import ru.nsu.ctf.paketnikback.domain.mapper.PacketMapper
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
+import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.utils.logger
+import java.time.Instant
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Service
-class PacketStreamServiceImpl(
+final class PacketStreamServiceImpl(
     private val packetStreamRepository: PacketStreamRepository,
+    private val unallocatedPacketRepository: UnallocatedPacketRepository,
+    private val packetMapper: PacketMapper,
     private val mongoTemplate: MongoTemplate,
+    private val minioClient: MinioClient,
 ) : PacketStreamService {
     private val log = logger()
 
-    override fun addPackets(stream: PacketStream, packets: List<Packet>) {
-        if (packetStreamRepository.existsById(stream)) {
-            log.info("adding ${packets.size} packets to $stream")
-            addToExisting(stream, packets)
-            log.info("added ${packets.size} packets to $stream")
-        } else {
-            log.info("creating a new $stream with ${packets.size} packets")
-            createStream(stream, packets)
-            log.info("created a new $stream with ${packets.size} packets")
+    override fun getAllStreams(): List<PacketStreamResponse> {
+        val query = Query()
+        query
+            .fields()
+            .include("id", "srcIp", "dstIp", "srcPort", "dstPort", "pcapId")
+        return mongoTemplate
+            .find(query, PacketStreamDocument::class.java)
+            .map(packetMapper::streamToResponse)
+    }
+
+    override fun getStreamPackets(id: String): List<PacketData> = packetStreamRepository
+        .findById(id)
+        .orElseThrow { EntityNotFoundException("no such stream with id $id") }
+        .packets
+
+    override fun getUnallocated(): List<UnallocatedPacketDto> = unallocatedPacketRepository
+        .findAll()
+        .map(packetMapper::unallocatedToDto)
+
+    override fun createStreamsFromPcap(bucketName: String, objectName: String) {
+        log.info("creating streams with objectId = '$bucketName.$objectName'")
+        minioClient
+            .getObject(
+                GetObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(objectName)
+                    .build(),
+            ).use { stream ->
+                val packets = mutableListOf<Packet>()
+                Pcap.openStream(stream).loop { packet ->
+                    packets.add(packet)
+                    true
+                }
+                val packetsData = packets.map(::convertToPacketData)
+                val (tcpPackets, otherPackets) = packetsData.partition { it.protocol == Protocol.TCP.toString() }
+                saveAsStreams(tcpPackets, "$bucketName.$objectName")
+                saveUnallocated(otherPackets) 
+            }
+    }
+
+    private fun saveAsStreams(packets: List<PacketData>, objectId: String) {
+        data class StreamKey(
+            val srcIp: String,
+            val dstIp: String,
+            val srcPort: Int,
+            val dstPort: Int,
+        )
+        packets
+            .groupBy { packet ->
+                val ipv4Info = packet.getInfo<IPv4Info>()
+                val tcpInfo = packet.getInfo<TcpInfo>()
+                StreamKey(
+                    srcIp = ipv4Info.srcIp,
+                    dstIp = ipv4Info.dstIp,
+                    srcPort = tcpInfo.srcPort,
+                    dstPort = tcpInfo.dstPort,
+                )
+            }.forEach { (stream, packets) -> 
+                val streamDocument = PacketStreamDocument(
+                    srcIp = stream.srcIp,
+                    dstIp = stream.dstIp,
+                    srcPort = stream.srcPort,
+                    dstPort = stream.dstPort,
+                    pcapId = objectId,
+                    packets = packets,
+                )
+                packetStreamRepository.save(streamDocument)
+            }
+    }
+
+    private fun saveUnallocated(packets: List<PacketData>) {
+        packets.forEach { 
+            unallocatedPacketRepository.save(UnallocatedPacketDocument(packet = it))
         }
     }
 
-    override fun getAllStreams(): List<PacketStreamDocument> = packetStreamRepository.findAll()
-
-    private fun addToExisting(stream: PacketStream, packets: List<Packet>) {
-        val update = Update().push("packets").each(packets)
-        mongoTemplate.updateFirst(
-            Query.query(Criteria.where("stream").`is`(stream)),
-            update,
-            PacketStreamDocument::class.java,
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun convertToPacketData(packet: Packet): PacketData {
+        val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
+        val encodedData = Base64.encode(packet.payload.array)
+        val info = readPacketInfo(packet)
+        val tags = listOf<String>()
+        return PacketData(
+            receivedAt = receivedAt,
+            encodedData = encodedData,
+            info = info.map { it.first },
+            protocol = info.map { it.second }.maxBy { it.protocolLayer.ordinal }.toString(),
+            tags = tags,
         )
     }
 
-    private fun createStream(stream: PacketStream, packets: List<Packet>) {
-        val packetStream = PacketStreamDocument(stream, packets)
-        packetStreamRepository.save(packetStream)
+    private fun readPacketInfo(packet: Packet): List<Pair<PacketInfo, Protocol>> {
+        val result = mutableListOf<Pair<PacketInfo, Protocol>>()
+        protocolInfoSuppliers.forEach { (protocol, supplier) ->
+            supplier(packet)?.let { result.add(it to protocol) }
+        }
+        return result
+    }
+
+    private companion object Suppliers {
+        private val protocolInfoSuppliers = mapOf(
+            Protocol.ETHERNET_II to this::readEthernet,
+            Protocol.IPv4 to this::readIPv4,
+            Protocol.TCP to this::readTcp,
+            Protocol.UDP to this::readUdp,
+        )
+
+        private fun readEthernet(packet: Packet): EthernetInfo? {
+            val ethernet = packet.getPacket(Protocol.ETHERNET_II) as? MACPacket ?: return null
+            return EthernetInfo(
+                srcMac = ethernet.sourceMacAddress,
+                dstMac = ethernet.destinationMacAddress,
+            )
+        }
+
+        private fun readIPv4(packet: Packet): IPv4Info? {
+            val ipv4 = packet.getPacket(Protocol.IPv4) as? IPv4Packet ?: return null
+            return IPv4Info(
+                version = ipv4.version.toByte(),
+                length = ipv4.totalIPLength,
+                ttl = ipv4.timeToLive,
+                doNotFragment = ipv4.isDontFragmentSet,
+                moreFragments = ipv4.isMoreFragmentsSet,
+                fragmentOffset = ipv4.fragmentOffset.toInt(),
+                headerChecksum = ipv4.ipChecksum,
+                protocol = ipv4.protocol.name,
+                srcIp = ipv4.sourceIP,
+                dstIp = ipv4.destinationIP,
+            )
+        }
+
+        @OptIn(ExperimentalEncodingApi::class)
+        private fun readTcp(packet: Packet): TcpInfo? {
+            val tcp = packet.getPacket(Protocol.TCP) as? TCPPacket ?: return null
+            return TcpInfo(
+                srcPort = tcp.sourcePort,
+                dstPort = tcp.destinationPort,
+                sequenceNumber = tcp.sequenceNumber,
+                ackNumber = tcp.acknowledgementNumber,
+                dataOffset = tcp.headerLength,
+                cwr = tcp.isCWR,
+                ece = tcp.isECE,
+                urg = tcp.isURG,
+                ack = tcp.isACK,
+                psh = tcp.isPSH,
+                rst = tcp.isRST,
+                syn = tcp.isSYN,
+                fin = tcp.isFIN,
+                windowSize = tcp.windowSize,
+                checksum = tcp.checksum,
+                urgentPointer = tcp.urgentPointer,
+                data = Base64.encode(tcp.payload?.array ?: byteArrayOf()),
+            )
+        }
+
+        @OptIn(ExperimentalEncodingApi::class)
+        private fun readUdp(packet: Packet): UdpInfo? {
+            val udp = packet.getPacket(Protocol.UDP) as? UDPPacket ?: return null
+            return UdpInfo(
+                srcPort = udp.sourcePort,
+                dstPort = udp.destinationPort,
+                length = udp.length,
+                checksum = udp.checksum,
+                data = Base64.encode(udp.payload?.array ?: byteArrayOf()),
+            )
+        }
     }
 }

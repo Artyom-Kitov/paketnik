@@ -1,11 +1,19 @@
 package ru.nsu.ctf.paketnikback.domain.service
 
-import ru.nsu.ctf.paketnikback.domain.entity.packet.Packet
-import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStream
-import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
+import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
+import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
+import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 
 interface PacketStreamService {
-    fun addPackets(stream: PacketStream, packets: List<Packet>)
+    fun getAllStreams(): List<PacketStreamResponse>
 
-    fun getAllStreams(): List<PacketStreamDocument>
+    fun getStreamPackets(id: String): List<PacketData>
+
+    fun getUnallocated(): List<UnallocatedPacketDto>
+
+    /**
+     * Reads all packets from pcap objectName in bucket bucketName,
+     * splits them all to streams and unallocated packets and saves that all to the database.
+     */
+    fun createStreamsFromPcap(bucketName: String, objectName: String)
 }
