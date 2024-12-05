@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { postPcapLocal, getPcap } from '../../../api'; 
+import React, { useState, useEffect } from "react";
+import { postPcapLocal, getPcap } from "../../../api";
 
 export function LoadPcapWidget() {
   const [files, setFiles] = useState<string[]>([]);
@@ -10,7 +10,7 @@ export function LoadPcapWidget() {
       try {
         const pcapFiles = await getPcap();
         console.log("Fetched PCAP Files:", pcapFiles);
-        const fileList = pcapFiles.map(pcap => pcap.id);
+        const fileList = pcapFiles.map((pcap) => pcap.id);
         setFiles(fileList);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -34,7 +34,7 @@ export function LoadPcapWidget() {
       try {
         await postPcapLocal(pcap);
         const updatedFiles = await getPcap();
-        const updatedFileList = updatedFiles.map(pcap => pcap.id);
+        const updatedFileList = updatedFiles.map((pcap) => pcap.id);
         setFiles(updatedFileList);
       } catch (error) {
         console.error("Error uploading file:", error);
