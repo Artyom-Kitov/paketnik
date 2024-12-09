@@ -4,36 +4,36 @@ import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.errors.MinioException
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.nsu.ctf.paketnikback.utils.logger
 
 @Configuration
-class MinioConfig {
+class MinioConfig(
+    @Value("\${minio.endpoint}") private val endpoint: String,
+    @Value("\${minio.access-key}") private val accessKey: String,
+    @Value("\${minio.secret-key}") private val secretKey: String,
+) {
     @Bean
     fun minioClient(): MinioClient {
         val log = logger()
         val client = MinioClient
             .builder()
-            .endpoint("http://localhost:9000")
-            .credentials("admin", "password")
+            .endpoint(endpoint)
+            .credentials(accessKey, secretKey)
             .build()
 
         val bucketName = "default-bucket"
 
         try {
-            val found = client.bucketExists(
-                BucketExistsArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .build(),
-            )
+            val found =
+                client.bucketExists(
+                    BucketExistsArgs.builder().bucket(bucketName).build(),
+                )
             if (!found) {
                 client.makeBucket(
-                    MakeBucketArgs
-                        .builder()
-                        .bucket(bucketName)
-                        .build(),
+                    MakeBucketArgs.builder().bucket(bucketName).build(),
                 )
                 log.info("Default bucket $bucketName успешно создан")
             } else {
