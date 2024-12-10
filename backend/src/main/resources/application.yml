@@ -4,15 +4,24 @@ spring:
     version: 0.0.1
   data:
     mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI}
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://paketnik:paketnik123@localhost:27017}
       authentication-database: admin
       database: paketnik-db
+  mvc:
+    validation:
+      fail-fast: true
 
 server:
   port: 8081
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:admin}
+  secret-key: ${MINIO_SECRET_KEY:password}
 
 app:
   flag-regex: ${FLAG_REGEX:}
   host-addr: ${HOST_ADDR:}
   start-time: ${START_TIME:}
   round-ticks: ${ROUND_TICKS:0}
+  

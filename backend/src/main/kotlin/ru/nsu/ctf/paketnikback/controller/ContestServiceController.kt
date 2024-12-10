@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,6 +18,7 @@ import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceCreationRequest
 import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 
+@Validated
 @RestController
 @RequestMapping("/services")
 class ContestServiceController(
@@ -35,7 +37,7 @@ class ContestServiceController(
     )
     @PostMapping
     fun create(
-        @RequestBody @Valid request: ContestServiceCreationRequest,
+        @Valid @RequestBody request: ContestServiceCreationRequest,
     ): ResponseEntity<ContestServiceResponse> = ResponseEntity.ok(contestServiceService.create(request))
 
     @Operation(

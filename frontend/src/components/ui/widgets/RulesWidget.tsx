@@ -8,6 +8,7 @@ export function RulesWidget() {
         <div className="space-y-4">
           <div className="bg-[#2d3748] p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-2">Active Rules</h3>
+
             <ul className="list-disc list-inside space-y-2">
               <li>HTTP Traffic (Port 80)</li>
               <li>HTTPS Traffic (Port 443)</li>
@@ -27,11 +28,27 @@ export function RulesWidget() {
                 />
               </div>
               <div>
-                <label className="block text-sm mb-1">Port</label>
+                <label className="block text-sm mb-1">Type</label>
                 <input
-                  type="number"
+                  type="text"
                   className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
-                  placeholder="Enter port number"
+                  placeholder="Enter pule type"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Regex</label>
+                <input
+                  type="text"
+                  className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+                  placeholder="Enter regex"
+                />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">Scope</label>
+                <input
+                  type="text"
+                  className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
+                  placeholder="Enter rule scope"
                 />
               </div>
               <button className="bg-[#4a5568] px-4 py-2 rounded hover:bg-[#2d3748] transition-colors">
