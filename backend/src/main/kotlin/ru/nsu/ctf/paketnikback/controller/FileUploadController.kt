@@ -121,7 +121,6 @@ class FileUploadController(
     fun uploadLocalFiles(@RequestParam("files") files: List<MultipartFile>): ResponseEntity<Map<String, String>> {
         val result = minioService.uploadLocalFiles(files)
         return ResponseEntity(result.message, result.status)
-
     }
 
     @Operation(
@@ -135,9 +134,12 @@ class FileUploadController(
             ApiResponse(responseCode = "400", description = "Error in file upload")
         ]
     )
-    @PostMapping("/upload/remote")
+    @PostMapping(
+        path = ["/upload/remote"],
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+    )
     fun uploadRemoteFile(@RequestPart("file") file: MultipartFile,
-    @RequestHeader("X-File-Name") fileName: String,): ResponseEntity<String> {
+    @RequestHeader("X-File-Name") fileName: String): ResponseEntity<String> {
         val result = minioService.uploadRemoteFile(file, fileName)
         return ResponseEntity(result.message, result.status)
     }
