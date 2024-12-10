@@ -13,7 +13,7 @@ import ru.nsu.ctf.paketnikback.domain.service.MinioService
 @RestController
 @RequestMapping("/minio-api")
 class FileUploadController(
-    private val minioService: MinioService
+    private val minioService: MinioService,
 ) {
 
     @Operation(
@@ -103,7 +103,10 @@ class FileUploadController(
             ApiResponse(responseCode = "400", description = "Not a single file has been uploaded")
         ]
     )
-    @PostMapping("/upload/local")
+    @PostMapping(
+        path = ["/upload/local"],
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+    )
     fun uploadLocalFiles(@RequestParam("files") files: List<MultipartFile>): ResponseEntity<Map<String, String>> {
         val result = minioService.uploadLocalFiles(files)
         return ResponseEntity(result.message, result.status)

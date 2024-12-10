@@ -17,12 +17,15 @@ import ru.nsu.ctf.paketnikback.domain.dto.*
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.util.UUID
 import org.springframework.http.HttpStatus
+import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 
 
 @Service
 class MinioServiceImpl(
     private val minioClient: MinioClient,
+    private val packetStreamService: PacketStreamService,
 ): MinioService {
+
     private var bucketName = "default-bucket"
     private val log = logger()
 
@@ -238,6 +241,7 @@ class MinioServiceImpl(
                     .build(),
             )
         }
+        packetStreamService.createStreamsFromPcap(bucketName, fileName)
     }
 
     private fun calculateFileHashStreaming(file: MultipartFile): String {
