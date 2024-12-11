@@ -1,21 +1,40 @@
 import { useEffect, useState } from "react";
-import { streamData } from "../../../fixtures/streamData";
-import { StreamWidget, Rules } from "./StreamWidget";
+import { StreamWidget } from "./StreamWidget";
 import { ContextMenu } from "./ContextMenu";
-import { Stream } from "./Stream";
 import { currentStreamId } from "./selectedStream";
 import { useSetAtom } from "jotai";
+import { getStreams } from "../../../api";
+import { useQuery } from "@tanstack/react-query";
 
 export const StreamsListWidget = () => {
-  const [streams, setStream] = useState<Stream[]>([]);
   const [show, setShow] = useState(false);
   const [points, setPoints] = useState({ top: 0, left: 0 });
   const setCurrentStreamId = useSetAtom(currentStreamId);
 
+
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["streams"],
+    queryFn: getStreams,
+  });
+
+  if (isPending) {
+    <div className="w-full h-full flex flex-col">
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+        Loading... {data}
+      </div>
+    </div>;
+  } else if (isError) {
+    <div className="w-full h-full flex flex-col">
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+        Error: {error.message}
+      </div>
+    </div>;
+  }
+
   useEffect(() => {
     const handleClick = () => setShow(false);
     window.addEventListener("click", handleClick);
-    setStream(streamData);
+    //setStream(streamData);
     return () => window.removeEventListener("click", handleClick);
   }, []);
 
@@ -24,7 +43,7 @@ export const StreamsListWidget = () => {
     setShow(true);
   }
 
-  function onClick(id: number) {
+  function onClick(id: string) {
     setCurrentStreamId(id);
   }
 
@@ -59,14 +78,14 @@ export const StreamsListWidget = () => {
             </tr>
           </thead>
           <tbody>
-            {streams.map((stream) => [
+            {data?.map((stream, i) => [
               <StreamWidget
-                key={stream.id}
+                key={i}
                 onClick={onClick}
                 onContextMenu={showContextMenu}
                 data={stream}
               />,
-              <Rules key={stream.id} rules={stream.rules} />,
+              //<Rules key={stream.id} rules={stream.ta} />,
             ])}
           </tbody>
         </table>

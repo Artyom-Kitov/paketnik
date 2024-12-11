@@ -1,8 +1,9 @@
 import { ServerMessageWidget } from "./ServerMessageWidget";
 import { ClientMessageWidget } from "./ClientMessageWidget";
 import { currentStreamId } from "../streamsList/selectedStream";
-import { streamData } from "../../../fixtures/streamData";
+import { getPackets, Stream } from "../../../api";
 import { useAtomValue } from "jotai";
+import { useQuery } from "@tanstack/react-query";
 
 type StreamInfoWidgetProps = {
   searchQuery: string;
@@ -10,13 +11,39 @@ type StreamInfoWidgetProps = {
 
 type Message = {
   type: "Server" | "Client";
-} & (typeof streamData)[number];
+} & (Stream[])[number];
 
 export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = ({
   searchQuery,
 }) => {
+
+
   const streamId = useAtomValue(currentStreamId);
-  const stream = streamData.find((s) => s.id === streamId);
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["streams"],
+    queryFn: async () => {
+      if(streamId != undefined){
+        const data = await getPackets(streamId)
+        return data
+      } else{
+        return null
+      }
+    },
+  });
+  if (isPending) {
+    <div className="w-full h-full flex flex-col">
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+        Loading... {data}
+      </div>
+    </div>;
+  } else if (isError) {
+    <div className="w-full h-full flex flex-col">
+      <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+        Error: {error.message}
+      </div>
+    </div>;
+  }
+  const stream = data?.find((s) => s.id === streamId);
 
   const filterMessages = (messages: Message[]) => {
     if (!searchQuery) {

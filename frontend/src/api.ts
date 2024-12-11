@@ -15,6 +15,78 @@ export interface Rule {
   scope: string;
 }
 
+export interface Stream {
+  id: string;
+  srcIp: string;
+  srcPort: number;
+  dstIp: string;
+  dstPort: number;
+  pcapId: string;
+}
+
+export interface Ethernet{
+    srcMac: string;
+    dstMac: string;
+}
+
+export interface Ipv4 {
+  version: string;
+  length: number;
+  doNotFragment: boolean;
+  moreFragments: boolean;
+  fragmentOffset: number;
+  ttl: number;
+  headerChecksum: number;
+  srcIp: string;
+  dstIp: string;
+}
+
+export interface Tcp {
+  srcPort: number;
+  dstPort: number;
+  sequenceNumber: number;
+  ackNumber: number;
+  dataOffset: number;
+  cwr: boolean;
+  ece: boolean;
+  urg: boolean;
+  ack: boolean;
+  psh: boolean;
+  rst: boolean;
+  syn: boolean;
+  fin: boolean;
+  windowSize: number;
+  checksum: string;
+  urgentPointer: number;
+  payload: string;
+};
+
+export interface Udp {
+  srcPort: number;
+  dstPort: number;
+  length: number;
+  checksum: number;
+  data: string;
+}
+
+export interface Packet {
+    receivedAt: string;
+    encodedData: string;
+    layers: {
+      ethernet: Ethernet;
+      ipv4: Ipv4;
+      tcp: Tcp;
+      udp: Udp;
+    };
+    tags: string[];
+}
+
+export interface UnallocatedPacket {
+  id: string;
+  packet: Packet;
+}
+
+
 export async function getRules(): Promise<Rule[]> {
   return await fetchData<Rule[]>("/rules", "GET", "");
 }
@@ -46,6 +118,19 @@ export async function deleteService(id: string): Promise<void> {
 export async function postService(service: Service): Promise<void> {
   return await fetchData<void>("/services", "POST", service);
 }
+
+export async function getStreams(): Promise<Stream[]> {
+  return await fetchData<Stream[]>("/streams/infos", "GET", "");
+}
+
+export async function getPackets(id: string): Promise<Packet[]> {
+  return await fetchData<Packet[]>("/streams/packets?id=" + id, "GET", "");
+}
+
+export async function getUnallocatedPackets(): Promise<UnallocatedPacket[]> {
+  return await fetchData<UnallocatedPacket[]>("/streams/unallocated", "GET", "");
+}
+
 
 async function fetchData<Type>(
   path: string,

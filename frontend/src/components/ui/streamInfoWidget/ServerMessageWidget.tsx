@@ -1,6 +1,6 @@
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
-import { Stream } from "../streamsList/Stream";
+import { Stream } from "../../../api";
 
 type ServerMessageWidgetProps = {
   data: Stream;
@@ -62,7 +62,7 @@ export const ServerMessageWidget: React.FC<ServerMessageWidgetProps> = ({
       <h2 className="text-lg font-semibold">HTTP/1.1 200</h2>
       <div className="text-sm mt-2 whitespace-normal">
         <p className="font-semibold">Headers:</p>
-        <p>Src MAC: {data.headers.ethernet.srcMac}</p>
+        <p>Src MAC: {data.ethernet.srcMac}</p>
         <p>Dest MAC: {data.headers.ethernet.destMac}</p>
         <p>Src IP: {data.headers.ip.srcIp}</p>
         <p>Dest IP: {data.headers.ip.destIp}</p>
