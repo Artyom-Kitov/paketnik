@@ -1,6 +1,6 @@
 import { DotsVerticalIcon } from "@radix-ui/react-icons";
 import React, { useState } from "react";
-import { Stream } from "../../../api";
+import { Stream } from "../streamsList/Stream";
 
 type ClientMessageWidgetProps = {
   data: Stream;

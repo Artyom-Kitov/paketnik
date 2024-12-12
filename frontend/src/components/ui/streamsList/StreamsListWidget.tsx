@@ -67,14 +67,6 @@ export const StreamsListWidget = () => {
               <th className="text-xl text-[#e2e8f0] font-bold sticky">
                 dstport
               </th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">
-                started_at
-              </th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">
-                duration
-              </th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">up</th>
-              <th className="text-xl text-[#e2e8f0] font-bold sticky">down</th>
             </tr>
           </thead>
           <tbody>
