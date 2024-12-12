@@ -1,6 +1,9 @@
 package ru.nsu.ctf.paketnikback.controller
 
-import jakarta.validation.Valid
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,8 +20,21 @@ import ru.nsu.ctf.paketnikback.domain.service.RegexSearchService
 class RegexSearchController(
     private val regexSearchService: RegexSearchService,
 ) {
+    @Operation(
+        summary = "Search by regex in given pcap.",
+        description = "Result of search by regex - list of matches with packet number, match string and offset in packet",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Success"),
+            ApiResponse(responseCode = "204", description = "No content found"),
+            ApiResponse(responseCode = "400", description = "Invalid request"),
+            ApiResponse(responseCode = "404", description = "Pcap not found"),
+        ],
+    )
     @PostMapping
-    fun search(
-        @RequestBody @Valid request: RegexSearchRequest 
-    ): ResponseEntity<RegexSearchResponse> = ResponseEntity.ok(regexSearchService.search(request))
+    fun search( @RequestBody @Valid request: RegexSearchRequest ): ResponseEntity<RegexSearchResponse> {
+        val response = regexSearchService.search(request)
+        return ResponseEntity.ok(response) 
+    }
 }
