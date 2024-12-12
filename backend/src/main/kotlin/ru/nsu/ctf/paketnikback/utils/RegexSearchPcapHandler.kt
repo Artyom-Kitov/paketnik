@@ -5,16 +5,13 @@ import io.pkts.buffer.Buffer
 import io.pkts.packet.Packet
 import io.pkts.packet.PCapPacket
 
-class RegexSearchPcapHandler : PacketHandler {
-    private var matches = mutableListOf<Triple<Int, String, Int>>()
-    private var regex : Regex
+import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchMatch
+
+class RegexSearchPcapHandler(regex : Regex) : PacketHandler {
+    private var matches = mutableListOf<RegexSearchMatch>()
     private var packetsCounter : Int = 0
     
-    constructor(_regex : Regex) {
-        regex = _regex
-    }
-    
-    fun getMatches() : List<Triple<Int, String, Int>> {
+    fun getMatches() : List<RegexSearchMatch> {
         return matches.toList()
     }
 
@@ -26,7 +23,7 @@ class RegexSearchPcapHandler : PacketHandler {
         
         val items = regex.findAll(text)
         for (item in items) {
-            matches.add(Triple(packetsCounter, item.value, item.range.first))
+            matches.add(RegexSearchMatch(packetsCounter, item.value, item.range.first))
         }
         
         packetsCounter = packetsCounter + 1
