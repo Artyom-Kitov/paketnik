@@ -34,7 +34,6 @@ export const StreamsListWidget = () => {
   useEffect(() => {
     const handleClick = () => setShow(false);
     window.addEventListener("click", handleClick);
-    //setStream(streamData);
     return () => window.removeEventListener("click", handleClick);
   }, []);
 

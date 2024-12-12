@@ -1,4 +1,4 @@
-//import { PacketWidget } from "./PacketWidget";
+import { PacketWidget } from "./PacketWidget";
 import { currentStreamId } from "../streamsList/selectedStream";
 import { getPackets } from "../../../api";
 import { useAtomValue } from "jotai";
@@ -14,7 +14,7 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
 
   const streamId = useAtomValue(currentStreamId);
   const { isPending, isError, data, error } = useQuery({
-    queryKey: ["streams"],
+    queryKey: [streamId],
     queryFn: async () => {
       if(streamId != undefined){
         console.log(streamId)
@@ -45,15 +45,15 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
       <div className="text-left text-[#fff] text-2xl font-bold mb-[6px]">
         Stream Info
       </div>
-      {/* {data != undefined && data != null && (
+      {data != undefined && data != null && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
-          <div className="max-h-[700px] overflow-auto space-y-4">
+          <div className="overflow-auto space-y-4">
             {data.map((message, index) =>
                 <PacketWidget key={index} data={message} />
             )}
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
