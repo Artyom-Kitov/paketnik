@@ -51,6 +51,10 @@ class ContestServiceServiceImpl(
 
     override fun deleteById(id: String) {
         log.info("deleting service with id $id")
+        if (!contestServiceRepository.existsById(id)) {
+            log.error("service with id $id does not exist")
+            throw EntityNotFoundException("no service with id $id")
+        }
         contestServiceRepository.deleteById(id)
         log.info("successfully deleted service with id = $id")
     }
