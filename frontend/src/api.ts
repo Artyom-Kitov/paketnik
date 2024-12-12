@@ -36,19 +36,19 @@ export async function getPcap(): Promise<Pcap[]> {
 }
 
 export async function deletePcap(id: string): Promise<void> {
-  return await fetchData<void>("/minio-api/files/" + id, "DELETE", "")
+  return await fetchData<void>("/minio-api/files/" + id, "DELETE", "");
 }
 
-export async function getPcapById(id : string): Promise<Pcap> {
-  const response = await fetchData<{ content : Blob }>(
+export async function getPcapById(id: string): Promise<Pcap> {
+  const response = await fetchData<{ content: Blob }>(
     "/minio-api/files/" + id,
     "GET",
     "",
   );
-  const pcapFile: Pcap = ({
+  const pcapFile: Pcap = {
     id: id,
-    content: response.content
-  })
+    content: response.content,
+  };
   return pcapFile;
 }
 
@@ -100,8 +100,7 @@ async function fetchData<Type>(
       method: method,
       body: formData,
     };
-  } 
-  else {
+  } else {
     options = {
       method: method,
       headers: {
