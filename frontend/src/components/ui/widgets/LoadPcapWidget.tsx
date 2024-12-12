@@ -1,23 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { postPcapLocal, getPcap } from "../../../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { postPcapLocal, getPcap, Pcap } from "../../../api";
 
 export function LoadPcapWidget() {
   const [files, setFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    async function fetchFiles() {
-      try {
-        const pcapFiles = await getPcap();
-        console.log("Fetched PCAP Files:", pcapFiles);
-        const fileList = pcapFiles.map((pcap) => pcap.id);
-        setFiles(fileList);
-      } catch (error) {
-        console.error("Error fetching files:", error);
-      }
+  const queryClient = useQueryClient();
+
+  const fetchFiles = async () => {
+    try {
+      const pcapFiles = await getPcap();
+      console.log("Fetched PCAP Files:", pcapFiles);
+      const fileList = pcapFiles.map((pcap) => pcap.id);
+      setFiles(fileList);
+    } catch (error) {
+      console.error("Error fetching files:", error);
     }
+  };
+
+  useEffect(() => {
     fetchFiles();
   }, []);
+
+  const { mutate: loadAndAnalyzeMutation } = useMutation({
+    mutationFn: postPcapLocal,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["pcap"] });
+      fetchFiles();
+    },
+    onError: (error: any) => {
+      console.error("Error uploading file:", error);
+    },
+  });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -25,20 +40,13 @@ export function LoadPcapWidget() {
     }
   };
 
-  const handleLoadAndAnalyze = async () => {
+  const handleLoadAndAnalyze = () => {
     if (selectedFile) {
-      const pcap = {
+      const pcap: Pcap = {
         id: selectedFile.name,
         content: selectedFile,
       };
-      try {
-        await postPcapLocal(pcap);
-        const updatedFiles = await getPcap();
-        const updatedFileList = updatedFiles.map((pcap) => pcap.id);
-        setFiles(updatedFileList);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-      }
+      loadAndAnalyzeMutation(pcap);
     }
   };
 
