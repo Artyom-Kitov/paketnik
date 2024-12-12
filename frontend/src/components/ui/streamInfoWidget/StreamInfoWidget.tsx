@@ -8,21 +8,18 @@ type StreamInfoWidgetProps = {
   searchQuery: string;
 };
 
-
 export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
-
-
   const streamId = useAtomValue(currentStreamId);
   const { isPending, isError, data, error } = useQuery({
     queryKey: [streamId],
     queryFn: async () => {
-      if(streamId != undefined){
-        console.log(streamId)
-        const data = await getPackets(streamId)
-        return data
-      } else{
-        console.log("No id")
-        return undefined
+      if (streamId != undefined) {
+        console.log(streamId);
+        const data = await getPackets(streamId);
+        return data;
+      } else {
+        console.log("No id");
+        return undefined;
       }
     },
   });
@@ -48,9 +45,9 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
       {data != undefined && data != null && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="overflow-auto space-y-4">
-            {data.map((message, index) =>
-                <PacketWidget key={index} data={message} />
-            )}
+            {data.map((message, index) => (
+              <PacketWidget key={index} data={message} />
+            ))}
           </div>
         </div>
       )}

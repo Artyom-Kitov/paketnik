@@ -24,9 +24,9 @@ export interface Stream {
   pcapId: string;
 }
 
-export interface Ethernet{
-    srcMac: string;
-    dstMac: string;
+export interface Ethernet {
+  srcMac: string;
+  dstMac: string;
 }
 
 export interface Ipv4 {
@@ -59,7 +59,7 @@ export interface Tcp {
   checksum: string;
   urgentPointer: number;
   payload: string;
-};
+}
 
 export interface Udp {
   srcPort: number;
@@ -70,22 +70,21 @@ export interface Udp {
 }
 
 export interface Packet {
-    receivedAt: string;
-    encodedData: string;
-    layers: {
-      ethernet: Ethernet;
-      ipv4: Ipv4;
-      tcp: Tcp;
-      udp: Udp;
-    };
-    tags: string[];
+  receivedAt: string;
+  encodedData: string;
+  layers: {
+    ethernet: Ethernet;
+    ipv4: Ipv4;
+    tcp: Tcp;
+    udp: Udp;
+  };
+  tags: string[];
 }
 
 export interface UnallocatedPacket {
   id: string;
   packet: Packet;
 }
-
 
 export async function getRules(): Promise<Rule[]> {
   return await fetchData<Rule[]>("/rules", "GET", "");
@@ -128,9 +127,12 @@ export async function getPackets(id: string): Promise<Packet[]> {
 }
 
 export async function getUnallocatedPackets(): Promise<UnallocatedPacket[]> {
-  return await fetchData<UnallocatedPacket[]>("/streams/unallocated", "GET", "");
+  return await fetchData<UnallocatedPacket[]>(
+    "/streams/unallocated",
+    "GET",
+    "",
+  );
 }
-
 
 async function fetchData<Type>(
   path: string,

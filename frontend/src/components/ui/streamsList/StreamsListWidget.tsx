@@ -11,7 +11,6 @@ export const StreamsListWidget = () => {
   const [points, setPoints] = useState({ top: 0, left: 0 });
   const setCurrentStreamId = useSetAtom(currentStreamId);
 
-
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["streams"],
     queryFn: getStreams,
@@ -56,7 +55,7 @@ export const StreamsListWidget = () => {
           <thead className="bg-[#475569] sticky top-0">
             <tr className="h-[50px]">
               <th className="text-xl text-[#e2e8f0] font-bold sticky">
-                service
+                stream
               </th>
               <th className="text-xl text-[#e2e8f0] font-bold sticky">srcip</th>
               <th className="text-xl text-[#e2e8f0] font-bold sticky">
