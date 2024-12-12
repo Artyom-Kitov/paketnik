@@ -48,7 +48,7 @@ export function NewServiceForm({
     return serviceName != "" && serviceName.length <= 64;
   };
   const getIsPortValid = () => {
-    return port != "" && parseInt(port) >= 1 && parseInt(port) <= 49151;
+    return port != "" && parseInt(port) >= 1 && parseInt(port) <= 65535;
   };
   const getIsServiceDescriptionValid = () => {
     return serviceDescription.length <= 256;
@@ -73,7 +73,7 @@ export function NewServiceForm({
       }
       if (!getIsPortValid()) {
         errorString = errorString.concat(
-          "Port should be not empty and should be a decimal number from 1 to 49151\n",
+          "Port should be not empty and should be a decimal number from 1 to 65535\n",
         );
       }
       if (!getIsServiceDescriptionValid()) {
