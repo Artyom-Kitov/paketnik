@@ -13,17 +13,32 @@ export function NewRuleWidget() {
 
   const addRuleMutation = useMutation({
     mutationFn: postRule,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rules"] });
+    onSuccess: (data) => {
+      if (data.ok) {
+        queryClient.invalidateQueries({ queryKey: ["rules"] });
+      } else {
+        data.text().then((text) => setErrorMessage(text));
+      }
     },
   });
   const getIsDataValid = () => {
-    return getIsRuleNameValid();
+    return getIsRuleNameValid() && getIsRegexValid();
   };
   const getIsRuleNameValid = () => {
     return name != "" && name.length <= 64;
   };
+  const getIsRegexValid = () => {
+    try {
+      new RegExp(regex);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+    return true;
+  };
+
   const registerRule = () => {
+    setErrorMessage("");
     if (getIsDataValid()) {
       const rule: Rule = {
         id: "0",
@@ -39,8 +54,12 @@ export function NewRuleWidget() {
         errorString = errorString.concat(
           "Service name shouldn't be empty and shouldn't be longer than 64 symbols\n" +
             "length of your rule name is " +
-            name.length,
+            name.length +
+            "\n",
         );
+      }
+      if (!getIsRegexValid()) {
+        errorString = errorString.concat("Regex is invalid\n");
       }
       setErrorMessage(errorString);
     }
