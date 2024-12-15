@@ -78,8 +78,8 @@ final class PacketStreamServiceImpl(
                 }
                 val packetsData = packets.map(::convertToPacketData)
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
-                saveAsStreams(tcpPackets, "$bucketName.$objectName")
-                saveUnallocated(objectName, otherPackets) 
+                saveAsStreams(tcpPackets, objectName)
+                saveUnallocated(otherPackets, objectName)
             }
     }
 
@@ -113,9 +113,9 @@ final class PacketStreamServiceImpl(
             }
     }
 
-    private fun saveUnallocated(objectName: String, packets: List<PacketData>) {
+    private fun saveUnallocated(packets: List<PacketData>, objectId: String) {
         packets.forEach { 
-            unallocatedPacketRepository.save(UnallocatedPacketDocument(pcapId = objectName, packet = it))
+            unallocatedPacketRepository.save(UnallocatedPacketDocument(pcapId = objectId, packet = it))
         }
     }
 
