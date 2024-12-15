@@ -20,6 +20,8 @@ import ru.nsu.ctf.paketnikback.domain.service.RegexSearchService
 class RegexSearchController(
     private val regexSearchService: RegexSearchService,
 ) {
+    private val log = logger()
+
     @Operation(
         summary = "Search by regex in given pcap.",
         description = "Result of search by regex - list of matches with packet number, match string and offset in packet",
@@ -35,6 +37,13 @@ class RegexSearchController(
     @PostMapping
     fun search( @RequestBody @Valid request: RegexSearchRequest ): ResponseEntity<RegexSearchResponse> {
         val response = regexSearchService.search(request)
+
+        if (response.matches.isEmpty()) {
+            log.info("DATA_NOT_FOUND")
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
+        }
+        
+        log.info("SEARCH_SUCCESS")
         return ResponseEntity.ok(response) 
     }
 }

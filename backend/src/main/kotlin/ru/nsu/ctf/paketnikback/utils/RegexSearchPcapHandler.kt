@@ -22,7 +22,7 @@ class RegexSearchPcapHandler(regex : Regex) : PacketHandler {
         val text = buffer.toString(Charsets.UTF_8)
         
         val items = regex.findAll(text)
-        for (item in items) {
+        items.forEach { item -> 
             matches.add(RegexSearchMatch(packetsCounter, item.value, item.range.first))
         }
         
