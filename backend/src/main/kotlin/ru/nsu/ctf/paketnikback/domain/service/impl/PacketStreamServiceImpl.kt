@@ -78,8 +78,8 @@ final class PacketStreamServiceImpl(
                 }
                 val packetsData = packets.map(::convertToPacketData)
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
-                saveAsStreams(tcpPackets, objectName)
-                saveUnallocated(otherPackets, objectName)
+                saveAsStreams(tcpPackets, "$bucketName.$objectName")
+                saveUnallocated(otherPackets, "$bucketName.$objectName")
             }
     }
 
