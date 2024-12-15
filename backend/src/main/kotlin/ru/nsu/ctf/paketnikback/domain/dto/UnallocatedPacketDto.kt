@@ -4,5 +4,6 @@ import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 
 data class UnallocatedPacketDto(
     val id: String,
+    val pcapId: String,
     val packet: PacketData,
 )
