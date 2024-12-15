@@ -25,17 +25,21 @@ export function FilesWidget() {
   }
 
   if (isPending) {
-    <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
-        Loading... {data}
+    return (
+      <div className="w-full h-full flex flex-col">
+        <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+          Loading... {data}
+        </div>
       </div>
-    </div>;
+    );
   } else if (isError) {
-    <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
-        Error: {error.message}
+    return (
+      <div className="w-full h-full flex flex-col">
+        <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+          Error: {error.message}
+        </div>
       </div>
-    </div>;
+    );
   }
 
   return (
@@ -45,7 +49,7 @@ export function FilesWidget() {
       </div>
       <div className="bg-[#475569] p-4 text-white flex-1 overflow-auto">
         <div className="space-y-4">
-          <div className="bg-[#2d3748] w-fit p-4 rounded-lg">
+          <div className="bg-[#2d3748] p-4 rounded-lg">
             <h3 className="text-lg  font-semibold mb-3">PCAP Dumps</h3>
             <div className="space-y-2">
               {data?.map((file) => (
@@ -57,7 +61,9 @@ export function FilesWidget() {
                   }}
                   className="flex items-center hover:!bg-[#4a5568] justify-between p-2 rounded"
                 >
-                  <span>{file.id}</span>
+                  <span title={file.id} className="truncate">
+                    {file.id}
+                  </span>
                 </div>
               ))}
             </div>
