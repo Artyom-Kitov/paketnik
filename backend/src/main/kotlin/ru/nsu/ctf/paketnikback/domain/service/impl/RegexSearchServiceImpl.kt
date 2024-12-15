@@ -17,7 +17,18 @@ class RegexSearchServiceImpl(
     private val log = logger()
 
     override fun search(request: RegexSearchRequest): RegexSearchResponse {
-        // need to be implemented
+        var result = RegexSearchResponse()
+
+        val filename = request.filename
+        
+        val regex = try {
+            Regex(request.regex)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("ERR: Invalid regex '${request.regex}': ${e.message}")
+        }
+
+        
+
         return RegexSearchResponse([])
     }
 }

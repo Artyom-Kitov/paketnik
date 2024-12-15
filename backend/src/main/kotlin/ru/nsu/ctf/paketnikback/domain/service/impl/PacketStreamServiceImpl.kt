@@ -62,7 +62,7 @@ final class PacketStreamServiceImpl(
         .map(packetMapper::unallocatedToDto)
 
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
-        log.info("creating streams with objectId = '$bucketName.$objectName'")
+        log.info("creating streams with objectId = '$objectName'")
         minioClient
             .getObject(
                 GetObjectArgs
@@ -78,8 +78,8 @@ final class PacketStreamServiceImpl(
                 }
                 val packetsData = packets.map(::convertToPacketData)
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
-                saveAsStreams(tcpPackets, "$bucketName.$objectName")
-                saveUnallocated(otherPackets, "$bucketName.$objectName")
+                saveAsStreams(tcpPackets, objectName)
+                saveUnallocated(otherPackets, objectName)
             }
     }
 
