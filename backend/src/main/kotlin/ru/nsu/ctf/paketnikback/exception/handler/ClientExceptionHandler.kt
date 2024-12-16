@@ -11,6 +11,7 @@ import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
+import ru.nsu.ctf.paketnikback.exception.InternalServerErrorException
 import ru.nsu.ctf.paketnikback.utils.logger
 
 @ControllerAdvice
@@ -27,6 +28,12 @@ class ClientExceptionHandler : ResponseEntityExceptionHandler() {
     fun handleInvalidEntityException(e: InvalidEntityException): ResponseEntity<String> {
         log.error("invalid entity", e)
         return ResponseEntity.badRequest().body(e.message)
+    }
+
+    @ExceptionHandler(InternalServerErrorException::class)
+    fun handleInternalServerErrorException(e: InternalServerErrorException): ResponseEntity<String> {
+        log.error("internal server error", e)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.message)
     }
 
     override fun handleMethodArgumentNotValid(
