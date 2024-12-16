@@ -76,7 +76,9 @@ final class PacketStreamServiceImpl(
                     packets.add(packet)
                     true
                 }
-                val packetsData = packets.map(::convertToPacketData)
+
+                val packetsData = packets.withIndex().map((index, packet) -> convertToPacketData(packet, index))
+
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
                 saveAsStreams(tcpPackets, objectName)
                 saveUnallocated(otherPackets, objectName)
@@ -120,7 +122,7 @@ final class PacketStreamServiceImpl(
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    private fun convertToPacketData(packet: Packet): PacketData {
+    private fun convertToPacketData(packet: Packet, index: Integer): PacketData {
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
         val encodedData = Base64.encode(packet.payload.array)
         val info = readPacketInfo(packet)
@@ -130,6 +132,7 @@ final class PacketStreamServiceImpl(
             encodedData = encodedData,
             layers = info,
             tags = tags,
+            index = index,
         )
     }
 

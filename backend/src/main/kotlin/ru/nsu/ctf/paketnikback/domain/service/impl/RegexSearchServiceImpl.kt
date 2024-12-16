@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchRequest
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchResponse
+import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchMatch
 import ru.nsu.ctf.paketnikback.domain.service.RegexSearchService
 
 import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
@@ -15,6 +16,7 @@ import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 
 import ru.nsu.ctf.paketnikback.utils.logger
 import ru.nsu.ctf.paketnikback.utils.RegexSearchPcapHandler
+import kotlin.io.encoding.Base64
 
 @Service
 class RegexSearchServiceImpl(
@@ -33,10 +35,9 @@ class RegexSearchServiceImpl(
         }
 
         val packetsData = findPacketsDataByPcapId(filename)
+        val matches = findMatches(packetsData, regex)
 
-        // TODO: implement regex search
-
-        return RegexSearchResponse(matches = [])
+        return RegexSearchResponse(matches)
     }
 
     private fun findPacketsDataByPcapId(pcapId: String): List<PacketData> {
@@ -54,5 +55,21 @@ class RegexSearchServiceImpl(
         }
 
         return items.toList()
+    }
+
+    private fun findMatches(packets: List<PacketData>, regex: Regex): List<RegexSearchMatch> {
+        val matches = mutableListOf<RegexSearchMatch>()
+
+        packets.forEach { packet -> 
+            val decodedData = Base64.decode(packet.encodedData)
+            val text = decodedData.toString(Charsets.UTF_8)
+
+            val items = regex.findAll(text)
+            items.forEach { item -> 
+                matches.add(RegexSearchMatch(packet.index, item.value, item.range.first)) 
+            }
+        }
+
+        return matches.toList()
     }
 }
