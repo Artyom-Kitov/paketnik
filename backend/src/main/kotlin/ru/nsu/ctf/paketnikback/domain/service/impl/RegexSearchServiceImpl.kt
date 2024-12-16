@@ -10,7 +10,7 @@ import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 
 @Service
 class RegexSearchServiceImpl(
-    pcapProcessorService: PcapProcessorService,
+    private val pcapProcessorService: PcapProcessorService,
 ) : RegexSearchService {
 
     override fun search(request: RegexSearchRequest): RegexSearchResponse {
