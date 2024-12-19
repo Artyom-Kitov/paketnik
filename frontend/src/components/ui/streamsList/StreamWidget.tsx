@@ -1,8 +1,8 @@
-import { Stream } from "./Stream";
+import { Stream } from "../../../api";
 
 export type Props = {
   onContextMenu: (pageX: number, pageY: number) => void;
-  onClick: (id: number) => void;
+  onClick: (id: string) => void;
   data: Stream;
 };
 
@@ -21,16 +21,12 @@ const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
       className="h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc]"
     >
       <th className="text-xl text-[#fff] font-bold bg-[#FF4081]">
-        {stream.serviceName}
+        {stream.id}
       </th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.srcIp}</th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.srcPort}</th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.dstIp}</th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.dstPort}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{stream.startTime}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{stream.duration}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{stream.up}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{stream.down}</th>
     </tr>
   );
 };
