@@ -15,7 +15,6 @@ export interface Rule {
   scope: string;
 }
 
-
 export interface Stream {
   id: string;
   srcIp: string;
