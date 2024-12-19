@@ -64,8 +64,8 @@ export async function deleteRule(id: string): Promise<void> {
   return await fetchData<void>("/rules/" + id, "DELETE", "");
 }
 
-export async function postRule(rule: Rule): Promise<void> {
-  return await fetchData<void>("/rules", "POST", rule);
+export async function postRule(rule: Rule): Promise<Response> {
+  return await fetchData<Response>("/rules", "POST", rule);
 }
 
 export async function getServices(): Promise<Service[]> {
@@ -110,7 +110,8 @@ async function fetchData<Type>(
     };
   }
   try {
-    if (method == "DELETE") {
+    if (method == "DELETE" || (path == "/rules" && method == "POST")) {
+      console.log("aboba");
       return (await fetch(host + path, options)) as Type;
     } else {
       return (await fetch(host + path, options)).json() as Type;
