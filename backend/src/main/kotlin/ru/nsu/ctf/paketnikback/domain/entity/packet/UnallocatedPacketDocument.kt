@@ -8,5 +8,6 @@ import java.util.UUID
 data class UnallocatedPacketDocument(
     @Id
     val id: String = UUID.randomUUID().toString(),
+    val pcapId: String,
     val packet: PacketData,
 )
