@@ -1,3 +1,3 @@
 import { atom } from "jotai";
 
-export const currentStreamId = atom<number | undefined>(undefined);
+export const currentStreamId = atom<string | undefined>(undefined);
