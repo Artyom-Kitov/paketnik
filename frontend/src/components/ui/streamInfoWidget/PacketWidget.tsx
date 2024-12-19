@@ -1,5 +1,4 @@
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import React, { useState } from "react";
+import React from "react";
 import { Packet } from "../../../api";
 
 type ServerMessageWidgetProps = {
@@ -7,57 +6,8 @@ type ServerMessageWidgetProps = {
 };
 
 export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({ data }) => {
-  console.log(data);
-  const [height, setHeight] = useState(230);
-  const [isResizing, setIsResizing] = useState(false);
-  const [initialMousePosition, setInitialMousePosition] = useState(0);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsResizing(true);
-    setInitialMousePosition(e.clientY);
-    e.preventDefault();
-  };
-
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isResizing) {
-      const newHeight = height + (e.clientY - initialMousePosition);
-      setHeight(newHeight > 50 ? newHeight : 50);
-      setInitialMousePosition(e.clientY);
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsResizing(false);
-  };
-
-  const handleDoubleClick = () => {
-    setHeight((prevHeight) => (prevHeight !== 50 ? 50 : 230));
-  };
-
-  React.useEffect(() => {
-    if (isResizing) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isResizing]);
-
   return (
-    <div
-      style={{ height }}
-      className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden"
-    >
-      <DotsHorizontalIcon
-        className="absolute bottom-2 left-2 text-gray-200 cursor-move"
-        onMouseDown={handleMouseDown}
-        onDoubleClick={handleDoubleClick}
-      />
+    <div className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden h-72 max-h-fit min-h-28 resize-y">
       <h2 className="text-lg font-semibold">Packet</h2>
       <div className="text-sm mt-2 whitespace-normal">
         <p>Received at: {data.receivedAt}</p>
