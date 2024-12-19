@@ -15,6 +15,7 @@ export interface Rule {
   scope: string;
 }
 
+
 export interface Stream {
   id: string;
   srcIp: string;
@@ -86,6 +87,43 @@ export interface UnallocatedPacket {
   packet: Packet;
 }
 
+export interface Pcap {
+  id: string;
+  content: Blob;
+}
+
+export async function getPcap(): Promise<Pcap[]> {
+  const response = await fetchData<{ [key: string]: string[] }>(
+    "/minio-api/get-files",
+    "GET",
+    "",
+  );
+  const pcapFiles: Pcap[] = Object.values(response)
+    .flat()
+    .map((fileName) => ({
+      id: fileName,
+      content: new Blob(),
+    }));
+  return pcapFiles;
+}
+
+export async function deletePcap(id: string): Promise<void> {
+  return await fetchData<void>("/minio-api/files/" + id, "DELETE", "");
+}
+
+export async function getPcapById(id: string): Promise<Pcap> {
+  const response = await fetchData<{ content: Blob }>(
+    "/minio-api/files/" + id,
+    "GET",
+    "",
+  );
+  const pcapFile: Pcap = {
+    id: id,
+    content: response.content,
+  };
+  return pcapFile;
+}
+
 export async function getRules(): Promise<Rule[]> {
   return await fetchData<Rule[]>("/rules", "GET", "");
 }
@@ -98,8 +136,8 @@ export async function deleteRule(id: string): Promise<void> {
   return await fetchData<void>("/rules/" + id, "DELETE", "");
 }
 
-export async function postRule(rule: Rule): Promise<void> {
-  return await fetchData<void>("/rules", "POST", rule);
+export async function postRule(rule: Rule): Promise<Response> {
+  return await fetchData<Response>("/rules", "POST", rule);
 }
 
 export async function getServices(): Promise<Service[]> {
@@ -137,11 +175,19 @@ export async function getUnallocatedPackets(): Promise<UnallocatedPacket[]> {
 async function fetchData<Type>(
   path: string,
   method: string,
-  body: Service | Rule | string,
+  body: Service | Rule | Pcap | string | Blob,
+  fileName?: string,
 ): Promise<Type> {
   let options = {};
   if (method == "GET" || method == "DELETE") {
     options = { method: method };
+  } else if (body instanceof Blob) {
+    const formData = new FormData();
+    formData.append("files", body, fileName);
+    options = {
+      method: method,
+      body: formData,
+    };
   } else {
     options = {
       method: method,
@@ -152,7 +198,8 @@ async function fetchData<Type>(
     };
   }
   try {
-    if (method == "DELETE") {
+    if (method == "DELETE" || (path == "/rules" && method == "POST")) {
+      console.log("aboba");
       return (await fetch(host + path, options)) as Type;
     } else {
       return (await fetch(host + path, options)).json() as Type;

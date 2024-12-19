@@ -7,20 +7,75 @@ export function NewRuleWidget() {
   const [type, setType] = useState("REGEX");
   const [scope, setScope] = useState("INCOMING");
   const [regex, setRegex] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const queryClient = useQueryClient();
 
   const addRuleMutation = useMutation({
     mutationFn: postRule,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rules"] });
+    onSuccess: (data) => {
+      if (data.ok) {
+        queryClient.invalidateQueries({ queryKey: ["rules"] });
+      } else {
+        data.text().then((text) => setErrorMessage(text));
+      }
     },
   });
+  const getIsDataValid = () => {
+    return getIsRuleNameValid() && getIsRegexValid();
+  };
+  const getIsRuleNameValid = () => {
+    return name != "" && name.length <= 64;
+  };
+  const getIsRegexValid = () => {
+    try {
+      new RegExp(regex);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+    return true;
+  };
+
+  const registerRule = () => {
+    setErrorMessage("");
+    if (getIsDataValid()) {
+      const rule: Rule = {
+        id: "0",
+        name: name,
+        regex: regex,
+        type: type,
+        scope: scope,
+      };
+      addRuleMutation.mutate(rule);
+    } else {
+      let errorString: string = "Data is incorrect!\n";
+      if (!getIsRuleNameValid()) {
+        errorString = errorString.concat(
+          "Service name shouldn't be empty and shouldn't be longer than 64 symbols\n" +
+            "length of your rule name is " +
+            name.length +
+            "\n",
+        );
+      }
+      if (!getIsRegexValid()) {
+        errorString = errorString.concat("Regex is invalid\n");
+      }
+      setErrorMessage(errorString);
+    }
+  };
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="bg-[#475569] p-4 text-white flex-1 overflow-auto">
         <div className="bg-[#2d3748] p-4 rounded-lg">
           <h3 className="text-lg font-semibold mb-2">Add New Rule</h3>
+          {errorMessage && (
+            <div className="text-red-400 mb-4 whitespace-pre-line">
+              {errorMessage}
+            </div>
+          )}
+
           <div className="my-2">
             <label className="block text-sm mb-1">Rule Name</label>
             <input
@@ -66,14 +121,7 @@ export function NewRuleWidget() {
           <button
             className="bg-[#4a5568] px-4 py-2 rounded hover:bg-[#2d3748] transition-colors"
             onClick={() => {
-              const rule: Rule = {
-                id: "0",
-                name: name,
-                regex: regex,
-                type: type,
-                scope: scope,
-              };
-              addRuleMutation.mutate(rule);
+              registerRule();
             }}
           >
             Add Rule
