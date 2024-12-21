@@ -8,5 +8,5 @@ data class PacketData(
     val encodedData: String,
     val layers: LayersInfo,
     val tags: List<String>,
-    val index: Integer,
+    val index: Int,
 )

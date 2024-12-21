@@ -122,7 +122,7 @@ final class PacketStreamServiceImpl(
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    private fun convertToPacketData(packet: Packet, index: Integer): PacketData {
+    private fun convertToPacketData(packet: Packet, index: Int): PacketData {
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
         val encodedData = Base64.encode(packet.payload.array)
         val info = readPacketInfo(packet)

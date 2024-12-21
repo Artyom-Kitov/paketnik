@@ -36,7 +36,7 @@ class PcapProcessorServiceImpl(
             packets.addAll(stream.packets)
         }
 
-        unallocatedPackets.forEach { packet ->
+        unallocated.forEach { packet ->
             packets.add(packet.packet)
         }
 
