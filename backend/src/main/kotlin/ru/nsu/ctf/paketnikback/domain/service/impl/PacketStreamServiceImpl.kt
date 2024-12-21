@@ -77,7 +77,7 @@ final class PacketStreamServiceImpl(
                     true
                 }
 
-                val packetsData = packets.withIndex().map((index, packet) -> convertToPacketData(packet, index))
+                val packetsData = packets.withIndex().map({ x -> convertToPacketData(x.value, x.index) })
 
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
                 saveAsStreams(tcpPackets, objectName)

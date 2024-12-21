@@ -15,6 +15,8 @@ import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchRequest
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchResponse
 import ru.nsu.ctf.paketnikback.domain.service.RegexSearchService
 
+import ru.nsu.ctf.paketnikback.utils.logger
+
 @RestController
 @RequestMapping("/search")
 class RegexSearchController(
@@ -35,7 +37,7 @@ class RegexSearchController(
         ],
     )
     @PostMapping
-    fun search( @RequestBody @Valid request: RegexSearchRequest ): ResponseEntity<RegexSearchResponse> {
+    fun search( @RequestBody request: RegexSearchRequest ): ResponseEntity<RegexSearchResponse> {
         val response = regexSearchService.search(request)
 
         if (response.matches.isEmpty()) {
