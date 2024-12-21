@@ -13,6 +13,7 @@ import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 
 import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Service
 class PcapProcessorServiceImpl(
@@ -43,6 +44,7 @@ class PcapProcessorServiceImpl(
         return packets.toList()
     }
 
+    @OptIn(ExperimentalEncodingApi::class)
     private fun findMatches(packets: List<PacketData>, regex: Regex): List<RegexSearchMatch> {
         val matches = mutableListOf<RegexSearchMatch>()
 
