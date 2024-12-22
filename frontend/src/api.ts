@@ -226,8 +226,14 @@ async function fetchData<Type>(
       if(result.status == 200){
         return result.json() as Type;
       }
-      else if(result.status == 500){
-        return undefined as Type
+      else if(result.status == 500 && path == "/search"){
+        throw new Error("Server error");
+      }
+      else if(result.status == 404 && path == "/search"){
+        throw new Error("Pcap not found");
+      }
+      else if(result.status == 204 && path == "/search"){
+        throw new Error("No matches");
       }
       else{
         return result as Type;
