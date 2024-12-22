@@ -12,6 +12,8 @@ import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 
+import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
+
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -32,6 +34,10 @@ class PcapProcessorServiceImpl(
 
         val streams = packetStreamRepository.findAllByPcapId(pcapId)
         val unallocated = unallocatedPacketRepository.findAllByPcapId(pcapId)
+
+        if (streams.isEmpty() && unallocated.isEmpty()) {
+            throw EntityNotFoundException("ERR: File '${pcapId}' not found")
+        }
 
         streams.forEach { stream -> 
             packets.addAll(stream.packets)

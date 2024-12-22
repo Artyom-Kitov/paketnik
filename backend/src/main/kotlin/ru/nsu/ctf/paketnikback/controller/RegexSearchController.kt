@@ -34,7 +34,7 @@ class RegexSearchController(
             ApiResponse(responseCode = "200", description = "Success"),
             ApiResponse(responseCode = "204", description = "No content found"),
             ApiResponse(responseCode = "400", description = "Invalid request"),
-            ApiResponse(responseCode = "404", description = "Pcap not found"),
+            ApiResponse(responseCode = "404", description = "Pcap file not found"),
         ],
     )
     @PostMapping
