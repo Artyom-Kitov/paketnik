@@ -97,7 +97,6 @@ export interface SearchRequest {
   regex: string;
 }
 
-
 export interface SearchMatch {
   packet: number;
   string: string;
@@ -188,7 +187,9 @@ export async function getUnallocatedPackets(): Promise<UnallocatedPacket[]> {
   );
 }
 
-export async function getSearchResults(searchRequest: SearchRequest): Promise<SearchResult>{
+export async function getSearchResults(
+  searchRequest: SearchRequest,
+): Promise<SearchResult> {
   return await fetchData<SearchResult>("/search", "POST", searchRequest);
 }
 
@@ -221,21 +222,17 @@ async function fetchData<Type>(
     if (method == "DELETE" || (path == "/rules" && method == "POST")) {
       return (await fetch(host + path, options)) as Type;
     } else {
-      const result = (await fetch(host + path, options))
-      console.log(result.status)
-      if(result.status == 200){
+      const result = await fetch(host + path, options);
+      console.log(result.status);
+      if (result.status == 200) {
         return result.json() as Type;
-      }
-      else if(result.status == 500 && path == "/search"){
+      } else if (result.status == 500 && path == "/search") {
         throw new Error("Server error");
-      }
-      else if(result.status == 404 && path == "/search"){
+      } else if (result.status == 404 && path == "/search") {
         throw new Error("Pcap not found");
-      }
-      else if(result.status == 204 && path == "/search"){
+      } else if (result.status == 204 && path == "/search") {
         throw new Error("No matches");
-      }
-      else{
+      } else {
         return result as Type;
       }
     }

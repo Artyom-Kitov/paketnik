@@ -11,10 +11,8 @@ import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
 import { ServicesListWidget } from "../serviceList/ServicesListWidget";
 import { SearchBar } from "../searchbar/SearchBar";
 
-
 export function MainScreen() {
   const [currentWidget, setCurrentWidget] = useState<string>("");
-
 
   const renderCurrentWidget = () => {
     switch (currentWidget) {

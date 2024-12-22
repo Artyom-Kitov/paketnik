@@ -40,7 +40,7 @@ export const SearchBar: React.FC = () => {
     onError: (error: Error) => {
       setSuccess("");
       setError(error.message);
-    }
+    },
   });
 
   const getIsRuleNameValid = () => {
@@ -200,8 +200,12 @@ export const SearchBar: React.FC = () => {
           </div>
         </div>
       </div>
-      {error && <span className="text-red-500 ml-4 font-semibold">{error}</span>}
-      {success && <span className="text-green-500 ml-4 font-semibold">{success}</span>}
+      {error && (
+        <span className="text-red-500 ml-4 font-semibold">{error}</span>
+      )}
+      {success && (
+        <span className="text-green-500 ml-4 font-semibold">{success}</span>
+      )}
     </div>
   );
 };
