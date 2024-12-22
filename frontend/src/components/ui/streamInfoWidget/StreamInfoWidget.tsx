@@ -3,38 +3,55 @@ import { currentStreamId } from "../streamsList/selectedStream";
 import { getPackets } from "../../../api";
 import { useAtomValue } from "jotai";
 import { useQuery } from "@tanstack/react-query";
+import { searchResult } from "../searchbar/SearchResult";
+import { SearchMatch } from "../../../api";
 
-type StreamInfoWidgetProps = {
-  searchQuery: string;
-};
-
-export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
+export const StreamInfoWidget: React.FC = () => {
   const streamId = useAtomValue(currentStreamId);
+  const searchData = useAtomValue(searchResult);
+
+  const getSearches = (packetIndex: number): SearchMatch[] => {
+    const highlights: SearchMatch[] = [];
+    searchData?.matches.forEach((match) => {
+      if (match.packet == packetIndex) {
+        highlights.push(match);
+      }
+    });
+    return highlights;
+  };
+
   const { isPending, isError, data, error } = useQuery({
     queryKey: [streamId],
     queryFn: async () => {
       if (streamId != undefined) {
         console.log(streamId);
         const data = await getPackets(streamId);
-        return data;
+        if(data == undefined){
+          throw new Error("An error oqqured while fetching packets")
+        } else{
+          return data; 
+        }
       } else {
         console.log("No id");
-        return undefined;
+        return null;
       }
     },
   });
   if (isPending) {
+    return (
     <div className="w-full h-full flex flex-col">
       <div className="text-right text-[#fff] text-2xl font-bold mb-2">
         Loading... {data}
       </div>
-    </div>;
+    </div>)
   } else if (isError) {
+    console.log(data)
+    return(
     <div className="w-full h-full flex flex-col">
       <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
         Error: {error.message}
       </div>
-    </div>;
+    </div>)
   }
 
   return (
@@ -46,7 +63,11 @@ export const StreamInfoWidget: React.FC<StreamInfoWidgetProps> = () => {
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="overflow-auto space-y-4">
             {data.map((message, index) => (
-              <PacketWidget key={index} data={message} />
+              <PacketWidget
+                key={index}
+                data={message}
+                highlights={getSearches(message.index)}
+              />
             ))}
           </div>
         </div>

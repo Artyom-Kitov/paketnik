@@ -1,35 +1,81 @@
 import React, { useState } from "react";
 import { MagnifyingGlassIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-
-type SearchBarProps = {
-  onSearch: (query: string, filters: Filters) => void;
-};
+import { getSearchResults, SearchRequest } from "../../../api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { searchResult } from "./SearchResult";
+import { useSetAtom } from "jotai";
 
 type Filters = {
   timeRange?: { from?: string; to?: string };
   sourceIp?: string;
   destinationIp?: string;
   protocol?: string;
+  filename?: string;
 };
 
-export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+export const SearchBar: React.FC = () => {
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     timeRange: { from: "", to: "" },
     sourceIp: "",
     destinationIp: "",
     protocol: "",
+    filename: "",
+  });
+  const setSearchResult = useSetAtom(searchResult);
+
+  const queryClient = useQueryClient();
+
+  const searchRegexMutation = useMutation({
+    mutationFn: getSearchResults,
+    onSuccess: (data) => {
+      if (data.matches != undefined) {
+        setError("");
+        setSuccess("Found " + data.matches.length + " matches");
+        setSearchResult(data);
+      } else {
+        setSuccess("");
+        setError("No matches found");
+      }
+      queryClient.invalidateQueries({ queryKey: ["searches"] });
+    },
   });
 
-  const handleSearch = () => {
+  const getIsRuleNameValid = () => {
+    return filters.filename != undefined && filters.filename.length <= 69;
+  };
+  const getIsRegexValid = () => {
     try {
       new RegExp(query);
-      onSearch(query, filters);
-      setError("");
-    } catch {
-      setError("Invalid Regular Expression");
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+    return true;
+  };
+
+  const handleSearch = () => {
+    let errorString: string = "Data is incorrect!\n";
+    if (!getIsRuleNameValid()) {
+      errorString = errorString.concat(
+        "Service name shouldn't be empty and shouldn't be longer than 69 symbols\n",
+      );
+    }
+    if (!getIsRegexValid()) {
+      errorString = errorString.concat("Regex is invalid\n");
+    }
+    if (getIsRuleNameValid() && getIsRegexValid()) {
+      const searchRequest: SearchRequest = {
+        regex: query,
+        filename: filters.filename!,
+      };
+      searchRegexMutation.mutate(searchRequest);
+    } else {
+      setSuccess("");
+      setError(errorString);
     }
   };
 
@@ -140,10 +186,23 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
                 <option value="HTTPS">HTTPS</option>
               </select>
             </div>
+            <div className="flex flex-col">
+              <label className="text-sm">Filename:</label>
+              <input
+                type="text"
+                placeholder="example.pcap"
+                value={filters.filename || ""}
+                onChange={(e) =>
+                  setFilters({ ...filters, filename: e.target.value })
+                }
+                className="px-4 py-2 bg-gray-500 text-gray-200 rounded"
+              />
+            </div>
           </div>
         </div>
       </div>
       {error && <span className="text-red-500 ml-4">{error}</span>}
+      {success && <span className="text-green-500 ml-4">{success}</span>}
     </div>
   );
 };
