@@ -11,13 +11,10 @@ import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
 import { ServicesListWidget } from "../serviceList/ServicesListWidget";
 import { SearchBar } from "../searchbar/SearchBar";
 
+
 export function MainScreen() {
   const [currentWidget, setCurrentWidget] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
 
   const renderCurrentWidget = () => {
     switch (currentWidget) {
@@ -47,7 +44,7 @@ export function MainScreen() {
               <h1 className="font-bold text-3xl text-white min-h-[30px]">
                 Paketnik
               </h1>
-              <SearchBar onSearch={handleSearch} />
+              <SearchBar />
             </Panel>
             <Panel minSize={91}>
               <PanelGroup direction="horizontal" className="right-widget-group">
@@ -64,7 +61,7 @@ export function MainScreen() {
                   minSize={20}
                   className="mb-[28px] ml-[6px] mr-[7px]"
                 >
-                  <StreamInfoWidget searchQuery={searchQuery} />
+                  <StreamInfoWidget />
                 </Panel>
                 {currentWidget && (
                   <>
