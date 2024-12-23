@@ -16,11 +16,7 @@ import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
 import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.EthernetInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.IPv4Info
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.LayersInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.TcpInfo
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.UdpInfo
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.*
 import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.PacketMapper
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
@@ -61,6 +57,8 @@ final class PacketStreamServiceImpl(
         .findAll()
         .map(packetMapper::unallocatedToDto)
 
+    override fun getStreamHttpInfo(id: String): List<HttpInfo> = getStreamPackets(id).mapNotNull { it.httpInfo }
+
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
         log.info("creating streams with objectId = '$objectName'")
         minioClient
@@ -77,7 +75,7 @@ final class PacketStreamServiceImpl(
                     true
                 }
 
-                val packetsData = packets.withIndex().map({ x -> convertToPacketData(x.value, x.index) })
+                val packetsData = packets.withIndex().map { x -> convertToPacketData(x.value, x.index) }
 
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
                 saveAsStreams(tcpPackets, objectName)
@@ -126,6 +124,7 @@ final class PacketStreamServiceImpl(
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
         val encodedData = Base64.encode(packet.payload.array)
         val info = readPacketInfo(packet)
+        val httpInfo = readHttp(packet);
         val tags = listOf<String>()
         return PacketData(
             receivedAt = receivedAt,
@@ -133,6 +132,7 @@ final class PacketStreamServiceImpl(
             layers = info,
             tags = tags,
             index = index,
+            httpInfo = httpInfo,
         )
     }
 
@@ -144,6 +144,33 @@ final class PacketStreamServiceImpl(
             udp = readUdp(packet),
         )
         return layers
+    }
+
+    private fun readHttp(packet: Packet): HttpInfo? {
+        val tcpPayload = packet.getPacket(Protocol.TCP)?.payload?.array ?: return null
+        val data = String(tcpPayload)
+        if (!data.contains("HTTP")) return null
+
+        val lines = data.split("\r\n")
+        val requestLine = lines.firstOrNull()?.split(" ")
+        val headers = mutableMapOf<String, String>()
+
+        for (line in lines.drop(1)) {
+            if (line.isBlank()) break
+            val (key, value) = line.split(": ", limit = 2)
+            headers[key] = value
+        }
+
+        val bodyStart = data.indexOf("\r\n\r\n") + 4
+        val body = if (bodyStart in data.indices) data.substring(bodyStart) else null
+
+        return HttpInfo(
+            method = requestLine?.getOrNull(0),
+            url = requestLine?.getOrNull(1),
+            statusCode = requestLine?.getOrNull(1)?.toIntOrNull(),
+            headers = headers,
+            body = body
+        )
     }
 
     private companion object {
