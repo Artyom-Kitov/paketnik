@@ -21,8 +21,7 @@ minio:
 
 app:
   flag-regex: ${FLAG_REGEX:}
-  host-addr: 172.19.42.36
-  #${HOST_ADDR:}
+  host-addr: ${HOST_ADDR:}
   start-time: ${START_TIME:}
   round-ticks: ${ROUND_TICKS:0}
   
