@@ -1,8 +1,10 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
 import org.springframework.stereotype.Service
+import ru.nsu.ctf.paketnikback.app.config.AppConfig
 import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceCreationRequest
 import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
+import ru.nsu.ctf.paketnikback.domain.entity.contest.ContestServiceDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.ContestServiceMapper
 import ru.nsu.ctf.paketnikback.domain.repository.ContestServiceRepository
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
@@ -12,6 +14,7 @@ import ru.nsu.ctf.paketnikback.utils.logger
 @Service
 class ContestServiceServiceImpl(
     private val contestServiceRepository: ContestServiceRepository,
+    private val appConfig: AppConfig,
     private val mapper: ContestServiceMapper,
 ) : ContestServiceService {
     private val log = logger()
@@ -57,5 +60,24 @@ class ContestServiceServiceImpl(
         }
         contestServiceRepository.deleteById(id)
         log.info("successfully deleted service with id = $id")
+    }
+
+    override fun findByStream(srcIp: String, dstIp: String, srcPort: Int, dstPort: Int): ContestServiceResponse? {
+        val service: ContestServiceDocument? = if (srcIp == appConfig.hostAddr) {
+            contestServiceRepository
+                .findByPort(srcPort)
+                .orElse(null)
+        } else if (dstIp == appConfig.hostAddr) {
+            contestServiceRepository
+                .findByPort(dstPort)
+                .orElse(null)
+        } else {
+            null
+        }
+        return if (service != null) {
+            mapper.toResponse(service)
+        } else {
+            null
+        }
     }
 }

@@ -28,7 +28,7 @@ class ClientExceptionHandler : ResponseEntityExceptionHandler() {
         log.error("invalid entity", e)
         return ResponseEntity.badRequest().body(e.message)
     }
-    
+
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
         headers: HttpHeaders,

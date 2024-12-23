@@ -14,5 +14,6 @@ data class PacketStreamDocument(
     val srcPort: Int,
     val dstPort: Int,
     val pcapId: String,
+    val serviceId: String?,
     val packets: List<PacketData> = emptyList(),
 )
