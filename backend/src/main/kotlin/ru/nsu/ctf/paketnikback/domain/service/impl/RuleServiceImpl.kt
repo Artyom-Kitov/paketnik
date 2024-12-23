@@ -47,8 +47,6 @@ class RuleServiceImpl(
     }
 
     override fun createRule(request: RuleRequestDto): RuleResponseDto {
-        validateRuleRequest(request)
-        
         log.info("creating a rule from request $request")
         val rule = ruleMapper.toDomainFromRequest(request)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(rule))
@@ -62,8 +60,6 @@ class RuleServiceImpl(
             throw EntityNotFoundException("Rule with ID $id not found")
         }
         
-        validateRuleRequest(request)
-
         log.info("updating a rule with id $id")
         val updatedRule = ruleMapper.toDomainFromRequest(request).copy(id = id)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(updatedRule))

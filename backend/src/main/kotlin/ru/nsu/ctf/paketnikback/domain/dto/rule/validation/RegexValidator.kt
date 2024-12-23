@@ -15,4 +15,3 @@ class RegexValidator : ConstraintValidator<ValidRegex, String> {
         }
     }
 }
-

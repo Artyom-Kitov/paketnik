@@ -3,7 +3,7 @@ package ru.nsu.ctf.paketnikback.domain.service
 import org.springframework.web.multipart.MultipartFile
 import ru.nsu.ctf.paketnikback.domain.dto.*
 
-interface MinioService{
+interface MinioService {
     fun createBucket(name: String): BucketCreationResult
 
     fun getUploadedFiles(): GetUploadedFilesResult

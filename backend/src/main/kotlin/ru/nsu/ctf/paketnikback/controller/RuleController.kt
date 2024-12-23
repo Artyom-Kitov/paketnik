@@ -3,6 +3,7 @@ package ru.nsu.ctf.paketnikback.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,7 +33,7 @@ class RuleController(
         ],
     )
     @PostMapping
-    fun createRule(@RequestBody request: RuleRequestDto): ResponseEntity<RuleResponseDto> {
+    fun createRule(@Valid @RequestBody request: RuleRequestDto): ResponseEntity<RuleResponseDto> {
         val response = ruleService.createRule(request)
         return ResponseEntity.ok(response)
     }
@@ -66,7 +67,7 @@ class RuleController(
     @PutMapping("/{id}")
     fun updateRule(
         @PathVariable id: String,
-        @RequestBody request: RuleRequestDto,
+        @Valid @RequestBody request: RuleRequestDto,
     ): ResponseEntity<RuleResponseDto> {
         val response = ruleService.updateRule(id, request)
         return ResponseEntity.ok(response)
