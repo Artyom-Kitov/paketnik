@@ -61,6 +61,75 @@ final class PacketStreamServiceImpl(
         .findAll()
         .map(packetMapper::unallocatedToDto)
 
+    override fun generatePcapForStream(streamId: String): ByteArray {
+        val packets = getStreamPackets(streamId)
+
+        if (packets.isEmpty()) {
+            throw EntityNotFoundException("Stream not found")
+        }
+
+        val outputStream = ByteArrayOutputStream()
+        Pcap.openDead().use { pcapHandle ->
+            packets.forEach { packetData ->
+                val rawPacket = convertToRawPacket(packetData)
+                pcapHandle.dump(rawPacket)
+            }
+        }
+
+        return outputStream.toByteArray()
+    }
+
+    private fun convertToRawPacket(packetData: PacketData): DefaultEthernetPacket {
+        val payloadData = Base64.decode(packetData.encodedData)
+
+        val tcpPacket = packetData.layers.tcp?.let { tcpInfo ->
+            DefaultTCPPacket.create(
+                payloadData,
+                tcpInfo.srcPort,
+                tcpInfo.dstPort,
+                tcpInfo.sequenceNumber,
+                tcpInfo.ackNumber,
+                tcpInfo.dataOffset.toByte(),
+                tcpInfo.urg,
+                tcpInfo.ack,
+                tcpInfo.psh,
+                tcpInfo.rst,
+                tcpInfo.syn,
+                tcpInfo.fin,
+                tcpInfo.windowSize,
+                tcpInfo.checksum
+            )
+        }
+
+        val ipv4Packet = packetData.layers.ipv4?.let { ipv4Info ->
+            DefaultIPv4Packet.create(
+                tcpPacket ?: ApplicationPacket(payloadData),
+                ipv4Info.srcIp,
+                ipv4Info.dstIp,
+                ipv4Info.ttl.toByte(),
+                Protocol.TCP.number.toByte(),
+                ipv4Info.headerChecksum
+            )
+        }
+
+        val ethernetPacket = packetData.layers.ethernet?.let { ethernetInfo ->
+            DefaultEthernetPacket.create(
+                ipv4Packet ?: ApplicationPacket(payloadData),
+                ethernetInfo.srcMac,
+                ethernetInfo.dstMac,
+                0x0800 // Тип для IPv4
+            )
+        }
+
+        // Если отсутствует Ethernet-слой, возвращаем IPv4 или TCP как базовый пакет
+        return ethernetPacket ?: ipv4Packet ?: tcpPacket ?: DefaultEthernetPacket.create(
+            ApplicationPacket(payloadData),
+            "00:00:00:00:00:00", // Default source MAC
+            "00:00:00:00:00:00", // Default destination MAC
+            0x0800
+        )
+    }
+
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
         log.info("creating streams with objectId = '$objectName'")
         minioClient
@@ -102,7 +171,7 @@ final class PacketStreamServiceImpl(
                     srcPort = tcpInfo.srcPort,
                     dstPort = tcpInfo.dstPort,
                 )
-            }.forEach { (stream, packets) -> 
+            }.forEach { (stream, packets) ->
                 val streamDocument = PacketStreamDocument(
                     srcIp = stream.srcIp,
                     dstIp = stream.dstIp,
@@ -116,7 +185,7 @@ final class PacketStreamServiceImpl(
     }
 
     private fun saveUnallocated(packets: List<PacketData>, objectId: String) {
-        packets.forEach { 
+        packets.forEach {
             unallocatedPacketRepository.save(UnallocatedPacketDocument(pcapId = objectId, packet = it))
         }
     }

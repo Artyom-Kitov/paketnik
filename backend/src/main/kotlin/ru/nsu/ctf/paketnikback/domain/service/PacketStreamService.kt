@@ -16,4 +16,6 @@ interface PacketStreamService {
      * splits them all to streams and unallocated packets and saves that all to the database.
      */
     fun createStreamsFromPcap(bucketName: String, objectName: String)
+
+    fun generatePcapForStream(streamId: String): ByteArray
 }

@@ -53,4 +53,30 @@ class PacketStreamController(
     )
     @GetMapping("/unallocated")
     fun getUnallocated() = ResponseEntity.ok(packetStreamService.getUnallocated())
+
+    @Operation(
+        summary = "Download PCAP file for a stream",
+        description = "Generates and returns a PCAP file containing all packets for the given stream."
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            ApiResponse(responseCode = "404", description = "Stream not found"),
+            ApiResponse(responseCode = "500", description = "Failed to generate PCAP file"),
+        ]
+    )
+    @GetMapping("/{streamId}/download")
+    fun downloadStreamPcap(@PathVariable streamId: String): ResponseEntity<ByteArray> {
+        return try {
+            val pcapData = packetStreamService.generatePcapForStream(streamId)
+            ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"stream_$streamId.pcap\"")
+                .header("Content-Type", "application/vnd.tcpdump.pcap")
+                .body(pcapData)
+        } catch (ex: EntityNotFoundException) {
+            ResponseEntity.status(404).body("Error: Stream not found".toByteArray())
+        } catch (ex: Exception) {
+            ResponseEntity.status(500).body("Error: Failed to generate PCAP file".toByteArray())
+        }
+    }
 }
