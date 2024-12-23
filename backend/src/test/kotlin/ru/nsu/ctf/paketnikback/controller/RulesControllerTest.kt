@@ -11,8 +11,8 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.testcontainers.containers.MinIOContainer
 import org.testcontainers.containers.MongoDBContainer
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDTO
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDTO
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleType
 import ru.nsu.ctf.paketnikback.domain.entity.rule.ScopeType
 import ru.nsu.ctf.paketnikback.domain.service.RuleService
@@ -28,14 +28,14 @@ class RulesControllerTest(
     @Autowired val webTestClient: WebTestClient,
 ) {
     private object TestConstants {
-        val REQUEST_WITH_EMPTY_NAME = RuleRequestDTO("", RuleType.REGEX, "1", ScopeType.BOTH)
+        val REQUEST_WITH_EMPTY_NAME = RuleRequestDto("", RuleType.REGEX, "1", ScopeType.BOTH)
         val REQUEST_WITH_TOO_LONG_NAME =
-            RuleRequestDTO("a".repeat(228), RuleType.REGEX, "1", ScopeType.BOTH)
+            RuleRequestDto("a".repeat(228), RuleType.REGEX, "1", ScopeType.BOTH)
         val REQUEST_WITH_TOO_LONG_REGEX =
-            RuleRequestDTO("a", RuleType.REGEX, "a".repeat(228), ScopeType.BOTH)
-        val REQUEST_WITH_EMPTY_REGEX = RuleRequestDTO("a", RuleType.REGEX, "", ScopeType.BOTH)
+            RuleRequestDto("a", RuleType.REGEX, "a".repeat(228), ScopeType.BOTH)
+        val REQUEST_WITH_EMPTY_REGEX = RuleRequestDto("a", RuleType.REGEX, "", ScopeType.BOTH)
         val REQUEST_WITH_INVALID_REGEX =
-            RuleRequestDTO("a", RuleType.REGEX, "\\\\(]", ScopeType.BOTH)
+            RuleRequestDto("a", RuleType.REGEX, "\\\\(]", ScopeType.BOTH)
     }
 
     @Autowired private lateinit var service: RuleService
@@ -67,11 +67,11 @@ class RulesControllerTest(
         }
     }
 
-    fun getUniqueRequest(): RuleRequestDTO {
+    fun getUniqueRequest(): RuleRequestDto {
         val randomName = UUID.randomUUID().toString()
         val randomRegex = UUID.randomUUID().toString()
 
-        return RuleRequestDTO(
+        return RuleRequestDto(
             randomName,
             RuleType.REGEX,
             randomRegex,
@@ -79,7 +79,7 @@ class RulesControllerTest(
         )
     }
 
-    fun checkNoSuchRule(req: RuleRequestDTO) {
+    fun checkNoSuchRule(req: RuleRequestDto) {
         assertFalse(
             this.service.getAllRules().any {
                 it.name == req.name &&
@@ -105,7 +105,7 @@ class RulesControllerTest(
                 .post()
                 .uri("/rules")
                 .bodyValue(
-                    RuleRequestDTO(
+                    RuleRequestDto(
                         randomName,
                         RuleType.REGEX,
                         randomRegex,
@@ -114,10 +114,10 @@ class RulesControllerTest(
                 ).exchange()
                 .expectStatus()
                 .is2xxSuccessful
-                .expectBody(RuleResponseDTO::class.java)
+                .expectBody(RuleResponseDto::class.java)
                 .returnResult()
                 .responseBody as
-                RuleResponseDTO
+                RuleResponseDto
 
         assertTrue {
             responseResult.name == randomName &&
@@ -165,7 +165,7 @@ class RulesControllerTest(
         val randomRegex = UUID.randomUUID().toString()
 
         val newRuleCreationReq =
-            RuleRequestDTO(
+            RuleRequestDto(
                 randomName,
                 RuleType.REGEX,
                 randomRegex,
@@ -175,7 +175,7 @@ class RulesControllerTest(
         val newRuleId = this.service.createRule(newRuleCreationReq).id
 
         val updateRuleReq =
-            RuleRequestDTO(
+            RuleRequestDto(
                 "randomName",
                 RuleType.REGEX,
                 "randomRegex",
@@ -189,9 +189,9 @@ class RulesControllerTest(
             .exchange()
             .expectStatus()
             .is2xxSuccessful()
-            .expectBody(RuleResponseDTO::class.java)
+            .expectBody(RuleResponseDto::class.java)
             .isEqualTo(
-                RuleResponseDTO(
+                RuleResponseDto(
                     newRuleId,
                     "randomName",
                     RuleType.REGEX,
@@ -201,9 +201,9 @@ class RulesControllerTest(
             )
 
         val newUpdatedRule = service.getAllRules().find { it.id == newRuleId }
-        assertTrue(newUpdatedRule is RuleResponseDTO)
+        assertTrue(newUpdatedRule is RuleResponseDto)
         assertEquals(
-            RuleResponseDTO(
+            RuleResponseDto(
                 newRuleId,
                 "randomName",
                 RuleType.REGEX,
@@ -220,7 +220,7 @@ class RulesControllerTest(
         val randomRegex = UUID.randomUUID().toString()
 
         val newRuleCreationReq =
-            RuleRequestDTO(
+            RuleRequestDto(
                 randomName,
                 RuleType.REGEX,
                 randomRegex,
@@ -304,7 +304,7 @@ class RulesControllerTest(
     @Test
     fun getAllTest() {
         val rulesBefore = service.getAllRules()
-        val rulesWasAdded: MutableList<RuleResponseDTO> = mutableListOf()
+        val rulesWasAdded: MutableList<RuleResponseDto> = mutableListOf()
         for (i in 0..100) {
             val uniqueReq = this.getUniqueRequest()
             rulesWasAdded.add(service.createRule(uniqueReq))
@@ -316,11 +316,11 @@ class RulesControllerTest(
                     .exchange()
                     .expectStatus()
                     .is2xxSuccessful()
-                    .expectBodyList(RuleResponseDTO::class.java)
+                    .expectBodyList(RuleResponseDto::class.java)
                     .hasSize(rulesBefore.size + rulesWasAdded.size)
                     .returnResult()
                     .responseBody as
-                    List<RuleResponseDTO>
+                    List<RuleResponseDto>
 
             assertTrue(rulesGot.containsAll(rulesBefore))
             assertTrue(rulesGot.containsAll(rulesWasAdded))
