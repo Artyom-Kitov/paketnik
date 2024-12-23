@@ -7,6 +7,7 @@ import ru.nsu.ctf.paketnikback.domain.dto.ContestServiceResponse
 import ru.nsu.ctf.paketnikback.domain.entity.contest.ContestServiceDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.ContestServiceMapper
 import ru.nsu.ctf.paketnikback.domain.repository.ContestServiceRepository
+import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.utils.logger
@@ -14,6 +15,7 @@ import ru.nsu.ctf.paketnikback.utils.logger
 @Service
 class ContestServiceServiceImpl(
     private val contestServiceRepository: ContestServiceRepository,
+    private val packetStreamRepository: PacketStreamRepository,
     private val appConfig: AppConfig,
     private val mapper: ContestServiceMapper,
 ) : ContestServiceService {
@@ -24,6 +26,7 @@ class ContestServiceServiceImpl(
         
         val document = mapper.toDocument(request)
         val saved = contestServiceRepository.save(document)
+        updateStreams()
         
         log.info("successfully created $saved")
         return mapper.toResponse(saved)
@@ -48,6 +51,7 @@ class ContestServiceServiceImpl(
             hexColor = request.hexColor,
         )
         val saved = contestServiceRepository.save(newDocument)
+        updateStreams()
         log.info("successfully updated service with id = $id, data = $saved")
         return mapper.toResponse(saved)
     }
@@ -59,6 +63,7 @@ class ContestServiceServiceImpl(
             throw EntityNotFoundException("no service with id $id")
         }
         contestServiceRepository.deleteById(id)
+        updateStreams()
         log.info("successfully deleted service with id = $id")
     }
 
@@ -79,5 +84,19 @@ class ContestServiceServiceImpl(
         } else {
             null
         }
+    }
+    
+    private fun updateStreams() {
+        packetStreamRepository.findAll()
+            .map { stream ->
+                stream.copy(serviceId = findByStream(
+                    stream.srcIp,
+                    stream.dstIp,
+                    stream.srcPort,
+                    stream.dstPort,
+                )?.id)
+            }.forEach { stream ->
+                packetStreamRepository.save(stream)
+            }
     }
 }

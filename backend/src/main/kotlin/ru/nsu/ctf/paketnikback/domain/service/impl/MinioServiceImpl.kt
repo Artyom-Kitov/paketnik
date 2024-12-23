@@ -220,7 +220,7 @@ class MinioServiceImpl(
                     .bucket(bucketName)
                     .`object`(fileName)
                     .build(),
-            )
+            ).let { log.info(it.toString()) }
             return true
         } catch (e: MinioException) {
             return false
