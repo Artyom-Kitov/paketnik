@@ -1,8 +1,8 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
 import org.springframework.stereotype.Service
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDTO
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDTO
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
 import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
 import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
@@ -32,7 +32,7 @@ class RuleServiceImpl(
 ) : RuleService {
     private val log = logger()
 
-    override fun getAllRules(): List<RuleResponseDTO> {
+    override fun getAllRules(): List<RuleResponseDto> {
         log.info("getting all rules to generate a response")
         val ruleDocuments = ruleRepository.findAll()
         log.info("successfully retrieved ${ruleDocuments.size} rules from MongoDB to generate a response.")
@@ -46,9 +46,7 @@ class RuleServiceImpl(
         return ruleDocuments.map { ruleMapper.toDomain(it) }
     }
 
-    override fun createRule(request: RuleRequestDTO): RuleResponseDTO {
-        validateRuleRequest(request)
-        
+    override fun createRule(request: RuleRequestDto): RuleResponseDto {
         log.info("creating a rule from request $request")
         val rule = ruleMapper.toDomainFromRequest(request)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(rule))
@@ -56,14 +54,12 @@ class RuleServiceImpl(
         return ruleMapper.toResponseDTO(ruleMapper.toDomain(savedDocument))
     }
 
-    override fun updateRule(id: String, request: RuleRequestDTO): RuleResponseDTO {
+    override fun updateRule(id: String, request: RuleRequestDto): RuleResponseDto {
         log.info("looking for a rule with id $id to update")
         if (!ruleRepository.existsById(id)) {
             throw EntityNotFoundException("Rule with ID $id not found")
         }
         
-        validateRuleRequest(request)
-
         log.info("updating a rule with id $id")
         val updatedRule = ruleMapper.toDomainFromRequest(request).copy(id = id)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(updatedRule))
@@ -80,7 +76,7 @@ class RuleServiceImpl(
         ruleRepository.deleteById(id)
     }
 
-    private fun validateRuleRequest(request: RuleRequestDTO) {
+    private fun validateRuleRequest(request: RuleRequestDto) {
         log.info("validating a request: $request")
         if (request.name.isBlank()) {
             throw InvalidEntityException("Rule name cannot be empty")
