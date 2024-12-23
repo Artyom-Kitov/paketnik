@@ -25,6 +25,7 @@ import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.PacketMapper
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
+import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.utils.logger
@@ -36,6 +37,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 final class PacketStreamServiceImpl(
     private val packetStreamRepository: PacketStreamRepository,
     private val unallocatedPacketRepository: UnallocatedPacketRepository,
+    private val contestServiceService: ContestServiceService,
     private val packetMapper: PacketMapper,
     private val mongoTemplate: MongoTemplate,
     private val minioClient: MinioClient,
@@ -49,7 +51,17 @@ final class PacketStreamServiceImpl(
             .include("id", "srcIp", "dstIp", "srcPort", "dstPort", "pcapId")
         return mongoTemplate
             .find(query, PacketStreamDocument::class.java)
-            .map(packetMapper::streamToResponse)
+            .map(::mapToResponse)
+    }
+
+    private fun mapToResponse(stream: PacketStreamDocument): PacketStreamResponse {
+        val service = contestServiceService.findByStream(
+            stream.srcIp,
+            stream.dstIp,
+            stream.srcPort,
+            stream.dstPort,
+        )
+        return packetMapper.streamToResponse(stream).copy(service = service)
     }
 
     override fun getStreamPackets(id: String): List<PacketData> = packetStreamRepository
@@ -109,6 +121,13 @@ final class PacketStreamServiceImpl(
                     srcPort = stream.srcPort,
                     dstPort = stream.dstPort,
                     pcapId = objectId,
+                    serviceId = contestServiceService
+                        .findByStream(
+                            stream.srcIp,
+                            stream.dstIp,
+                            stream.srcPort,
+                            stream.dstPort,
+                        )?.id,
                     packets = packets,
                 )
                 packetStreamRepository.save(streamDocument)
