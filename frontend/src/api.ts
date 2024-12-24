@@ -91,7 +91,27 @@ export interface Pcap {
   id: string;
   content: Blob;
 }
+export async function postPcapRemote(pcap: Pcap): Promise<void> {
+  return await fetchData<void>(
+    "/minio-api/upload/remote",
+    "POST",
+    pcap.content,
+    pcap.id,
+  );
+}
 
+export async function postPcapLocal(pcap: Pcap): Promise<void> {
+  return await fetchData<void>(
+    "/minio-api/upload/local",
+    "POST",
+    pcap.content,
+    pcap.id,
+  );
+}
+
+export async function postBucket(pcap: Pcap): Promise<void> {
+  return await fetchData<void>("/minio-api/create-bucket", "POST", pcap);
+}
 export interface SearchRequest {
   filename: string;
   regex: string;
@@ -126,19 +146,6 @@ export async function deletePcap(id: string): Promise<void> {
   return await fetchData<void>("/minio-api/files/" + id, "DELETE", "");
 }
 
-export async function getPcapById(id: string): Promise<Pcap> {
-  const response = await fetchData<{ content: Blob }>(
-    "/minio-api/files/" + id,
-    "GET",
-    "",
-  );
-  const pcapFile: Pcap = {
-    id: id,
-    content: response.content,
-  };
-  return pcapFile;
-}
-
 export async function getRules(): Promise<Rule[]> {
   return await fetchData<Rule[]>("/rules", "GET", "");
 }
@@ -164,6 +171,7 @@ export async function updateService(service: Service): Promise<void> {
 }
 
 export async function deleteService(id: string): Promise<void> {
+  return await fetchData<void>("/services/" + id, "DELETE", "");
   return await fetchData<void>("/services/" + id, "DELETE", "");
 }
 
@@ -200,13 +208,16 @@ async function fetchData<Type>(
   fileName?: string,
 ): Promise<Type> {
   let options = {};
-  if (method == "GET" || method == "DELETE") {
+  if (method === "GET" || method === "DELETE") {
     options = { method: method };
   } else if (body instanceof Blob) {
     const formData = new FormData();
-    formData.append("files", body, fileName);
+    formData.append("file", body, fileName);
     options = {
       method: method,
+      headers: {
+        "X-File-Name": fileName,
+      },
       body: formData,
     };
   } else {
@@ -219,7 +230,11 @@ async function fetchData<Type>(
     };
   }
   try {
-    if (method == "DELETE" || (path == "/rules" && method == "POST")) {
+    if (
+      method == "DELETE" ||
+      (path == "/rules" && method == "POST") ||
+      path == "/minio-api/upload/remote"
+    ) {
       return (await fetch(host + path, options)) as Type;
     } else {
       const result = await fetch(host + path, options);
@@ -238,7 +253,7 @@ async function fetchData<Type>(
     }
   } catch (error) {
     const errorMessage: string =
-      "An error occured: " + (error as Error).message;
+      "An error occurred: " + (error as Error).message;
     console.log(errorMessage);
     throw new Error(errorMessage);
   }
