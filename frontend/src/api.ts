@@ -111,7 +111,7 @@ export async function postPcapLocal(pcap: Pcap): Promise<void> {
 
 export async function postBucket(pcap: Pcap): Promise<void> {
   return await fetchData<void>("/minio-api/create-bucket", "POST", pcap);
-
+}
 export interface SearchRequest {
   filename: string;
   regex: string;
