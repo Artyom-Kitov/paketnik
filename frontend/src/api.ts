@@ -79,6 +79,7 @@ export interface Packet {
     udp: Udp;
   };
   tags: string[];
+  index: number;
 }
 
 export interface UnallocatedPacket {
@@ -89,6 +90,21 @@ export interface UnallocatedPacket {
 export interface Pcap {
   id: string;
   content: Blob;
+}
+
+export interface SearchRequest {
+  filename: string;
+  regex: string;
+}
+
+export interface SearchMatch {
+  packet: number;
+  string: string;
+  offset: number;
+}
+
+export interface SearchResult {
+  matches: SearchMatch[];
 }
 
 export async function getPcap(): Promise<Pcap[]> {
@@ -171,10 +187,16 @@ export async function getUnallocatedPackets(): Promise<UnallocatedPacket[]> {
   );
 }
 
+export async function getSearchResults(
+  searchRequest: SearchRequest,
+): Promise<SearchResult> {
+  return await fetchData<SearchResult>("/search", "POST", searchRequest);
+}
+
 async function fetchData<Type>(
   path: string,
   method: string,
-  body: Service | Rule | Pcap | string | Blob,
+  body: Service | Rule | Pcap | string | Blob | SearchRequest,
   fileName?: string,
 ): Promise<Type> {
   let options = {};
@@ -198,10 +220,21 @@ async function fetchData<Type>(
   }
   try {
     if (method == "DELETE" || (path == "/rules" && method == "POST")) {
-      console.log("aboba");
       return (await fetch(host + path, options)) as Type;
     } else {
-      return (await fetch(host + path, options)).json() as Type;
+      const result = await fetch(host + path, options);
+      console.log(result.status);
+      if (result.status == 200) {
+        return result.json() as Type;
+      } else if (result.status == 500) {
+        throw new Error("Server error");
+      } else if (result.status == 404 && path == "/search") {
+        throw new Error("Pcap not found");
+      } else if (result.status == 204 && path == "/search") {
+        throw new Error("No matches");
+      } else {
+        return result as Type;
+      }
     }
   } catch (error) {
     const errorMessage: string =
