@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MagnifyingGlassIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { getSearchResults, SearchRequest } from "../../../api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { searchResult } from "./SearchResult";
+import { searchResult } from "./searchResult";
 import { useSetAtom } from "jotai";
 
 type Filters = {
