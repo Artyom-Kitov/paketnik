@@ -7,6 +7,8 @@ import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchResponse
 import ru.nsu.ctf.paketnikback.domain.service.RegexSearchService
 import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
+
 
 @Service
 class RegexSearchServiceImpl(
@@ -19,7 +21,7 @@ class RegexSearchServiceImpl(
         val regex = try {
             Regex(request.regex)
         } catch (e: Exception) {
-            throw IllegalArgumentException("ERR: Invalid regex '${request.regex}': ${e.message}")
+            throw InvalidEntityException("ERR: Invalid regex '${request.regex}': ${e.message}")
         }
 
         val matches = pcapProcessorService.searchByRegex(filename, regex)
