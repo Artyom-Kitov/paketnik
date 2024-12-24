@@ -28,10 +28,10 @@ class PacketStreamController(
     fun getAll() = ResponseEntity.ok(packetStreamService.getAllStreams())
 
     @Operation(
-        summary = "Get stream packets",
-        description = "Returns all packets that belong to the given stream. " +
-                "Packet raw data is encoded in Base64 format. " +
-                "In info field there are fields depending on the protocol.",
+        summary = "Get all stream data",
+        description = "Returns all data including packets that belong to the given stream. " +
+            "Packet raw data is encoded in Base64 format. " +
+            "In info field there are fields depending on the protocol.",
     )
     @ApiResponses(
         value = [
@@ -44,12 +44,12 @@ class PacketStreamController(
 
     @Operation(
         summary = "Get unallocated packets",
-        description = "Returns all packets that don't belong to any stream"
+        description = "Returns all packets that don't belong to any stream",
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Successfully retrieved")
-        ]
+            ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        ],
     )
     @GetMapping("/unallocated")
     fun getUnallocated() = ResponseEntity.ok(packetStreamService.getUnallocated())

@@ -158,6 +158,7 @@ export async function updateService(service: Service): Promise<void> {
 
 export async function deleteService(id: string): Promise<void> {
   return await fetchData<void>("/services/" + id, "DELETE", "");
+  return await fetchData<void>("/services/" + id, "DELETE", "");
 }
 
 export async function postService(service: Service): Promise<void> {
