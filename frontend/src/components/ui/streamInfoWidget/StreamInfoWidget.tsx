@@ -25,7 +25,7 @@ export const StreamInfoWidget: React.FC = () => {
     queryFn: async () => {
       if (streamId != undefined) {
         const data = await getPackets(streamId);
-        console.log(data)
+        console.log(data);
         if (data == undefined) {
           throw new Error("An error oqqured while fetching packets");
         } else {
@@ -46,7 +46,7 @@ export const StreamInfoWidget: React.FC = () => {
       </div>
     );
   } else if (isError) {
-    console.log("in error")
+    console.log("in error");
     console.log(data);
     return (
       <div className="w-full h-full flex flex-col">
