@@ -3,6 +3,7 @@ package ru.nsu.ctf.paketnikback.domain.service
 import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
 import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.HttpInfo
 
 interface PacketStreamService {
     fun getAllStreams(): List<PacketStreamResponse>
@@ -10,6 +11,8 @@ interface PacketStreamService {
     fun getStreamPackets(id: String): List<PacketData>
 
     fun getUnallocated(): List<UnallocatedPacketDto>
+    
+    fun getStreamHttpInfo(id: String): List<HttpInfo>
 
     /**
      * Reads all packets from pcap objectName in bucket bucketName,
