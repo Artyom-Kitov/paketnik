@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import ru.nsu.ctf.paketnikback.domain.dto.PacketStreamResponse
 import ru.nsu.ctf.paketnikback.domain.dto.UnallocatedPacketDto
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.HttpInfo
 
 interface PacketStreamService {
     fun getAllStreams(): List<PacketStreamResponse>
@@ -17,6 +18,8 @@ interface PacketStreamService {
         @RequestParam packetIndex: Int,
         @RequestParam format: String
     )
+    
+    fun getStreamHttpInfo(id: String): List<HttpInfo>
 
     /**
      * Reads all packets from pcap objectName in bucket bucketName,
