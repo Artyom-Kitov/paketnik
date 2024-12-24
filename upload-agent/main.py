@@ -61,18 +61,6 @@ class PcapsStorage:
         self._uploaded = set(pcaps)
 
 
-class IterableToFileAdapter(object):
-    def __init__(self, iterable):
-        self.iterator = iter(iterable)
-        self.length = len(iterable)
-
-    def read(self, size=-1): # TBD: add buffer for `len(data) > size` case
-        return next(self.iterator, b'')
-    
-    def __len__(self):
-        return self.length
-
-
 class upload_in_chunks(object):
     def __init__(self, filename: str, chunksize: int = 1 << 13):
         self._filename = filename
@@ -113,14 +101,13 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
             
     t_start = time.time()
     try:
-        files = {filename: IterableToFileAdapter(upload_in_chunks(path_to_pcap))}
-        response = requests.post(url, files=files, headers=headers, timeout=TIMEOUT)
+        response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers, timeout=TIMEOUT)
     except Exception as err:
         logger.error(f'{path_to_pcap} transfer failed with error')
         logger.debug(f'{traceback.format_exc()}')
         return False
     t_end = time.time()
-            
+    
     if response.status_code != 200:
         logger.error(f'{path_to_pcap}: error status code ({response.status_code})')
         return False
