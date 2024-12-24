@@ -3,7 +3,6 @@ package ru.nsu.ctf.paketnikback.domain.entity.stream
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
-import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.HttpInfo
 import java.util.UUID
 
 @Document(collection = "streams")

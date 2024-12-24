@@ -69,6 +69,23 @@ final class PacketStreamServiceImpl(
         .findAll()
         .map(packetMapper::unallocatedToDto)
 
+    override fun exportHttpRequest(streamId: String, packetIndex: Int, format: String): String {
+        val packets = getStreamPackets(streamId)
+        if (packetIndex !in packets.indices) {
+            throw EntityNotFoundException("No packet with index $packetIndex in stream $streamId")
+        }
+
+        val packet = packets[packetIndex]
+        val httpInfo = packet.httpInfo
+            ?: throw EntityNotFoundException("Packet at index $packetIndex is not an HTTP packet")
+
+        return when (format.lowercase()) {
+            "curl" -> generateCurlCommand(httpInfo)
+            "python" -> generatePythonRequestsCode(httpInfo)
+            else -> throw IllegalArgumentException("Unsupported export format: $format")
+        }
+    }
+
     override fun getStreamHttpInfo(id: String): List<HttpInfo> = getStreamPackets(id).mapNotNull { it.httpInfo }
 
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
@@ -93,6 +110,33 @@ final class PacketStreamServiceImpl(
                 saveAsStreams(tcpPackets, objectName)
                 saveUnallocated(otherPackets, objectName)
             }
+    }
+
+    private fun generateCurlCommand(httpInfo: HttpInfo): String {
+        val method = httpInfo.method ?: "GET"
+        val url = httpInfo.url ?: throw IllegalArgumentException("HTTP packet does not contain a URL")
+        val headers = httpInfo.headers.entries.joinToString(" ") { (key, value) -> "-H \"$key: $value\"" }
+        val body = httpInfo.body?.let { "-d '${it.replace("'", "\\'")}'" } ?: ""
+        return "curl -X $method \"$url\" $headers $body"
+    }
+
+    private fun generatePythonRequestsCode(httpInfo: HttpInfo): String {
+        val method = httpInfo.method?.lowercase() ?: "get"
+        val url = httpInfo.url ?: throw IllegalArgumentException("HTTP packet does not contain a URL")
+        val headers = httpInfo.headers.entries.joinToString(",\n    ") { (key, value) -> "\"$key\": \"$value\"" }
+        val body = httpInfo.body?.let { "data = $it" } ?: "data = None"
+        return """
+            import requests
+
+            url = "$url"
+            headers = {
+                $headers
+            }
+            $body
+
+            response = requests.$method(url, headers=headers, json=data)
+            print(response.text)
+            """.trimIndent()
     }
 
     private fun saveAsStreams(packets: List<PacketData>, objectId: String) {
@@ -143,7 +187,7 @@ final class PacketStreamServiceImpl(
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
         val encodedData = Base64.encode(packet.payload.array)
         val info = readPacketInfo(packet)
-        val httpInfo = readHttp(packet);
+        val httpInfo = readHttp(packet)
         val tags = listOf<String>()
         return PacketData(
             receivedAt = receivedAt,
@@ -188,7 +232,7 @@ final class PacketStreamServiceImpl(
             url = requestLine?.getOrNull(1),
             statusCode = requestLine?.getOrNull(1)?.toIntOrNull(),
             headers = headers,
-            body = body
+            body = body,
         )
     }
 

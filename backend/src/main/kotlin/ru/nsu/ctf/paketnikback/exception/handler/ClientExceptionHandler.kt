@@ -30,6 +30,12 @@ class ClientExceptionHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity.badRequest().body(e.message)
     }
 
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleInvalidArgumentException(e: IllegalArgumentException): ResponseEntity<String> {
+        log.error("invalid argument", e)
+        return ResponseEntity.badRequest().body(e.message)
+    }
+
     override fun handleMethodArgumentNotValid(
         ex: MethodArgumentNotValidException,
         headers: HttpHeaders,
@@ -42,14 +48,14 @@ class ClientExceptionHandler : ResponseEntityExceptionHandler() {
             mapOf(
                 "field" to fieldError.field,
                 "message" to (fieldError.defaultMessage ?: "Invalid value"),
-                "rejectedValue" to fieldError.rejectedValue
+                "rejectedValue" to fieldError.rejectedValue,
             )
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             mapOf(
                 "error" to "Validation failed",
-                "details" to errors
-            )
+                "details" to errors,
+            ),
         )
     }
 }

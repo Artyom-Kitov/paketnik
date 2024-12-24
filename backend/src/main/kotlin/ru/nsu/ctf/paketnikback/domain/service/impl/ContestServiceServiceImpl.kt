@@ -85,16 +85,19 @@ class ContestServiceServiceImpl(
             null
         }
     }
-    
+
     private fun updateStreams() {
-        packetStreamRepository.findAll()
+        packetStreamRepository
+            .findAll()
             .map { stream ->
-                stream.copy(serviceId = findByStream(
-                    stream.srcIp,
-                    stream.dstIp,
-                    stream.srcPort,
-                    stream.dstPort,
-                )?.id)
+                stream.copy(
+                    serviceId = findByStream(
+                        stream.srcIp,
+                        stream.dstIp,
+                        stream.srcPort,
+                        stream.dstPort,
+                    )?.id,
+                )
             }.forEach { stream ->
                 packetStreamRepository.save(stream)
             }
