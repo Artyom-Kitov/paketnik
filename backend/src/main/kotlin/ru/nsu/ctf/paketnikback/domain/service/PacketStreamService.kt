@@ -12,13 +12,13 @@ interface PacketStreamService {
     fun getStreamPackets(id: String): List<PacketData>
 
     fun getUnallocated(): List<UnallocatedPacketDto>
-    
+
     fun exportHttpRequest(
         @RequestParam streamId: String,
         @RequestParam packetIndex: Int,
-        @RequestParam format: String
-    )
-    
+        @RequestParam format: String,
+    ): String
+
     fun getStreamHttpInfo(id: String): List<HttpInfo>
 
     /**

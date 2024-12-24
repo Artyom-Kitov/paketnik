@@ -42,7 +42,7 @@ class MinioServiceImpl(
                         .bucket(bucketName)
                         .build(),
                 )
-                log.info("Bucket $name succesfully created")
+                log.info("Bucket $name successfully created")
                 BucketCreationResult("Bucket $name успешно создан", HttpStatus.OK)
             } else {
                 log.info("Bucket $name already exists.")
@@ -69,7 +69,7 @@ class MinioServiceImpl(
 
                 result[bucket.name()] = files
             }
-            log.info("File names succesfully received")
+            log.info("File names successfully received")
 
             return GetUploadedFilesResult(result, HttpStatus.OK)
         } catch (e: Exception) {
@@ -165,7 +165,7 @@ class MinioServiceImpl(
 
             try {
                 loadFileToMinio(file, hashFileName)
-                log.info("File $fileName succesfully load, hash name is $hashFileName")
+                log.info("File $fileName successfully load, hash name is $hashFileName")
                 uploadStatus[fileName] = "OK_status, hash name is $hashFileName"
             } catch (e: MinioException) {
                 log.error("Error: unable to load file $fileName: ${e.message}", e)
@@ -174,11 +174,11 @@ class MinioServiceImpl(
         }
 
         val allSuccessful = uploadStatus.values.all { it.contains("OK_status") }
-        val anySuccesfull = uploadStatus.values.any { it.contains("OK_status") }
+        val anySuccessful = uploadStatus.values.any { it.contains("OK_status") }
 
         val status = when {
             allSuccessful -> HttpStatus.OK
-            anySuccesfull -> HttpStatus.PARTIAL_CONTENT
+            anySuccessful -> HttpStatus.PARTIAL_CONTENT
             else -> HttpStatus.BAD_REQUEST
         }
 
@@ -204,8 +204,8 @@ class MinioServiceImpl(
 
         try {
             loadFileToMinio(file, hashFileName)
-            log.info("File $safeFileName succesfully upload, hash name is $hashFileName")
-            return UploadRemoteFileResult("File succesfully upload, hash name is $hashFileName", HttpStatus.OK)
+            log.info("File $safeFileName successfully upload, hash name is $hashFileName")
+            return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
         } catch (e: MinioException) {
             log.error("Error: upload remote file $safeFileName: ${e.message}", e)
             return UploadRemoteFileResult("ERR: ${e.message}", HttpStatus.BAD_REQUEST)
@@ -214,13 +214,14 @@ class MinioServiceImpl(
 
     private fun fileAlreadyExistInMinio(fileName: String): Boolean {
         try {
-            minioClient.statObject(
-                StatObjectArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
-                    .build(),
-            ).let { log.info(it.toString()) }
+            minioClient
+                .statObject(
+                    StatObjectArgs
+                        .builder()
+                        .bucket(bucketName)
+                        .`object`(fileName)
+                        .build(),
+                ).let { log.info(it.toString()) }
             return true
         } catch (e: MinioException) {
             return false

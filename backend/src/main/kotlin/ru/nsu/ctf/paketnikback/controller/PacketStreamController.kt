@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -42,12 +41,12 @@ class PacketStreamController(
     )
     @GetMapping("/packets")
     fun getByStreamId(@RequestParam id: String) = ResponseEntity.ok(packetStreamService.getStreamPackets(id))
-    
+
     @GetMapping("/export-request")
     fun exportRequest(
         @RequestParam streamId: String,
         @RequestParam packetIndex: Int,
-        @RequestParam format: String
+        @RequestParam format: String,
     ): ResponseEntity<Map<String, String>> {
         val export = packetStreamService.exportHttpRequest(streamId, packetIndex, format)
         return ResponseEntity.ok(mapOf("export" to export))
@@ -56,11 +55,11 @@ class PacketStreamController(
     @Operation(
         summary = "Get all stream http data",
         description = "Returns all http data from packets in given stream including:\n" +
-                "- HTTP method\n" +
-                "- URL\n" +
-                "- Status code\n" +
-                "- Headers\n" +
-                "- Body",
+            "- HTTP method\n" +
+            "- URL\n" +
+            "- Status code\n" +
+            "- Headers\n" +
+            "- Body",
     )
     @ApiResponses(
         value = [

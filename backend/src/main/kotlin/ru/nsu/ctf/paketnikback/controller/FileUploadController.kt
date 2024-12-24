@@ -29,7 +29,7 @@ class FileUploadController(
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Succesfully created"),
+            ApiResponse(responseCode = "200", description = "Successfully created"),
             ApiResponse(responseCode = "500", description = "Creating error"),
         ],
     )
@@ -45,7 +45,7 @@ class FileUploadController(
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "Succesfully received all bucket and file names"),
+            ApiResponse(responseCode = "200", description = "Successfully received all bucket and file names"),
             ApiResponse(responseCode = "500", description = "Error receiving files"),
         ],
     )
@@ -105,7 +105,7 @@ class FileUploadController(
     )
     @ApiResponses(
         value = [
-            ApiResponse(responseCode = "200", description = "All files succesfully load"),
+            ApiResponse(responseCode = "200", description = "All files successfully load"),
             ApiResponse(responseCode = "206", description = "Some files can`t be upload"),
             ApiResponse(responseCode = "400", description = "Not a single file has been uploaded"),
         ],
@@ -120,13 +120,13 @@ class FileUploadController(
     }
 
     @Operation(
-        summary = "Try to upload sended file",
+        summary = "Try to upload sent file",
         description = "Returns hashed file name (which will be used for uploading) or error message for this file",
     )
     @ApiResponses(
         value = [
             ApiResponse(responseCode = "409", description = "File already exist in bucket that is currently in use"),
-            ApiResponse(responseCode = "200", description = "File succesfully upload, return new fileName(hash code)"),
+            ApiResponse(responseCode = "200", description = "File successfully upload, return new fileName(hash code)"),
             ApiResponse(responseCode = "400", description = "Error in file upload"),
         ],
     )
