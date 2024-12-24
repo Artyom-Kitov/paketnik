@@ -13,6 +13,7 @@ import dpkt
 import requests
 
 PCAPS_LIST_STORAGE = '.storage.txt'
+FILE_UPLOAD_API_URL = 'http://{}:{}/minio-api/upload/remote'
 TIMEOUT = 1
 
 
@@ -92,7 +93,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
         logger.debug(f'{traceback.format_exc()}')
         return False
     
-    url = f'http://{dst_ip}:{dst_port}'
+    url = FILE_UPLOAD_API_URL.format(dst_ip, dst_port)
     headers = {'X-File-Name': path_to_pcap.encode('utf-8').hex()}
     
     logger.info(f'{path_to_pcap} transfer started')

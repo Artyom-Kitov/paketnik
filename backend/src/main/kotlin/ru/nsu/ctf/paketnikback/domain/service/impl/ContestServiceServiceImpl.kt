@@ -9,6 +9,7 @@ import ru.nsu.ctf.paketnikback.domain.mapper.ContestServiceMapper
 import ru.nsu.ctf.paketnikback.domain.repository.ContestServiceRepository
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
+import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.utils.logger
 
@@ -18,6 +19,7 @@ class ContestServiceServiceImpl(
     private val packetStreamRepository: PacketStreamRepository,
     private val appConfig: AppConfig,
     private val mapper: ContestServiceMapper,
+    private val pcapProcessorService: PcapProcessorService,
 ) : ContestServiceService {
     private val log = logger()
 
@@ -29,6 +31,7 @@ class ContestServiceServiceImpl(
         updateStreams()
         
         log.info("successfully created $saved")
+        pcapProcessorService.applyAllRules()
         return mapper.toResponse(saved)
     }
 
@@ -53,6 +56,7 @@ class ContestServiceServiceImpl(
         val saved = contestServiceRepository.save(newDocument)
         updateStreams()
         log.info("successfully updated service with id = $id, data = $saved")
+        pcapProcessorService.applyAllRules()
         return mapper.toResponse(saved)
     }
 
@@ -65,6 +69,7 @@ class ContestServiceServiceImpl(
         contestServiceRepository.deleteById(id)
         updateStreams()
         log.info("successfully deleted service with id = $id")
+        pcapProcessorService.applyAllRules()
     }
 
     override fun findByStream(srcIp: String, dstIp: String, srcPort: Int, dstPort: Int): ContestServiceResponse? {
