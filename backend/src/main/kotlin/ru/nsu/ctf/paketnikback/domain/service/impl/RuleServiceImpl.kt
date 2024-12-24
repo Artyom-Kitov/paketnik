@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
+import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleType
 import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
 import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.service.RuleService
@@ -12,6 +13,9 @@ import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
+
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * A service implementation class for rules.
@@ -74,6 +78,19 @@ class RuleServiceImpl(
         }
         log.info("rule with id $id has been successfully deleted")
         ruleRepository.deleteById(id)
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun checkPacketMatch(rule: Rule, packet: PacketData): Boolean {
+        if (rule.type == RuleType.REGEX) {
+            val regex = rule.regex.toRegex()
+            val decodedData = Base64.decode(packet.encodedData)
+            val text = decodedData.toString(Charsets.UTF_8)
+
+            val items = regex.findAll(text).toList()
+            return !items.isEmpty()
+        }
+        return false
     }
 
     private fun validateRuleRequest(request: RuleRequestDto) {
