@@ -232,9 +232,12 @@ async function fetchData<Type>(
         throw new Error("Pcap not found");
       } else if (result.status == 204 && path == "/search") {
         throw new Error("No matches");
-      } else {
-        return result as Type;
+      } else if (result.status == 400) {
+        throw new Error("Bad Request");
+      } else if (result.status == 404) {
+        throw new Error("Not Found");
       }
+      return result.json() as Type;
     }
   } catch (error) {
     const errorMessage: string =
