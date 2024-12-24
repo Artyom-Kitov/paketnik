@@ -32,15 +32,14 @@ export const SearchBar: React.FC = () => {
   const searchRegexMutation = useMutation({
     mutationFn: getSearchResults,
     onSuccess: (data) => {
-      if (data.matches != undefined) {
-        setError("");
-        setSuccess("Found " + data.matches.length + " matches");
-        setSearchResult(data);
-      } else {
-        setSuccess("");
-        setError("No matches found");
-      }
+      setError("");
+      setSuccess("Found " + data.matches.length + " matches");
+      setSearchResult(data);
       queryClient.invalidateQueries({ queryKey: ["searches"] });
+    },
+    onError: (error: Error) => {
+      setSuccess("");
+      setError(error.message);
     },
   });
 
@@ -201,8 +200,12 @@ export const SearchBar: React.FC = () => {
           </div>
         </div>
       </div>
-      {error && <span className="text-red-500 ml-4">{error}</span>}
-      {success && <span className="text-green-500 ml-4">{success}</span>}
+      {error && (
+        <span className="text-red-500 ml-4 font-semibold">{error}</span>
+      )}
+      {success && (
+        <span className="text-green-500 ml-4 font-semibold">{success}</span>
+      )}
     </div>
   );
 };

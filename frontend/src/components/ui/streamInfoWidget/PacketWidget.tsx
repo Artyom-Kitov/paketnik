@@ -7,28 +7,41 @@ type ServerMessageWidgetProps = {
   highlights: SearchMatch[];
 };
 
-export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({ data, highlights }) => {
-
+export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
+  data,
+  highlights,
+}) => {
   const setHighlightedSymbols = (): number[] => {
-    const numbers: number[] = []
-    highlights.forEach( (match) => {
-      const rawText = unescape(encodeURIComponent(match.string))
-      for(let i = match.offset; i < match.offset + rawText.length; i++){
-        numbers.push(i)
+    const numbers: number[] = [];
+    highlights.forEach((match) => {
+      const rawText = unescape(encodeURIComponent(match.string));
+      for (let i = match.offset; i < match.offset + rawText.length; i++) {
+        numbers.push(i);
       }
-    })
+    });
     return numbers;
-  }
+  };
 
-  const highlightedSymbols: number[] = setHighlightedSymbols()
-
+  const highlightedSymbols: number[] = setHighlightedSymbols();
 
   const getBody = () => {
-    return <span> { Array.from(data.encodedData).map((part, i) => 
-      <span key={i} style={highlightedSymbols.indexOf(i) > -1 ? { background: '#FFC107' } : {} }>
-          { part }
-      </span>)
-  } </span>;
+    return (
+      <span>
+        {" "}
+        {Array.from(data.encodedData).map((part, i) => (
+          <span
+            key={i}
+            style={
+              highlightedSymbols.indexOf(i) > -1
+                ? { background: "#FFC107" }
+                : {}
+            }
+          >
+            {part}
+          </span>
+        ))}{" "}
+      </span>
+    );
   };
 
   return (

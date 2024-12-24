@@ -26,10 +26,10 @@ export const StreamInfoWidget: React.FC = () => {
       if (streamId != undefined) {
         console.log(streamId);
         const data = await getPackets(streamId);
-        if(data == undefined){
-          throw new Error("An error oqqured while fetching packets")
-        } else{
-          return data; 
+        if (data == undefined) {
+          throw new Error("An error oqqured while fetching packets");
+        } else {
+          return data;
         }
       } else {
         console.log("No id");
@@ -39,19 +39,21 @@ export const StreamInfoWidget: React.FC = () => {
   });
   if (isPending) {
     return (
-    <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
-        Loading... {data}
+      <div className="w-full h-full flex flex-col">
+        <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+          Loading... {data}
+        </div>
       </div>
-    </div>)
+    );
   } else if (isError) {
-    console.log(data)
-    return(
-    <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
-        Error: {error.message}
+    console.log(data);
+    return (
+      <div className="w-full h-full flex flex-col">
+        <div className="text-right text-[#fff] text-2xl font-bold mb-2 text-red-600">
+          Error: {error.message}
+        </div>
       </div>
-    </div>)
+    );
   }
 
   return (
