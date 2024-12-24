@@ -73,6 +73,24 @@ final class PacketStreamServiceImpl(
         .findAll()
         .map(packetMapper::unallocatedToDto)
 
+    override fun exportHttpRequest(streamId: String, packetIndex: Int, format: String) {
+        val packets = getStreamPackets(streamId)
+        if (packetIndex !in packets.indices) {
+            throw EntityNotFoundException("No packet with index $packetIndex in stream $streamId")
+        }
+
+        // Получение HTTP-информации из пакета
+        val packet = packets[packetIndex]
+        val httpInfo = packet.httpInfo
+            ?: throw IllegalStateException("Packet at index $packetIndex is not an HTTP packet")
+
+        return when (format.lowercase()) {
+            "curl" -> generateCurlCommand(httpInfo)
+            "python" -> generatePythonRequestsCode(httpInfo)
+            else -> throw IllegalArgumentException("Unsupported export format: $format")
+        }
+    }
+
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
         log.info("creating streams with objectId = '$objectName'")
         minioClient

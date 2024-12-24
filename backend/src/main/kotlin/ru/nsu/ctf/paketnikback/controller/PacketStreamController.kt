@@ -41,6 +41,16 @@ class PacketStreamController(
     )
     @GetMapping("/packets")
     fun getByStreamId(@RequestParam id: String) = ResponseEntity.ok(packetStreamService.getStreamPackets(id))
+    
+    @GetMapping("/export-request")
+    fun exportRequest(
+        @RequestParam streamId: String,
+        @RequestParam packetIndex: Int,
+        @RequestParam format: String
+    ): ResponseEntity<Map<String, String>> {
+        val export = packetStreamService.exportHttpRequest(streamId, packetIndex, format)
+        return ResponseEntity.ok(mapOf("export" to export))
+    }
 
     @Operation(
         summary = "Get unallocated packets",
