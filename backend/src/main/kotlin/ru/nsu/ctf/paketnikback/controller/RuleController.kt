@@ -3,6 +3,7 @@ package ru.nsu.ctf.paketnikback.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -12,8 +13,8 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDTO
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDTO
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.service.RuleService
 
 @RestController
@@ -32,7 +33,7 @@ class RuleController(
         ],
     )
     @PostMapping
-    fun createRule(@RequestBody request: RuleRequestDTO): ResponseEntity<RuleResponseDTO> {
+    fun createRule(@Valid @RequestBody request: RuleRequestDto): ResponseEntity<RuleResponseDto> {
         val response = ruleService.createRule(request)
         return ResponseEntity.ok(response)
     }
@@ -47,7 +48,7 @@ class RuleController(
         ],
     )
     @GetMapping
-    fun getAllRules(): ResponseEntity<List<RuleResponseDTO>> {
+    fun getAllRules(): ResponseEntity<List<RuleResponseDto>> {
         val rules = ruleService.getAllRules()
         return ResponseEntity.ok(rules)
     }
@@ -66,8 +67,8 @@ class RuleController(
     @PutMapping("/{id}")
     fun updateRule(
         @PathVariable id: String,
-        @RequestBody request: RuleRequestDTO,
-    ): ResponseEntity<RuleResponseDTO> {
+        @Valid @RequestBody request: RuleRequestDto,
+    ): ResponseEntity<RuleResponseDto> {
         val response = ruleService.updateRule(id, request)
         return ResponseEntity.ok(response)
     }

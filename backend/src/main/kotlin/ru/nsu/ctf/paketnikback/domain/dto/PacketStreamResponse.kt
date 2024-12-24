@@ -6,5 +6,6 @@ data class PacketStreamResponse(
     val dstIp: String,
     val srcPort: Int,
     val dstPort: Int,
+    val service: ContestServiceResponse?,
     val pcapId: String,
 )

@@ -42,6 +42,34 @@ class PacketStreamController(
     @GetMapping("/packets")
     fun getByStreamId(@RequestParam id: String) = ResponseEntity.ok(packetStreamService.getStreamPackets(id))
 
+    @GetMapping("/export-request")
+    fun exportRequest(
+        @RequestParam streamId: String,
+        @RequestParam packetIndex: Int,
+        @RequestParam format: String,
+    ): ResponseEntity<Map<String, String>> {
+        val export = packetStreamService.exportHttpRequest(streamId, packetIndex, format)
+        return ResponseEntity.ok(mapOf("export" to export))
+    }
+
+    @Operation(
+        summary = "Get all stream http data",
+        description = "Returns all http data from packets in given stream including:\n" +
+            "- HTTP method\n" +
+            "- URL\n" +
+            "- Status code\n" +
+            "- Headers\n" +
+            "- Body",
+    )
+    @ApiResponses(
+        value = [
+            ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+            ApiResponse(responseCode = "404", description = "Given stream not found"),
+        ],
+    )
+    @GetMapping("/http")
+    fun getHttpInfoByStreamId(@RequestParam id: String) = ResponseEntity.ok(packetStreamService.getStreamHttpInfo(id))
+
     @Operation(
         summary = "Get unallocated packets",
         description = "Returns all packets that don't belong to any stream",

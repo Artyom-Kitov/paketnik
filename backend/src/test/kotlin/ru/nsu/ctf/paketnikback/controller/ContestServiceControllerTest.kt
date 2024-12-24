@@ -21,21 +21,21 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-private object TestConstants {
-    private const val MAX_PORT_NUMBER = 0xFFFF
-    val REQUEST_WITH_ZERO_PORT = ContestServiceCreationRequest("1", 0, "#ff0001")
-    val REQUEST_WITH_BIGGER_THAN_MAX_PORT =
-        ContestServiceCreationRequest("1", MAX_PORT_NUMBER + 1, "#ff0001")
-    val REQUEST_WITH_EMPTY_NAME = ContestServiceCreationRequest("", 80, "#ff0000")
-    val REQUEST_WITH_TOO_LONG_NAME =
-        ContestServiceCreationRequest("a".repeat(228), 80, "#ff0000")
-}
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
 class ContestServiceControllerTest(
     @Autowired val webTestClient: WebTestClient,
 ) {
+    private object TestConstants {
+        private const val MAX_PORT_NUMBER = 0xFFFF
+        val REQUEST_WITH_ZERO_PORT = ContestServiceCreationRequest("1", 0, "#ff0001")
+        val REQUEST_WITH_BIGGER_THAN_MAX_PORT =
+            ContestServiceCreationRequest("1", MAX_PORT_NUMBER + 1, "#ff0001")
+        val REQUEST_WITH_EMPTY_NAME = ContestServiceCreationRequest("", 80, "#ff0000")
+        val REQUEST_WITH_TOO_LONG_NAME =
+            ContestServiceCreationRequest("a".repeat(228), 80, "#ff0000")
+    }
+
     @Autowired
     private lateinit var service: ContestServiceService
 

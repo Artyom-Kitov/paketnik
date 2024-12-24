@@ -3,8 +3,8 @@ package ru.nsu.ctf.paketnikback.domain.mapper
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.Named
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDTO
-import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDTO
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
+import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
 import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleDocument
 import java.util.regex.Pattern
@@ -21,11 +21,11 @@ interface RuleMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "regex", source = "regex", qualifiedByName = ["patternToString"])
-    fun toResponseDTO(rule: Rule): RuleResponseDTO
+    fun toResponseDTO(rule: Rule): RuleResponseDto
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "regex", source = "regex", qualifiedByName = ["stringToPattern"])
-    fun toDomainFromRequest(requestDTO: RuleRequestDTO): Rule
+    fun toDomainFromRequest(requestDTO: RuleRequestDto): Rule
 
     companion object {
         @JvmStatic

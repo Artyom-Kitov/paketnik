@@ -1,11 +1,49 @@
 import React from "react";
 import { Packet } from "../../../api";
+import { SearchMatch } from "../../../api";
 
 type ServerMessageWidgetProps = {
   data: Packet;
+  highlights: SearchMatch[];
 };
 
-export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({ data }) => {
+export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
+  data,
+  highlights,
+}) => {
+  const setHighlightedSymbols = (): number[] => {
+    const numbers: number[] = [];
+    highlights.forEach((match) => {
+      const rawText = unescape(encodeURIComponent(match.string));
+      for (let i = match.offset; i < match.offset + rawText.length; i++) {
+        numbers.push(i);
+      }
+    });
+    return numbers;
+  };
+
+  const highlightedSymbols: number[] = setHighlightedSymbols();
+
+  const getBody = () => {
+    return (
+      <span>
+        {" "}
+        {Array.from(data.encodedData).map((part, i) => (
+          <span
+            key={i}
+            style={
+              highlightedSymbols.indexOf(i) > -1
+                ? { background: "#FFC107" }
+                : {}
+            }
+          >
+            {part}
+          </span>
+        ))}{" "}
+      </span>
+    );
+  };
+
   return (
     <div className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden h-72 max-h-fit min-h-28 resize-y">
       <h2 className="text-lg font-semibold">Packet</h2>
@@ -76,7 +114,7 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({ data }) => {
       {data.encodedData && (
         <div className="text-sm mt-2 mb-3 whitespace-normal">
           <p className="font-semibold ">Body:</p>
-          <p className="break-words">{data.encodedData}</p>
+          <p className="break-words">{getBody()}</p>
         </div>
       )}
     </div>
