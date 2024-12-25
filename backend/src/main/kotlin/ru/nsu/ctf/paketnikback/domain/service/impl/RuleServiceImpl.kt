@@ -4,14 +4,20 @@ import org.springframework.stereotype.Service
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
+import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleType
 import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
 import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.service.RuleService
+import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.util.regex.Pattern
 import java.util.regex.PatternSyntaxException
+
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
+import ru.nsu.ctf.paketnikback.domain.model.PacketData
 
 /**
  * A service implementation class for rules.
@@ -29,6 +35,7 @@ import java.util.regex.PatternSyntaxException
 class RuleServiceImpl(
     private val ruleRepository: RuleRepository,
     private val ruleMapper: RuleMapper,
+    private val pcapProcessorService: PcapProcessorService,
 ) : RuleService {
     private val log = logger()
 
@@ -51,6 +58,7 @@ class RuleServiceImpl(
         val rule = ruleMapper.toDomainFromRequest(request)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(rule))
         log.info("successfully created a new rule from request $request")
+        pcapProcessorService.applyAllRules()
         return ruleMapper.toResponseDTO(ruleMapper.toDomain(savedDocument))
     }
 
@@ -64,6 +72,7 @@ class RuleServiceImpl(
         val updatedRule = ruleMapper.toDomainFromRequest(request).copy(id = id)
         val savedDocument = ruleRepository.save(ruleMapper.toDocument(updatedRule))
         log.info("successfully updated a rule with id $id")
+        pcapProcessorService.applyAllRules()
         return ruleMapper.toResponseDTO(ruleMapper.toDomain(savedDocument))
     }
 
@@ -74,6 +83,23 @@ class RuleServiceImpl(
         }
         log.info("rule with id $id has been successfully deleted")
         ruleRepository.deleteById(id)
+        pcapProcessorService.applyAllRules()
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    override fun checkPacketMatch(
+        rule: Rule,
+        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+    ): Boolean {
+        if (rule.type == RuleType.REGEX) {
+            val regex = rule.regex.toRegex()
+            val decodedData = Base64.decode(packet.encodedData)
+            val text = decodedData.toString(Charsets.UTF_8)
+
+            val items = regex.findAll(text).toList()
+            return !items.isEmpty()
+        }
+        return false
     }
 
     private fun validateRuleRequest(request: RuleRequestDto) {

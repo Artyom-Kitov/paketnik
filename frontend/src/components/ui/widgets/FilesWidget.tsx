@@ -68,9 +68,6 @@ export function FilesWidget() {
               ))}
             </div>
             <div className="space-x-2 mt-2">
-              <button className="px-3 py-1 bg-[#4a5568] rounded hover:bg-[#2d3748] transition-colors">
-                Analysis
-              </button>
               <button
                 onClick={() => onDeleteClick(selectedFile)}
                 className="px-3 py-1 bg-[#e53e3e] rounded hover:bg-[#c53030] transition-colors"
