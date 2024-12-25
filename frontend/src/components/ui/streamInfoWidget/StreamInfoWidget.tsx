@@ -62,13 +62,14 @@ export const StreamInfoWidget: React.FC = () => {
       <div className="text-left text-[#fff] text-2xl font-bold mb-[6px]">
         Stream Info
       </div>
-      {data != undefined && data != null && (
+      {data != undefined && data != null && streamId != undefined && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="overflow-auto space-y-4">
             {data.map((message, index) => (
               <PacketWidget
                 key={index}
                 data={message}
+                streamId={streamId}
                 highlights={getSearches(message.index)}
               />
             ))}

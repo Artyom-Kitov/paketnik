@@ -91,6 +91,11 @@ export interface Pcap {
   id: string;
   content: Blob;
 }
+
+export interface ExportedRequest{
+  export: string;
+}
+
 export async function postPcapRemote(pcap: Pcap): Promise<void> {
   return await fetchData<void>(
     "/minio-api/upload/remote",
@@ -146,6 +151,10 @@ export async function deletePcap(id: string): Promise<void> {
   return await fetchData<void>("/minio-api/files/" + id, "DELETE", "");
 }
 
+export async function getRequest(streamId: string, packetIndex: number, format: string): Promise<ExportedRequest>{
+  return await fetchData<ExportedRequest>("/streams/export-request?streamId=" + streamId + "&packetIndex=" + packetIndex + "&format=" + format, "GET", "")
+}
+
 export async function getRules(): Promise<Rule[]> {
   return await fetchData<Rule[]>("/rules", "GET", "");
 }
@@ -171,7 +180,6 @@ export async function updateService(service: Service): Promise<void> {
 }
 
 export async function deleteService(id: string): Promise<void> {
-  return await fetchData<void>("/services/" + id, "DELETE", "");
   return await fetchData<void>("/services/" + id, "DELETE", "");
 }
 
