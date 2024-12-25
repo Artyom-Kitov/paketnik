@@ -172,7 +172,6 @@ export async function updateService(service: Service): Promise<void> {
 
 export async function deleteService(id: string): Promise<void> {
   return await fetchData<void>("/services/" + id, "DELETE", "");
-  return await fetchData<void>("/services/" + id, "DELETE", "");
 }
 
 export async function postService(service: Service): Promise<void> {
@@ -247,6 +246,10 @@ async function fetchData<Type>(
         throw new Error("Pcap not found");
       } else if (result.status == 204 && path == "/search") {
         throw new Error("No matches");
+      } else if (result.status == 400 && path.startsWith("/rules/")) {
+        throw new Error("Bad request: regex is invalid");
+      } else if (result.status == 404 && path.startsWith("/rules/")) {
+        throw new Error("Rule not found");
       } else {
         return result as Type;
       }
