@@ -38,7 +38,7 @@ final class PacketStreamServiceImpl(
     private val packetMapper: PacketMapper,
     private val mongoTemplate: MongoTemplate,
     private val minioClient: MinioClient,
-    private val pcapProcessorService: PcapProcessorService
+    private val pcapProcessorService: PcapProcessorService,
 ) : PacketStreamService {
     private val log = logger()
 
@@ -73,7 +73,13 @@ final class PacketStreamServiceImpl(
 
     override fun exportHttpRequest(streamId: String, packetIndex: Int, format: String): String {
         val packets = getStreamPackets(streamId)
-        if (packetIndex !in packets.indices) {
+        var targetPacket: PacketData? = null
+        for (p in packets) {
+            if (p.index == packetIndex) {
+                targetPacket = p
+            }
+        }
+        if (targetPacket == null) {
             throw EntityNotFoundException("No packet with index $packetIndex in stream $streamId")
         }
 
@@ -88,7 +94,11 @@ final class PacketStreamServiceImpl(
         }
     }
 
-    override fun getStreamHttpInfo(id: String): List<HttpInfo> = getStreamPackets(id).mapNotNull { it.httpInfo }
+    override fun getStreamHttpInfo(id: String): List<HttpInfo> {
+        val streamPackets: List<PacketData> = getStreamPackets(id)
+        val httpInfos: List<HttpInfo> = streamPackets.mapNotNull { it.httpInfo }
+        return httpInfos
+    }
 
     override fun createStreamsFromPcap(bucketName: String, objectName: String) {
         log.info("creating streams with objectId = '$objectName'")
@@ -192,6 +202,9 @@ final class PacketStreamServiceImpl(
         val info = readPacketInfo(packet)
         val httpInfo = readHttp(packet)
         val tags = listOf<String>()
+        if (httpInfo == null) {
+            log.info("packet with index $index has no HTTP info")
+        }
         return PacketData(
             receivedAt = receivedAt,
             encodedData = encodedData,
@@ -215,7 +228,9 @@ final class PacketStreamServiceImpl(
     private fun readHttp(packet: Packet): HttpInfo? {
         val tcpPayload = packet.getPacket(Protocol.TCP)?.payload?.array ?: return null
         val data = String(tcpPayload)
-        if (!data.contains("HTTP")) return null
+        if (!data.contains("HTTP")) {
+            return null
+        }
 
         val lines = data.split("\r\n")
         val requestLine = lines.firstOrNull()?.split(" ")
