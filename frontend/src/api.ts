@@ -80,6 +80,7 @@ export interface Packet {
   };
   tags: string[];
   index: number;
+  httpInfo: string | null;
 }
 
 export interface UnallocatedPacket {
