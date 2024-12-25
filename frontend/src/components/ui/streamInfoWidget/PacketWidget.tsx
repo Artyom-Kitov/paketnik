@@ -49,11 +49,11 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   return (
     <div className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden h-72 max-h-fit min-h-28 resize-y">
       <h2 className="text-lg inline font-semibold">Packet</h2>
-      <div className="inline float-right">
+      {data.httpInfo && <div className="inline float-right">
         <div className="inline mr-2">Export:</div>
         <button onClick={ () => getRequest(streamId, data.index, "curl")} className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors">curl</button>
         <button onClick={ () => getRequest(streamId, data.index, "python")} className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors">python request</button>
-      </div>
+      </div>}
       <div className="text-sm mt-2 whitespace-normal">
         <p>Received at: {data.receivedAt}</p>
         {data.tags.map((tag, i) => (
