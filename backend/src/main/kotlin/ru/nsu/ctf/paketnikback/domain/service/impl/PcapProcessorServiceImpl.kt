@@ -20,6 +20,8 @@ import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
+import ru.nsu.ctf.paketnikback.domain.util.RuleMatcher
+
 @Service
 class PcapProcessorServiceImpl(
     private val packetStreamRepository: PacketStreamRepository,
@@ -80,7 +82,7 @@ class PcapProcessorServiceImpl(
     private fun applyRulesToPacket(rules: List<Rule>, packet: PacketData): PacketData {
         val newTags = mutableListOf<String>()
         rules.forEach { rule ->
-            if (ruleService.checkPacketMatch(rule, packet)) {
+            if (RuleMatcher.checkPacketMatch(rule, packet)) {
                 newTags.add(rule.name)
             }
         }
