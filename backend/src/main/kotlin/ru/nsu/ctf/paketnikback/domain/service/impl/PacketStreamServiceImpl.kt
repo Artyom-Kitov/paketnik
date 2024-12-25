@@ -23,6 +23,7 @@ import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.time.Instant
@@ -37,6 +38,7 @@ final class PacketStreamServiceImpl(
     private val packetMapper: PacketMapper,
     private val mongoTemplate: MongoTemplate,
     private val minioClient: MinioClient,
+    private val pcapProcessorService: PcapProcessorService
 ) : PacketStreamService {
     private val log = logger()
 
@@ -109,6 +111,7 @@ final class PacketStreamServiceImpl(
                 val (tcpPackets, otherPackets) = packetsData.partition { it.layers.tcp != null }
                 saveAsStreams(tcpPackets, objectName)
                 saveUnallocated(otherPackets, objectName)
+                pcapProcessorService.applyAllRulesToPcap(objectName)
             }
     }
 

@@ -250,9 +250,12 @@ async function fetchData<Type>(
         throw new Error("Bad request: regex is invalid");
       } else if (result.status == 404 && path.startsWith("/rules/")) {
         throw new Error("Rule not found");
-      } else {
-        return result as Type;
+      } else if (result.status == 400) {
+        throw new Error("Bad Request");
+      } else if (result.status == 404) {
+        throw new Error("Not Found");
       }
+      return result as Type;
     }
   } catch (error) {
     const errorMessage: string =

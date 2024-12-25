@@ -10,6 +10,10 @@ spring:
   mvc:
     validation:
       fail-fast: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
 
 server:
   port: 8081
