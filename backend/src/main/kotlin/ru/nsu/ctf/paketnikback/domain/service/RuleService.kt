@@ -19,4 +19,9 @@ interface RuleService {
     fun updateRule(id: String, request: RuleRequestDto): RuleResponseDto
 
     fun deleteRule(id: String)
+
+//    fun checkPacketMatch(
+//        rule: Rule,
+//        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+//    ): Boolean
 }

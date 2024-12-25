@@ -10,6 +10,6 @@ object RuleMatcher {
     fun checkPacketMatch(rule: Rule, packet: PacketData): Boolean {
         val decodedData = Base64.decode(packet.encodedData)
         val text = decodedData.toString(Charsets.UTF_8)
-        return rule.regex.containsMatchIn(text)
+        return rule.regex.matcher(text).matches()
     }
 } 
