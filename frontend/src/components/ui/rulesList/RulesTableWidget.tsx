@@ -1,8 +1,11 @@
 import { RuleEntryWidget } from "./RuleEntryWidget";
 import { getRules } from "../../../api";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 export const RulesTableWidget = () => {
+  const [errorMessage, setErrorMessage] = useState("");
+
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["rules"],
     queryFn: getRules,
@@ -26,6 +29,11 @@ export const RulesTableWidget = () => {
     <div className="w-full h-full flex flex-col">
       <div className="text-left text-[#fff] text-2xl font-bold mb-2">Rules</div>
       <div className="w-full bg-[#475569] p-[7px] flex-1 overflow-auto">
+        {errorMessage && (
+          <div className="text-red-400 mb-4 whitespace-pre-line">
+            {errorMessage}
+          </div>
+        )}
         <table className="w-full border-collapse">
           <thead className="sticky top-0 bg-[#475569] z-10">
             <tr className="h-[50px]">
@@ -45,7 +53,13 @@ export const RulesTableWidget = () => {
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
-            {data?.map((rule) => <RuleEntryWidget key={rule.id} data={rule} />)}
+            {data?.map((rule) => (
+              <RuleEntryWidget
+                key={rule.id}
+                data={rule}
+                onError={setErrorMessage}
+              />
+            ))}
           </tbody>
         </table>
       </div>
