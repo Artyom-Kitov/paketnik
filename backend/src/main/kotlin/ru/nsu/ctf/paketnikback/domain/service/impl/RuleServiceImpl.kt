@@ -17,6 +17,7 @@ import java.util.regex.PatternSyntaxException
 
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import ru.nsu.ctf.paketnikback.domain.model.PacketData
 
 /**
  * A service implementation class for rules.
@@ -86,7 +87,10 @@ class RuleServiceImpl(
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    override fun checkPacketMatch(rule: Rule, packet: PacketData): Boolean {
+    override fun checkPacketMatch(
+        rule: Rule,
+        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+    ): Boolean {
         if (rule.type == RuleType.REGEX) {
             val regex = rule.regex.toRegex()
             val decodedData = Base64.decode(packet.encodedData)

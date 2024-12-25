@@ -62,7 +62,6 @@ class PcapProcessorServiceImpl(
             applyRulesToUnallocated(rules, packet)
         }
     }
-
     private fun applyRulesToStream(rules: List<Rule>, stream: PacketStreamDocument) {
         val updatedPackets = applyRulesToPackets(rules, stream.packets)
         val updatedStream = stream.copy(packets = updatedPackets)
@@ -70,19 +69,19 @@ class PcapProcessorServiceImpl(
     }
 
     private fun applyRulesToUnallocated(rules: List<Rule>, unallocated: UnallocatedPacketDocument) {
-        val updatedUnallocated = unallocated.copy(packet = applyRulesToPacket(unallocated.packet))
-        unallocatedPacketRepository.save(updatedPacket)
+        val updatedUnallocated = unallocated.copy(packet = applyRulesToPacket(rules, unallocated.packet))
+        unallocatedPacketRepository.save(updatedUnallocated)
     }
 
     private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> {
-        return packets.map { applyRulesToPacket(rules, it) }
+        return packets.map { packet -> applyRulesToPacket(rules, packet) }
     }
 
     private fun applyRulesToPacket(rules: List<Rule>, packet: PacketData): PacketData {
         val newTags = mutableListOf<String>()
         rules.forEach { rule ->
             if (ruleService.checkPacketMatch(rule, packet)) {
-                tags.add(rule.name)
+                newTags.add(rule.name)
             }
         }
         return packet.copy(tags = newTags.toList())
