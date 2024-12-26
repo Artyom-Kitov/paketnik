@@ -3,6 +3,8 @@ services:
     container_name: paketnik-mongo
     image: mongo:8.0
     restart: always
+    volumes:
+      - ./mongodbdata:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=paketnik
       - MONGO_INITDB_ROOT_PASSWORD=paketnik123
