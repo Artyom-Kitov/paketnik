@@ -244,7 +244,6 @@ class MinioServiceImpl(
                     .bucket(bucketName)
                     .`object`(fileName)
                     .stream(inputStream, file.size, -1)
-                    .contentType(file.contentType)
                     .build(),
             )
         }
@@ -259,7 +258,6 @@ class MinioServiceImpl(
                     .bucket(bucketName)
                     .`object`(fileName)
                     .stream(inputStream, file.size.toLong(), -1)
-                    .contentType("Bytes")
                     .build(),
             )
         }
