@@ -80,7 +80,15 @@ export interface Packet {
   };
   tags: string[];
   index: number;
-  httpInfo: string | null;
+  httpInfo: HttpInfo | null;
+}
+
+export interface HttpInfo{
+  method: string;
+  url: string;
+  statusCode: number;
+  headers: Map<string, string>;
+  body: string;
 }
 
 export interface UnallocatedPacket {
