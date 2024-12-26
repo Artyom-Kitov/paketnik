@@ -258,7 +258,7 @@ class MinioServiceImpl(
                     .builder()
                     .bucket(bucketName)
                     .`object`(fileName)
-                    .stream(inputStream, fileSize, -1)
+                    .stream(inputStream, file.size, -1)
                     .contentType("Bytes")
                     .build(),
             )
