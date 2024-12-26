@@ -69,6 +69,14 @@ export interface Udp {
   data: string;
 }
 
+export interface HttpInfo {
+  method: string;
+  url: string;
+  statusCode: number;
+  headers: Map<string, string>;
+  body: string;
+}
+
 export interface Packet {
   receivedAt: string;
   encodedData: string;
@@ -78,6 +86,7 @@ export interface Packet {
     tcp: Tcp;
     udp: Udp;
   };
+  httpInfo: HttpInfo;
   tags: string[];
   index: number;
 }
