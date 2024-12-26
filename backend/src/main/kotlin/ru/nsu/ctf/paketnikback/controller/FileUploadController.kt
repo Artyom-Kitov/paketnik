@@ -19,12 +19,15 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
+import ru.nsu.ctf.paketnikback.utils.logger
 
 @RestController
 @RequestMapping("/minio-api")
 class FileUploadController(
     private val minioService: MinioService,
 ) {
+    private val log = logger()
+
     @Operation(
         summary = "Create new bucket and set 'currently in use' to it",
         description = "Try create bucket and return status code",
@@ -141,7 +144,7 @@ class FileUploadController(
         @RequestHeader("X-File-Name") fileName: String,
     ): ResponseEntity<String> {
         val fileData = file.getByteArray()
-        val fileSize = fileData.contentLength()
+        val fileSize = file.contentLength()
         
         if (fileSize == 0) {
             log.info("ERR: File $fileName is empty")

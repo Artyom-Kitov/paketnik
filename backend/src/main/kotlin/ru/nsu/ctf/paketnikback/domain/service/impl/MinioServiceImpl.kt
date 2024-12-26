@@ -154,13 +154,13 @@ class MinioServiceImpl(
 
         files.forEach { file ->
             val fileName = file.originalFilename ?: "unknown_${UUID.randomUUID()}"
-
-            if (file.getSize() == 0) {
+            
+            if (file.getSize() == 0L) {
                 log.error("Error: file $fileName is empty")
                 uploadStatus[fileName] = "ERR: File is empty"
                 return@forEach
             }
-            
+
             val fileHash = calculateFileHashStreaming(file)
             val fileExtension = getFileExtension(fileName)
             val hashFileName = "$fileHash.$fileExtension"
