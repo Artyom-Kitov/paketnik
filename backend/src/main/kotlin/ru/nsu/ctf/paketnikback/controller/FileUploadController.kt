@@ -136,7 +136,7 @@ class FileUploadController(
         consumes = [MediaType.APPLICATION_OCTET_STREAM],
     )
     fun uploadRemoteFile(
-        @RequestBody file: InputStream,
+        @RequestBody file: ByteArray,
         @RequestHeader("X-File-Name") fileName: String,
         @RequestHeader("Content-Length") fileSize: Long,
     ): ResponseEntity<String> {

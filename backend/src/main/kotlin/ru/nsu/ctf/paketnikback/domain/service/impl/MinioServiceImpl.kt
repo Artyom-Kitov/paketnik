@@ -190,10 +190,10 @@ class MinioServiceImpl(
         return UploadLocalFilesResult(uploadStatus, status)
     }
 
-    override fun uploadRemoteFile(file: InputStream, fileName: String, fileSize: Long): UploadRemoteFileResult {
+    override fun uploadRemoteFile(file: ByteArray, fileName: String, fileSize: Long): UploadRemoteFileResult {
         log.info("Attempting upload remote files")
         val safeFileName = fileName ?: "unknown_${UUID.randomUUID()}"
-        val fileHash = calculateFileAsInputStreamHash(file)
+        val fileHash = calculateFileAsBytesHash(file)
         val fileExtension = getFileExtension(safeFileName)
         val hashFileName = "$fileHash.$fileExtension"
 
@@ -203,7 +203,7 @@ class MinioServiceImpl(
         }
 
         try {
-            loadFileAsInputStreamToMinio(file, hashFileName, fileSize)
+            loadFileAsBytesToMinio(file, hashFileName, fileSize)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
         } catch (e: MinioException) {
@@ -243,8 +243,8 @@ class MinioServiceImpl(
         packetStreamService.createStreamsFromPcap(bucketName, fileName)
     }
 
-    private fun loadFileAsInputStreamToMinio(file: InputStream, fileName: String, fileSize: Long) {
-        file.use { inputStream ->
+    private fun loadFileAsBytesToMinio(file: ByteArray, fileName: String, fileSize: Long) {
+        file.inputStream.use { inputStream ->
             minioClient.putObject(
                 PutObjectArgs
                     .builder()
@@ -258,10 +258,10 @@ class MinioServiceImpl(
         packetStreamService.createStreamsFromPcap(bucketName, fileName)
     }
 
-    private fun calculateFileAsInputStreamHash(file: InputStream): String {
+    private fun calculateFileAsBytesHash(file: ByteArray): String {
         val digest = MessageDigest.getInstance("SHA-256")
 
-        file.use { inputStream ->
+        file.inputStream.use { inputStream ->
             val buffer = ByteArray(8192)
             var bytesRead: Int
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
