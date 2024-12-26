@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
@@ -133,7 +134,7 @@ class FileUploadController(
     )
     @PostMapping(
         path = ["/upload/remote"],
-        consumes = [MediaType.APPLICATION_OCTET_STREAM],
+        consumes = [MediaType.APPLICATION_OCTET_STREAM_VALUE],
     )
     fun uploadRemoteFile(
         @RequestBody file: ByteArrayResource,
