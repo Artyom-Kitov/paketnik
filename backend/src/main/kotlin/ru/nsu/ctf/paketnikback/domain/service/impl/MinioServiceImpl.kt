@@ -18,6 +18,9 @@ import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.security.MessageDigest
 import java.util.UUID
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 
 @Service
 class MinioServiceImpl(
@@ -153,6 +156,13 @@ class MinioServiceImpl(
 
         files.forEach { file ->
             val fileName = file.originalFilename ?: "unknown_${UUID.randomUUID()}"
+
+            if(file == null || file.isEmpty()){
+                log.error("Error: file $fileName is Empty")
+                uploadStatus[fileName] = "ERR: File is Empty"
+                return@forEach
+            }
+
             val fileHash = calculateFileHashStreaming(file)
             val fileExtension = getFileExtension(fileName)
             val hashFileName = "$fileHash.$fileExtension"
@@ -257,4 +267,5 @@ class MinioServiceImpl(
     }
 
     private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "")
+
 }
