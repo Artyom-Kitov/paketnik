@@ -30,20 +30,22 @@ export function LoadPcapWidget() {
     }
   };
 
-  function getExtention(fileName: string){
-    return fileName.split('.').pop()
+  function getExtention(fileName: string) {
+    return fileName.split(".").pop();
   }
 
   const handleLoadAndAnalyze = () => {
-    if (selectedFile && getExtention(selectedFile.name)?.toLocaleLowerCase() === "pcap") {
-      console.log(getExtention(selectedFile.name)?.toLocaleLowerCase())
+    if (
+      selectedFile &&
+      getExtention(selectedFile.name)?.toLocaleLowerCase() === "pcap"
+    ) {
       const pcap: Pcap = {
         id: selectedFile.name,
         content: selectedFile,
       };
       loadAndAnalyzeMutation(pcap);
     } else {
-      setAnswer("That is not pcap file")
+      setAnswer("That is not pcap file");
     }
   };
 
