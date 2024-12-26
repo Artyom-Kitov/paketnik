@@ -146,7 +146,7 @@ class FileUploadController(
         val fileData = file.getByteArray()
         val fileSize = file.contentLength()
         
-        if (fileSize == 0) {
+        if (fileSize == 0L) {
             log.info("ERR: File $fileName is empty")
             return ResponseEntity.badRequest().body("File $fileName is empty")
         }
