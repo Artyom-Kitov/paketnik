@@ -244,7 +244,7 @@ class MinioServiceImpl(
     }
 
     private fun loadFileAsBytesToMinio(file: ByteArray, fileName: String, fileSize: Long) {
-        file.inputStream.use { inputStream ->
+        file.inputStream().use { inputStream ->
             minioClient.putObject(
                 PutObjectArgs
                     .builder()
@@ -274,7 +274,7 @@ class MinioServiceImpl(
     private fun calculateFileHashStreaming(file: MultipartFile): String {
         val digest = MessageDigest.getInstance("SHA-256")
 
-        file.inputStream.use { inputStream ->
+        file.inputStream().use { inputStream ->
             val buffer = ByteArray(8192)
             var bytesRead: Int
             while (inputStream.read(buffer).also { bytesRead = it } != -1) {
