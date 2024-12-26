@@ -136,11 +136,11 @@ class FileUploadController(
         consumes = [MediaType.APPLICATION_OCTET_STREAM],
     )
     fun uploadRemoteFile(
-        @RequestBody file: ByteArray,
+        @RequestBody file: ByteArrayResource,
         @RequestHeader("X-File-Name") fileName: String,
         @RequestHeader("Content-Length") fileSize: Long,
-    ): ResponseEntity<Map<String, String>> {
-        val result = minioService.uploadRemoteFile(file, fileName, fileSize)
+    ): ResponseEntity<String> {
+        val result = minioService.uploadRemoteFile(file.getByteArray(), fileName, fileSize)
         return ResponseEntity(result.message, result.status)
     }
 }
