@@ -3,6 +3,8 @@ services:
     container_name: paketnik-mongo
     image: mongo:8.0
     restart: always
+    volumes:
+      - ./mongodbdata:/data/db
     environment:
       - MONGO_INITDB_ROOT_USERNAME=paketnik
       - MONGO_INITDB_ROOT_PASSWORD=paketnik123
@@ -38,6 +40,10 @@ services:
       - MINIO_ENDPOINT=http://paketnik-minio:9000
       - MINIO_ACCESS_KEY=admin
       - MINIO_SECRET_KEY=password
+      - FLAG_REGEX=
+      - HOST_ADDR=127.0.0.1
+      - START_TIME=00:00
+      - ROUND_TICKS=30
     build:
       context: backend/.
       dockerfile: Dockerfile

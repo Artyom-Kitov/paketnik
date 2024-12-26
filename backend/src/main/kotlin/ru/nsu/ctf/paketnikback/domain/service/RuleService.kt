@@ -3,7 +3,6 @@ package ru.nsu.ctf.paketnikback.domain.service
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleRequestDto
 import ru.nsu.ctf.paketnikback.domain.dto.rule.RuleResponseDto
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
-import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 
 interface RuleService {
     fun getAllRules(): List<RuleResponseDto>
@@ -21,5 +20,8 @@ interface RuleService {
 
     fun deleteRule(id: String)
 
-    fun checkPacketMatch(rule: Rule, packet: PacketData): Boolean
+//    fun checkPacketMatch(
+//        rule: Rule,
+//        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+//    ): Boolean
 }

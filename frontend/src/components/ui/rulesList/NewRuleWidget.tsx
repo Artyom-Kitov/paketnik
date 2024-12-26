@@ -22,10 +22,13 @@ export function NewRuleWidget() {
     },
   });
   const getIsDataValid = () => {
-    return getIsRuleNameValid() && getIsRegexValid();
+    return getIsRuleNameValid() && getIsRegexValid() && getIsRegexLengthValid();
   };
   const getIsRuleNameValid = () => {
     return name != "" && name.length <= 64;
+  };
+  const getIsRegexLengthValid = () => {
+    return regex != "" && regex.length <= 200;
   };
   const getIsRegexValid = () => {
     try {
@@ -60,6 +63,14 @@ export function NewRuleWidget() {
       }
       if (!getIsRegexValid()) {
         errorString = errorString.concat("Regex is invalid\n");
+      }
+      if (!getIsRegexLengthValid()) {
+        errorString = errorString.concat(
+          "Regex length is invalid. It shouldn't be empty and shouldn't be longer than 200 symbols\n" +
+            "length of your regex is " +
+            regex.length +
+            "\n",
+        );
       }
       setErrorMessage(errorString);
     }

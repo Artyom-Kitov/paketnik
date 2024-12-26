@@ -1,22 +1,19 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
 import org.springframework.stereotype.Service
-
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchMatch
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
-import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
+import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleType
+import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
-import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
+import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
-
 import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
-import ru.nsu.ctf.paketnikback.domain.service.RuleService
-
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
-
+import ru.nsu.ctf.paketnikback.utils.logger
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
@@ -26,8 +23,8 @@ class PcapProcessorServiceImpl(
     private val unallocatedPacketRepository: UnallocatedPacketRepository,
     private val ruleRepository: RuleRepository,
     private val ruleMapper: RuleMapper,
-    private val ruleService: RuleService,
 ) : PcapProcessorService {
+    private val log = logger()
 
     override fun searchByRegex(pcapId: String, regex: Regex): List<RegexSearchMatch> {
         val packets = findPacketsByPcapId(pcapId)
@@ -35,8 +32,15 @@ class PcapProcessorServiceImpl(
         return matches
     }
 
+    fun getAllRulesAsEntity(): List<Rule> {
+        log.info("getting all rules to generate entities")
+        val ruleDocuments = ruleRepository.findAll()
+        log.info("successfully retrieved ${ruleDocuments.size} rules from MongoDB to generate entities.")
+        return ruleDocuments.map { ruleMapper.toDomain(it) }
+    }
+
     override fun applyAllRules() {
-        val rules = ruleService.getAllRulesAsEntity()
+        val rules = getAllRulesAsEntity()
         val streams = packetStreamRepository.findAll()
         val unallocated = unallocatedPacketRepository.findAll()
 
@@ -50,7 +54,7 @@ class PcapProcessorServiceImpl(
     }
 
     override fun applyAllRulesToPcap(pcapId: String) {
-        val rules = ruleService.getAllRulesAsEntity()
+        val rules = getAllRulesAsEntity()
         val streams = packetStreamRepository.findAllByPcapId(pcapId)
         val unallocated = unallocatedPacketRepository.findAllByPcapId(pcapId)
 
@@ -62,6 +66,7 @@ class PcapProcessorServiceImpl(
             applyRulesToUnallocated(rules, packet)
         }
     }
+
     private fun applyRulesToStream(rules: List<Rule>, stream: PacketStreamDocument) {
         val updatedPackets = applyRulesToPackets(rules, stream.packets)
         val updatedStream = stream.copy(packets = updatedPackets)
@@ -73,14 +78,33 @@ class PcapProcessorServiceImpl(
         unallocatedPacketRepository.save(updatedUnallocated)
     }
 
-    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> {
-        return packets.map { packet -> applyRulesToPacket(rules, packet) }
+    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> = packets.map { packet ->
+        applyRulesToPacket(
+            rules,
+            packet,
+        )
+    }
+
+    @OptIn(ExperimentalEncodingApi::class)
+    private fun checkPacketMatch(
+        rule: Rule,
+        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData,
+    ): Boolean {
+        if (rule.type == RuleType.REGEX) {
+            val regex = rule.regex.toRegex()
+            val decodedData = Base64.decode(packet.encodedData)
+            val text = decodedData.toString(Charsets.UTF_8)
+
+            val items = regex.findAll(text).toList()
+            return !items.isEmpty()
+        }
+        return false
     }
 
     private fun applyRulesToPacket(rules: List<Rule>, packet: PacketData): PacketData {
         val newTags = mutableListOf<String>()
         rules.forEach { rule ->
-            if (ruleService.checkPacketMatch(rule, packet)) {
+            if (checkPacketMatch(rule, packet)) {
                 newTags.add(rule.name)
             }
         }
