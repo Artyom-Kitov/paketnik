@@ -231,15 +231,16 @@ async function fetchData<Type>(
   try {
     if (
       method == "DELETE" ||
-      (path == "/rules" && method == "POST") ||
-      path == "/minio-api/upload/remote"
+      (path == "/rules" && method == "POST")
     ) {
       return (await fetch(host + path, options)) as Type;
     } else {
       const result = await fetch(host + path, options);
-      console.log(result.status);
+      console.log(path + result.status);
       if (result.status == 200) {
         return result.json() as Type;
+      } else if (result.status == 500 && path == "/minio-api/upload/remote"){
+        return result as Type;
       } else if (result.status == 500) {
         throw new Error("Server error");
       } else if (result.status == 404 && path == "/search") {

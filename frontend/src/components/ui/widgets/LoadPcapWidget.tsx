@@ -20,8 +20,7 @@ export function LoadPcapWidget() {
       setAnswer("Ok : file successfully upload");
     },
     onError: (error: Error) => {
-      setAnswer("Error:" + error.message);
-      console.error("Error uploading file:", error);
+      setAnswer(error.message);
     },
   });
 
