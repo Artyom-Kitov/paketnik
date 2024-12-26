@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile
 import ru.nsu.ctf.paketnikback.domain.dto.*
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.security.MessageDigest
 import java.util.UUID
@@ -153,6 +154,13 @@ class MinioServiceImpl(
 
         files.forEach { file ->
             val fileName = file.originalFilename ?: "unknown_${UUID.randomUUID()}"
+
+            if (file.getSize() == 0) {
+                log.error("Error: file $fileName is empty")
+                uploadStatus[fileName] = "ERR: File is empty"
+                return@forEach
+            }
+            
             val fileHash = calculateFileHashStreaming(file)
             val fileExtension = getFileExtension(fileName)
             val hashFileName = "$fileHash.$fileExtension"

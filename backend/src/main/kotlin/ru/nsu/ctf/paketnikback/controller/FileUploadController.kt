@@ -139,9 +139,16 @@ class FileUploadController(
     fun uploadRemoteFile(
         @RequestBody file: ByteArrayResource,
         @RequestHeader("X-File-Name") fileName: String,
-        @RequestHeader("Content-Length") fileSize: Long,
     ): ResponseEntity<String> {
-        val result = minioService.uploadRemoteFile(file.getByteArray(), fileName, fileSize)
+        val fileData = file.getByteArray()
+        val fileSize = fileData.contentLength()
+        
+        if (fileSize == 0) {
+            log.info("ERR: File $fileName is empty")
+            return ResponseEntity.badRequest().body("File $fileName is empty")
+        }
+
+        val result = minioService.uploadRemoteFile(fileData, fileName, fileSize)
         return ResponseEntity(result.message, result.status)
     }
 }
