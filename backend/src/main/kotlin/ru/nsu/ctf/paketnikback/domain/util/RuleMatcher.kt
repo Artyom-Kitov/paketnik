@@ -1,7 +1,7 @@
 package ru.nsu.ctf.paketnikback.domain.util
 
-import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 

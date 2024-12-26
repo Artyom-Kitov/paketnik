@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.nsu.ctf.paketnikback.domain.entity.packet.layer.HttpInfo
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 
 @RestController
@@ -68,7 +69,10 @@ class PacketStreamController(
         ],
     )
     @GetMapping("/http")
-    fun getHttpInfoByStreamId(@RequestParam id: String) = ResponseEntity.ok(packetStreamService.getStreamHttpInfo(id))
+    fun getHttpInfoByStreamId(@RequestParam id: String): ResponseEntity<List<HttpInfo>> {
+        val httpInfos: List<HttpInfo> = packetStreamService.getStreamHttpInfo(id)
+        return ResponseEntity.ok(httpInfos)
+    }
 
     @Operation(
         summary = "Get unallocated packets",

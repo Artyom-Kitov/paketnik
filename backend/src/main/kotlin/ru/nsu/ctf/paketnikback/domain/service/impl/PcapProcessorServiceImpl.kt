@@ -1,28 +1,21 @@
 package ru.nsu.ctf.paketnikback.domain.service.impl
 
 import org.springframework.stereotype.Service
-
 import ru.nsu.ctf.paketnikback.domain.dto.RegexSearchMatch
 import ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
 import ru.nsu.ctf.paketnikback.domain.entity.packet.UnallocatedPacketDocument
-import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.entity.rule.Rule
 import ru.nsu.ctf.paketnikback.domain.entity.rule.RuleType
+import ru.nsu.ctf.paketnikback.domain.entity.stream.PacketStreamDocument
 import ru.nsu.ctf.paketnikback.domain.mapper.RuleMapper
-import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
+import ru.nsu.ctf.paketnikback.domain.repository.RuleRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
-
 import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
-import ru.nsu.ctf.paketnikback.domain.service.RuleService
-
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
-
+import ru.nsu.ctf.paketnikback.utils.logger
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-
-import ru.nsu.ctf.paketnikback.domain.util.RuleMatcher
-import ru.nsu.ctf.paketnikback.utils.logger
 
 @Service
 class PcapProcessorServiceImpl(
@@ -73,6 +66,7 @@ class PcapProcessorServiceImpl(
             applyRulesToUnallocated(rules, packet)
         }
     }
+
     private fun applyRulesToStream(rules: List<Rule>, stream: PacketStreamDocument) {
         val updatedPackets = applyRulesToPackets(rules, stream.packets)
         val updatedStream = stream.copy(packets = updatedPackets)
@@ -84,14 +78,17 @@ class PcapProcessorServiceImpl(
         unallocatedPacketRepository.save(updatedUnallocated)
     }
 
-    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> {
-        return packets.map { packet -> applyRulesToPacket(rules, packet) }
+    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> = packets.map { packet ->
+        applyRulesToPacket(
+            rules,
+            packet,
+        )
     }
 
     @OptIn(ExperimentalEncodingApi::class)
-    private  fun checkPacketMatch(
+    private fun checkPacketMatch(
         rule: Rule,
-        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData
+        packet: ru.nsu.ctf.paketnikback.domain.entity.packet.PacketData,
     ): Boolean {
         if (rule.type == RuleType.REGEX) {
             val regex = rule.regex.toRegex()
@@ -103,7 +100,7 @@ class PcapProcessorServiceImpl(
         }
         return false
     }
-    
+
     private fun applyRulesToPacket(rules: List<Rule>, packet: PacketData): PacketData {
         val newTags = mutableListOf<String>()
         rules.forEach { rule ->
