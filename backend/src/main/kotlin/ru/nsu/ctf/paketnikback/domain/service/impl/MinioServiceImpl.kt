@@ -15,6 +15,8 @@ import org.springframework.web.multipart.MultipartFile
 import ru.nsu.ctf.paketnikback.domain.dto.*
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
+import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.security.MessageDigest
 import java.util.UUID
@@ -23,6 +25,8 @@ import java.util.UUID
 class MinioServiceImpl(
     private val minioClient: MinioClient,
     private val packetStreamService: PacketStreamService,
+    private val packetStreamRepository: PacketStreamRepository,
+    private val unallocatedPacketRepository: UnallocatedPacketRepository,
 ) : MinioService {
     private var bucketName = "default-bucket"
     private val log = logger()
@@ -139,8 +143,12 @@ class MinioServiceImpl(
                     .build(),
             )
             log.info("File $fileName successfully deleted.")
+            log.info("Attempting delete file streams")
+            packetStreamRepository.deleteByPcapId(fileName)
+            unallocatedPacketRepository.deleteByPcapId(fileName)
+            log.info("File streams succesfully deleted")
             DeleteFileResult("File $fileName successfully deleted.", HttpStatus.OK)
-        } catch (e: MinioException) {
+        } catch (e: Exception) {
             log.error("Error: Unable to delete file. ${e.message}", e)
             DeleteFileResult("Error: Unable to delete file. ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -256,5 +264,5 @@ class MinioServiceImpl(
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
-    private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "")
+    private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "pcap")
 }
