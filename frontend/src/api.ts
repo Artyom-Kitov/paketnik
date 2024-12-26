@@ -254,6 +254,8 @@ async function fetchData<Type>(
         throw new Error("Bad Request");
       } else if (result.status == 404) {
         throw new Error("Not Found");
+      } else if (result.status == 409 && path == "/minio-api/upload/remote"){
+        throw new Error("File already exist")
       }
       return result as Type;
     }
