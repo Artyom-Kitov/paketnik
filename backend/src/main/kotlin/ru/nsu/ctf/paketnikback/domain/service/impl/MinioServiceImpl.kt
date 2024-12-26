@@ -134,13 +134,7 @@ class MinioServiceImpl(
             return DeleteFileResult("Error: File $fileName not found.", HttpStatus.NOT_FOUND)
         }
         return try {
-            minioClient.removeObject(
-                RemoveObjectArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
-                    .build(),
-            )
+            removeMinioFile(fileName)
             log.info("File $fileName successfully deleted.")
             DeleteFileResult("File $fileName successfully deleted.", HttpStatus.OK)
         } catch (e: MinioException) {
@@ -177,8 +171,9 @@ class MinioServiceImpl(
                 loadFileToMinio(file, hashFileName)
                 log.info("File $fileName successfully load, hash name is $hashFileName")
                 uploadStatus[fileName] = "OK_status, hash name is $hashFileName"
-            } catch (e: MinioException) {
+            } catch (e: Exception) {
                 log.error("Error: unable to load file $fileName: ${e.message}", e)
+                removeMinioFile(hashFileName)
                 uploadStatus[fileName] = "ERR: ${e.message}"
             }
         }
@@ -216,8 +211,9 @@ class MinioServiceImpl(
             loadFileToMinio(file, hashFileName)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
-        } catch (e: MinioException) {
+        } catch (e: Exception) {
             log.error("Error: upload remote file $safeFileName: ${e.message}", e)
+            removeMinioFile(hashFileName)
             return UploadRemoteFileResult("ERR: ${e.message}", HttpStatus.BAD_REQUEST)
         }
     }
@@ -267,5 +263,15 @@ class MinioServiceImpl(
     }
 
     private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "")
+
+    private fun removeMinioFile(fileName: String){
+        minioClient.removeObject(
+                RemoveObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .build()
+        )
+    }
 
 }
