@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
@@ -132,13 +133,14 @@ class FileUploadController(
     )
     @PostMapping(
         path = ["/upload/remote"],
-        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        consumes = [MediaType.APPLICATION_OCTET_STREAM],
     )
     fun uploadRemoteFile(
-        @RequestPart("file") file: MultipartFile,
+        @RequestBody file: InputStream,
         @RequestHeader("X-File-Name") fileName: String,
+        @RequestHeader("Content-Length") fileSize: Long,
     ): ResponseEntity<String> {
-        val result = minioService.uploadRemoteFile(file, fileName)
+        val result = minioService.uploadRemoteFile(file, fileName, fileSize)
         return ResponseEntity(result.message, result.status)
     }
 }

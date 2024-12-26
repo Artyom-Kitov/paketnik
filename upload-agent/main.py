@@ -98,7 +98,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
     headers = {'X-File-Name': filename}
     
     logger.info(f'{path_to_pcap} transfer started')
-            
+    
     t_start = time.time()
     try:
         response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers, timeout=TIMEOUT)

@@ -190,10 +190,10 @@ class MinioServiceImpl(
         return UploadLocalFilesResult(uploadStatus, status)
     }
 
-    override fun uploadRemoteFile(file: MultipartFile, fileName: String): UploadRemoteFileResult {
+    override fun uploadRemoteFile(file: InputStream, fileName: String, fileSize: Long): UploadRemoteFileResult {
         log.info("Attempting upload remote files")
         val safeFileName = fileName ?: "unknown_${UUID.randomUUID()}"
-        val fileHash = calculateFileHashStreaming(file)
+        val fileHash = calculateFileAsInputStreamHash(file)
         val fileExtension = getFileExtension(safeFileName)
         val hashFileName = "$fileHash.$fileExtension"
 
@@ -203,7 +203,7 @@ class MinioServiceImpl(
         }
 
         try {
-            loadFileToMinio(file, hashFileName)
+            loadFileAsInputStreamToMinio(file, hashFileName, fileSize)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
         } catch (e: MinioException) {
@@ -241,6 +241,34 @@ class MinioServiceImpl(
             )
         }
         packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun loadFileAsInputStreamToMinio(file: InputStream, fileName: String, fileSize: Long) {
+        file.use { inputStream ->
+            minioClient.putObject(
+                PutObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .stream(inputStream, fileSize, -1)
+                    .contentType("Bytes")
+                    .build(),
+            )
+        }
+        packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun calculateFileAsInputStreamHash(file: InputStream): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+
+        file.use { inputStream ->
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     private fun calculateFileHashStreaming(file: MultipartFile): String {

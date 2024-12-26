@@ -14,5 +14,5 @@ interface MinioService {
 
     fun uploadLocalFiles(files: List<MultipartFile>): UploadLocalFilesResult
 
-    fun uploadRemoteFile(file: MultipartFile, fileName: String): UploadRemoteFileResult
+    fun uploadRemoteFile(file: InputStream, fileName: String, fileSize: Long): UploadRemoteFileResult
 }
