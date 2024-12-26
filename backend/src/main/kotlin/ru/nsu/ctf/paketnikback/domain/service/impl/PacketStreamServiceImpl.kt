@@ -25,6 +25,7 @@ import ru.nsu.ctf.paketnikback.domain.service.ContestServiceService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
 import ru.nsu.ctf.paketnikback.domain.service.PcapProcessorService
 import ru.nsu.ctf.paketnikback.exception.EntityNotFoundException
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.time.Instant
 import kotlin.io.encoding.Base64
@@ -72,6 +73,7 @@ final class PacketStreamServiceImpl(
         .map(packetMapper::unallocatedToDto)
 
     override fun exportHttpRequest(streamId: String, packetIndex: Int, format: String): String {
+        log.info("trying to export http info in $format format for stream $streamId, packet $packetIndex")
         val packets = getStreamPackets(streamId)
         var targetPacket: PacketData? = null
         for (p in packets) {
@@ -86,6 +88,10 @@ final class PacketStreamServiceImpl(
         val packet = packets[packetIndex]
         val httpInfo = packet.httpInfo
             ?: throw EntityNotFoundException("Packet at index $packetIndex is not an HTTP packet")
+        
+        if (httpInfo.method == null) {
+            throw InvalidEntityException("Packet an index $packetIndex is an HTTP response (should be request)")
+        }
 
         return when (format.lowercase()) {
             "curl" -> generateCurlCommand(httpInfo)
@@ -126,18 +132,22 @@ final class PacketStreamServiceImpl(
     }
 
     private fun generateCurlCommand(httpInfo: HttpInfo): String {
+        log.info("exporting http info as a curl command")
         val method = httpInfo.method ?: "GET"
         val url = httpInfo.url ?: throw IllegalArgumentException("HTTP packet does not contain a URL")
         val headers = httpInfo.headers.entries.joinToString(" ") { (key, value) -> "-H \"$key: $value\"" }
         val body = httpInfo.body?.let { "-d '${it.replace("'", "\\'")}'" } ?: ""
+        log.info("curl command successfully exported")
         return "curl -X $method \"$url\" $headers $body"
     }
 
     private fun generatePythonRequestsCode(httpInfo: HttpInfo): String {
+        log.info("exporting http info as a python command")
         val method = httpInfo.method?.lowercase() ?: "get"
         val url = httpInfo.url ?: throw IllegalArgumentException("HTTP packet does not contain a URL")
         val headers = httpInfo.headers.entries.joinToString(",\n    ") { (key, value) -> "\"$key\": \"$value\"" }
         val body = httpInfo.body?.let { "data = $it" } ?: "data = None"
+        log.info("python command successfully exported")
         return """
             import requests
 
@@ -200,10 +210,10 @@ final class PacketStreamServiceImpl(
         val receivedAt = Instant.ofEpochMilli(packet.arrivalTime / 1000)
         val encodedData = Base64.encode(packet.payload.array)
         val info = readPacketInfo(packet)
-        val httpInfo = readHttp(packet)
+        val httpInfo = parseHttp(packet)
         val tags = listOf<String>()
-        if (httpInfo == null) {
-            log.info("packet with index $index has no HTTP info")
+        if (httpInfo != null) {
+            log.info("packet with index $index has HTTP info")
         }
         return PacketData(
             receivedAt = receivedAt,
@@ -225,33 +235,98 @@ final class PacketStreamServiceImpl(
         return layers
     }
 
-    private fun readHttp(packet: Packet): HttpInfo? {
+    private fun parseHttp(packet: Packet): HttpInfo? {
         val tcpPayload = packet.getPacket(Protocol.TCP)?.payload?.array ?: return null
         val data = String(tcpPayload)
         if (!data.contains("HTTP")) {
             return null
         }
+        val lines = data.lines().filter { it.isNotEmpty() }
 
-        val lines = data.split("\r\n")
-        val requestLine = lines.firstOrNull()?.split(" ")
+        val firstLine = lines.first()
         val headers = mutableMapOf<String, String>()
+        val bodyBuilder = StringBuilder()
 
-        for (line in lines.drop(1)) {
-            if (line.isBlank()) break
-            val (key, value) = line.split(": ", limit = 2)
-            headers[key] = value
+        return if (isHttpRequest(firstLine)) {
+            parseHttpRequest(firstLine, bodyBuilder, headers, lines)
+        } else if (isHttpResponse(firstLine)) {
+            parseHttpResponse(firstLine, bodyBuilder, headers, lines)
+        } else {
+            return null
         }
+    }
 
-        val bodyStart = data.indexOf("\r\n\r\n") + 4
-        val body = if (bodyStart in data.indices) data.substring(bodyStart) else null
+    private fun parseHttpResponse(
+        firstLine: String,
+        bodyBuilder: StringBuilder,
+        headers: MutableMap<String, String>,
+        lines: List<String>,
+    ): HttpInfo? {
+        val parts = firstLine.split(" ", limit = 3)
+        if (parts.size < 3) return null
+
+        val statusCode = parts[1].toIntOrNull() ?: return null
+
+        fillBodyAndHeaders(bodyBuilder, headers, lines)
 
         return HttpInfo(
-            method = requestLine?.getOrNull(0),
-            url = requestLine?.getOrNull(1),
-            statusCode = requestLine?.getOrNull(1)?.toIntOrNull(),
-            headers = headers,
-            body = body,
+            null,
+            null,
+            statusCode,
+            headers,
+            bodyBuilder.toString().trim(),
         )
+    }
+
+    private fun parseHttpRequest(
+        firstLine: String,
+        bodyBuilder: StringBuilder,
+        headers: MutableMap<String, String>,
+        lines: List<String>,
+    ): HttpInfo? {
+        val parts = firstLine.split(" ")
+        if (parts.size < 3) return null
+
+        val method = parts[0]
+        val url = parts[1]
+
+        fillBodyAndHeaders(bodyBuilder, headers, lines)
+
+        return HttpInfo(
+            method,
+            url,
+            null,
+            headers,
+            bodyBuilder.toString().trim(),
+        )
+    }
+
+    private fun fillBodyAndHeaders(
+        bodyBuilder: StringBuilder, headers: MutableMap<String, String>, lines: List<String>,
+    ) {
+        var i = 1
+        while (i < lines.size && lines[i].contains(":")) {
+            val headerParts = lines[i].split(": ", limit = 2)
+            if (headerParts.size == 2) {
+                headers[headerParts[0]] = headerParts[1]
+            }
+            i++
+        }
+
+        for (j in i until lines.size) {
+            bodyBuilder.append(lines[j]).append("\n")
+        }
+    }
+
+    private fun isHttpRequest(line: String): Boolean {
+        val methods = listOf("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH")
+        val parts = line.split(" ")
+        return parts.size == 3 && methods.contains(parts[0].toUpperCase())
+    }
+
+    private fun isHttpResponse(line: String): Boolean {
+        val parts = line.split(" ")
+        return parts.size >= 3 && parts[0].startsWith("HTTP/") && parts[1].toIntOrNull() != null
     }
 
     private companion object {

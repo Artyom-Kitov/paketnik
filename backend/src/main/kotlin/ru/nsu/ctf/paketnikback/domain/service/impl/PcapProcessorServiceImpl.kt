@@ -78,9 +78,7 @@ class PcapProcessorServiceImpl(
         unallocatedPacketRepository.save(updatedUnallocated)
     }
 
-    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> = packets.map {
-            packet,
-        ->
+    private fun applyRulesToPackets(rules: List<Rule>, packets: List<PacketData>): List<PacketData> = packets.map { packet ->
         applyRulesToPacket(
             rules,
             packet,
