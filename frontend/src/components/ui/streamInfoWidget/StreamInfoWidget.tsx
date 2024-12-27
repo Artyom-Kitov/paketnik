@@ -10,7 +10,6 @@ import { useMemo } from "react";
 export const StreamInfoWidget: React.FC = () => {
   const streamId = useAtomValue(currentStreamId);
   const searchData = useAtomValue(searchResult);
-
   const getSearches = (packetIndex: number): SearchMatch[] => {
     const highlights: SearchMatch[] = [];
     searchData?.matches.forEach((match) => {
@@ -70,13 +69,14 @@ export const StreamInfoWidget: React.FC = () => {
       <div className="text-left text-[#fff] text-2xl font-bold mb-[6px]">
         Stream Info ({streamId?.slice(0, 5) ?? "none"})
       </div>
-      {data != undefined && data != null && (
+      {data != undefined && data != null && streamId != undefined && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
           <div className="overflow-auto space-y-4">
             {data.map((message, index) => (
               <PacketWidget
                 key={index}
                 data={message}
+                streamId={streamId}
                 highlights={getSearches(message.index)}
                 leftSideIp={leftSideIp}
               />

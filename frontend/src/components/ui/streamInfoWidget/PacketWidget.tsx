@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Packet } from "../../../api";
-import { SearchMatch } from "../../../api";
+import { ExportedRequest, Packet } from "../../../api";
+import { SearchMatch, getRequest } from "../../../api";
 import { ChevronDown, ChevronRight, Copy } from "lucide-react";
 
 type ServerMessageWidgetProps = {
   data: Packet;
+  streamId: string;
   highlights: SearchMatch[];
   leftSideIp?: string;
 };
@@ -42,9 +43,11 @@ const Section: React.FC<SectionProps> = ({
 
 export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   data,
+  streamId,
   highlights,
   leftSideIp,
 }) => {
+  const [status, setStatus] = useState<string | null>(null);
   const setHighlightedSymbols = (): number[] => {
     const numbers: number[] = [];
     highlights.forEach((match) => {
@@ -55,7 +58,6 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
     });
     return numbers;
   };
-
   const highlightedSymbols: number[] = setHighlightedSymbols();
 
   const getBody = () => {
@@ -76,6 +78,33 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
         ))}
       </span>
     );
+  };
+
+  async function exportRequest(
+    streamId: string,
+    index: number,
+    format: string,
+  ) {
+    try {
+      const exportedRequest: ExportedRequest = await getRequest(
+        streamId,
+        index,
+        format,
+      );
+      copytextToClipboard(exportedRequest.export);
+      setStatus("Copied to the clipboard");
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
+  }
+
+  const copytextToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      setStatus((error as Error).message);
+      console.error("Failed to copy to clipboard");
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -106,7 +135,24 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
             ))}
           </div>
         </Section>
-
+        {data.httpInfo && (
+          <div className="inline float-right">
+            <div className="inline mr-2">Export:</div>
+            <button
+              onClick={() => exportRequest(streamId, data.index, "curl")}
+              className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+            >
+              curl
+            </button>
+            <button
+              onClick={() => exportRequest(streamId, data.index, "python")}
+              className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+            >
+              python request
+            </button>
+            {status && <div className="mb-4">{status}</div>}
+          </div>
+        )}
         {data.httpInfo && (
           <Section title="HTTP Layer" defaultOpen={true}>
             <div className={`space-y-2 ${!isLeftSide && "text-right"}`}>
