@@ -13,7 +13,7 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   streamId,
   highlights,
 }) => {
-  const [status, setStatus] = useState<string|null>(null)
+  const [status, setStatus] = useState<string | null>(null);
   const setHighlightedSymbols = (): number[] => {
     const numbers: number[] = [];
     highlights.forEach((match) => {
@@ -47,33 +47,54 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
     );
   };
 
-  async function exportRequest(streamId: string, index: number, format: string) {
-      try{
-        const exportedRequest : ExportedRequest = await getRequest(streamId, index, format);
-        copytextToClipboard(exportedRequest.export)
-        setStatus("Copied to the clipboard")
-      } catch(error){
-        setStatus((error as Error).message)
-      }
+  async function exportRequest(
+    streamId: string,
+    index: number,
+    format: string,
+  ) {
+    try {
+      const exportedRequest: ExportedRequest = await getRequest(
+        streamId,
+        index,
+        format,
+      );
+      copytextToClipboard(exportedRequest.export);
+      setStatus("Copied to the clipboard");
+    } catch (error) {
+      setStatus((error as Error).message);
+    }
   }
 
   const copytextToClipboard = async (text: string) => {
-    try{
-      await navigator.clipboard.writeText(text)
-    } catch(error){
-      console.error("Failed to copy to clipboard")
-    }   
-  }
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      setStatus((error as Error).message)
+      console.error("Failed to copy to clipboard");
+    }
+  };
 
   return (
     <div className="relative bg-[#252c3a] p-4 pl-8 mr-[100px] rounded-lg shadow-md overflow-hidden h-72 max-h-fit min-h-28 resize-y">
       <h2 className="text-lg inline font-semibold">Packet</h2>
-      {data.httpInfo && <div className="inline float-right">
-        <div className="inline mr-2">Export:</div>
-        <button onClick={ () => exportRequest(streamId, data.index, "curl")} className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors">curl</button>
-        <button onClick={ () => exportRequest(streamId, data.index, "python")} className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors">python request</button>
-        {status && <div className="mb-4">{status}</div>}
-      </div>}
+      {data.httpInfo && (
+        <div className="inline float-right">
+          <div className="inline mr-2">Export:</div>
+          <button
+            onClick={() => exportRequest(streamId, data.index, "curl")}
+            className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+          >
+            curl
+          </button>
+          <button
+            onClick={() => exportRequest(streamId, data.index, "python")}
+            className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+          >
+            python request
+          </button>
+          {status && <div className="mb-4">{status}</div>}
+        </div>
+      )}
       <div className="text-sm mt-2 whitespace-normal">
         <p>Received at: {data.receivedAt}</p>
         {data.tags.map((tag, i) => (

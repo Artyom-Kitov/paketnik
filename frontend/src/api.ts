@@ -83,7 +83,7 @@ export interface Packet {
   httpInfo: HttpInfo | null;
 }
 
-export interface HttpInfo{
+export interface HttpInfo {
   method: string;
   url: string;
   statusCode: number;
@@ -101,7 +101,7 @@ export interface Pcap {
   content: Blob;
 }
 
-export interface ExportedRequest{
+export interface ExportedRequest {
   export: string;
 }
 
@@ -160,8 +160,21 @@ export async function deletePcap(id: string): Promise<void> {
   return await fetchData<void>("/minio-api/files/" + id, "DELETE", "");
 }
 
-export async function getRequest(streamId: string, packetIndex: number, format: string): Promise<ExportedRequest>{
-  return await fetchData<ExportedRequest>("/streams/export-request?streamId=" + streamId + "&packetIndex=" + packetIndex + "&format=" + format, "GET", "")
+export async function getRequest(
+  streamId: string,
+  packetIndex: number,
+  format: string,
+): Promise<ExportedRequest> {
+  return await fetchData<ExportedRequest>(
+    "/streams/export-request?streamId=" +
+      streamId +
+      "&packetIndex=" +
+      packetIndex +
+      "&format=" +
+      format,
+    "GET",
+    "",
+  );
 }
 
 export async function getRules(): Promise<Rule[]> {
