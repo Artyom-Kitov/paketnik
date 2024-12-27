@@ -16,11 +16,11 @@ export function LoadPcapWidget() {
     mutationFn: postPcapRemote,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["pcaps"] });
+      await queryClient.invalidateQueries({ queryKey: ["streams"] });
       setAnswer("Ok : file successfully upload");
     },
     onError: (error: Error) => {
-      setAnswer("Error:" + error.message);
-      console.error("Error uploading file:", error);
+      setAnswer(error.message);
     },
   });
 
@@ -30,13 +30,22 @@ export function LoadPcapWidget() {
     }
   };
 
+  function getExtention(fileName: string) {
+    return fileName.split(".").pop();
+  }
+
   const handleLoadAndAnalyze = () => {
-    if (selectedFile) {
+    if (
+      selectedFile &&
+      getExtention(selectedFile.name)?.toLocaleLowerCase() === "pcap"
+    ) {
       const pcap: Pcap = {
         id: selectedFile.name,
         content: selectedFile,
       };
       loadAndAnalyzeMutation(pcap);
+    } else {
+      setAnswer("That is not pcap file");
     }
   };
 
@@ -72,7 +81,7 @@ export function LoadPcapWidget() {
                 <input
                   type="file"
                   className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
-                  accept=".pcap,.pcapng"
+                  accept=".pcap"
                   onChange={handleFileChange}
                 />
                 <div>{serverAnswer}</div>

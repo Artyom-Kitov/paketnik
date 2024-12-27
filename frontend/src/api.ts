@@ -238,17 +238,14 @@ async function fetchData<Type>(
     };
   }
   try {
-    if (
-      method == "DELETE" ||
-      (path == "/rules" && method == "POST") ||
-      path == "/minio-api/upload/remote"
-    ) {
+    if (method == "DELETE" || (path == "/rules" && method == "POST")) {
       return (await fetch(host + path, options)) as Type;
     } else {
       const result = await fetch(host + path, options);
-      console.log(result.status);
       if (result.status == 200) {
         return result.json() as Type;
+      } else if (result.status == 500 && path == "/minio-api/upload/remote") {
+        return result as Type;
       } else if (result.status == 500) {
         throw new Error("Server error");
       } else if (result.status == 404 && path == "/search") {
@@ -263,6 +260,8 @@ async function fetchData<Type>(
         throw new Error("Bad Request");
       } else if (result.status == 404) {
         throw new Error("Not Found");
+      } else if (result.status == 409 && path == "/minio-api/upload/remote") {
+        throw new Error("File already exist");
       }
       return result as Type;
     }
