@@ -4,7 +4,8 @@ import { postPcapRemote, getPcap, Pcap } from "../../../api";
 
 export function LoadPcapWidget() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [serverAnswer, setAnswer] = useState<string | undefined>(undefined);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["pcaps"],
@@ -17,10 +18,15 @@ export function LoadPcapWidget() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["pcaps"] });
       await queryClient.invalidateQueries({ queryKey: ["streams"] });
-      setAnswer("Ok : file successfully upload");
+      setTimeout(async () => {
+        await queryClient.invalidateQueries({ queryKey: ["streams"] });
+      }, 1000);
+      setUploadSuccess(true);
+      setUploadError(null);
     },
     onError: (error: Error) => {
-      setAnswer(error.message);
+      setUploadSuccess(false);
+      setUploadError(error.message);
     },
   });
 
@@ -45,7 +51,7 @@ export function LoadPcapWidget() {
       };
       loadAndAnalyzeMutation(pcap);
     } else {
-      setAnswer("That is not pcap file");
+      setUploadError("That is not pcap file");
     }
   };
 
@@ -84,7 +90,16 @@ export function LoadPcapWidget() {
                   accept=".pcap"
                   onChange={handleFileChange}
                 />
-                <div>{serverAnswer}</div>
+                {uploadSuccess && (
+                  <div className="p-2 bg-green-600 bg-opacity-25 border border-green-500 rounded text-green-400">
+                    File successfully uploaded
+                  </div>
+                )}
+                {uploadError && (
+                  <div className="p-2 bg-red-600 bg-opacity-25 border border-red-500 rounded text-red-400">
+                    {uploadError}
+                  </div>
+                )}
                 <button
                   className="w-full bg-[#4a5568] px-4 py-2 rounded hover:bg-[#2d3748] transition-colors"
                   onClick={handleLoadAndAnalyze}

@@ -28,7 +28,7 @@ export const ServicesListWidget = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="text-right text-[#fff] text-2xl font-bold mb-2">
+      <div className="text-left text-[#fff] text-2xl font-bold mb-2">
         Services
       </div>
       <div className="w-full bg-[#475569] p-[7px] flex-1 overflow-auto">
