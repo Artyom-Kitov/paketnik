@@ -175,11 +175,11 @@ export async function getRequest(
 ): Promise<ExportedRequest> {
   return await fetchData<ExportedRequest>(
     "/streams/export-request?streamId=" +
-      streamId +
-      "&packetIndex=" +
-      packetIndex +
-      "&format=" +
-      format,
+    streamId +
+    "&packetIndex=" +
+    packetIndex +
+    "&format=" +
+    format,
     "GET",
     "",
   );
@@ -210,7 +210,7 @@ export async function updateService(service: Service): Promise<void> {
 }
 
 export async function deleteService(id: string): Promise<void> {
-  return await fetchData<void>("/services/" + id, "DELETE", "");
+  return await fetchData<void>("/services?id=" + id, "DELETE", "");
 }
 
 export async function postService(service: Service): Promise<void> {

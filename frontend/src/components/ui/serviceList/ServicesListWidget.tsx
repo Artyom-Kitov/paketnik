@@ -1,15 +1,23 @@
 import { ServiceWidget } from "./ServiceWidget";
-import { getServices } from "../../../api";
-import { useQuery } from "@tanstack/react-query";
+import { getServices, deleteService } from "../../../api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const ServicesListWidget = ({
   setCurrentWidget,
 }: {
   setCurrentWidget: (widget: string) => void;
 }) => {
+  const queryClient = useQueryClient();
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["service"],
     queryFn: getServices,
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["service"] });
+    },
   });
 
   if (isPending) {
@@ -56,13 +64,30 @@ export const ServicesListWidget = ({
               <th className="text-xl text-[#e2e8f0] font-bold sticky px-20.45">
                 hex color
               </th>
+              <th className="text-xl text-[#e2e8f0] font-bold sticky px-20.45">
+                actions
+              </th>
             </tr>
             <tr className="h-[12px] bg-[#1e293b]"></tr>
             <tr className="h-[7px]"> </tr>
           </thead>
           <tbody>
             {data?.map((service) => (
-              <ServiceWidget key={service.id} service={service} />
+              <tr
+                key={service.id}
+                className="h-[50px] bg-[#1e293b] mb-[7px] hover:bg-[#252c3a]"
+              >
+                <ServiceWidget service={service} />
+                <td className="text-center text-[#e2e8f0] text-xl">
+                  <button
+                    onClick={() => deleteMutation.mutate(service.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
+                    disabled={deleteMutation.isPending}
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>

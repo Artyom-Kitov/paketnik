@@ -1,28 +1,20 @@
 import { Service } from "../../../api";
 
-export type Props = {
-  service: Service;
-};
-
-const ServiceWidget = ({ service }: Props) => {
+export const ServiceWidget = ({ service }: { service: Service }) => {
   return (
-    <tr
-      onContextMenu={(e) => {
-        e.preventDefault();
-      }}
-      className="h-[50px] bg-[#1e293b] border-t-2 border-[#ccc]"
-    >
-      <th
-        className="text-xl text-[#fff] font-bold"
-        style={{ backgroundColor: service.hexColor }}
-      >
+    <>
+      <td className="text-center text-[#e2e8f0] text-xl font-bold">
         {service.name}
-      </th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{service.id}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{service.port}</th>
-      <th className="text-xl text-[#e2e8f0] font-bold">{service.hexColor}</th>
-    </tr>
+      </td>
+      <td className="text-center text-[#e2e8f0] text-xl font-bold">
+        {service.id}
+      </td>
+      <td className="text-center text-[#e2e8f0] text-xl font-bold">
+        {service.port}
+      </td>
+      <td className="text-center text-[#e2e8f0] text-xl font-bold">
+        {service.hexColor}
+      </td>
+    </>
   );
 };
-
-export { ServiceWidget };
