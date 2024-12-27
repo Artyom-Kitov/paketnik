@@ -9,7 +9,6 @@ import { SearchMatch } from "../../../api";
 export const StreamInfoWidget: React.FC = () => {
   const streamId = useAtomValue(currentStreamId);
   const searchData = useAtomValue(searchResult);
-
   const getSearches = (packetIndex: number): SearchMatch[] => {
     const highlights: SearchMatch[] = [];
     searchData?.matches.forEach((match) => {

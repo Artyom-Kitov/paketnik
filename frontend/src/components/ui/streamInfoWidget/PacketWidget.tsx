@@ -24,7 +24,6 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
     });
     return numbers;
   };
-
   const highlightedSymbols: number[] = setHighlightedSymbols();
 
   const getBody = () => {
