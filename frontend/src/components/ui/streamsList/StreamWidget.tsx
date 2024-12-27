@@ -26,17 +26,26 @@ const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
   const srcService = getService(stream.srcPort);
   const dstService = getService(stream.dstPort);
 
-  const serviceText = srcService && dstService
-    ? <>
-      <span style={{ color: srcService.hexColor }} className="bg-slate-100">{srcService.name}</span>
-      <span className="text-blue-300"> ↔ </span>
-      <span style={{ color: dstService.hexColor }} className="bg-slate-100">{dstService.name}</span>
-    </>
-    : srcService
-      ? <span style={{ color: srcService.hexColor }} className="bg-slate-100">{srcService.name}</span>
-      : dstService
-        ? <span style={{ color: dstService.hexColor }} className="bg-slate-100">{dstService.name}</span>
-        : null;
+  const serviceText =
+    srcService && dstService ? (
+      <>
+        <span style={{ color: srcService.hexColor }} className="bg-slate-100">
+          {srcService.name}
+        </span>
+        <span className="text-blue-300"> ↔ </span>
+        <span style={{ color: dstService.hexColor }} className="bg-slate-100">
+          {dstService.name}
+        </span>
+      </>
+    ) : srcService ? (
+      <span style={{ color: srcService.hexColor }} className="bg-slate-100">
+        {srcService.name}
+      </span>
+    ) : dstService ? (
+      <span style={{ color: dstService.hexColor }} className="bg-slate-100">
+        {dstService.name}
+      </span>
+    ) : null;
 
   return (
     <tr
@@ -48,8 +57,9 @@ const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
         e.preventDefault();
         onClick(stream.id);
       }}
-      className={`h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc] ${stream.id === streamId ? "bg-[#374151]" : ""
-        }`}
+      className={`h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc] ${
+        stream.id === streamId ? "bg-[#374151]" : ""
+      }`}
     >
       <th className="text-xl text-[#fff] font-bold bg-[#FF4081]">
         {stream.id.slice(0, 5)}
