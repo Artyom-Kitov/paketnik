@@ -1,4 +1,6 @@
+import { useAtomValue } from "jotai";
 import { Stream } from "../../../api";
+import { currentStreamId } from "./selectedStream";
 
 export type Props = {
   onContextMenu: (pageX: number, pageY: number) => void;
@@ -7,6 +9,7 @@ export type Props = {
 };
 
 const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
+  const streamId = useAtomValue(currentStreamId);
   const stream = data;
   return (
     <tr
@@ -18,10 +21,11 @@ const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
         e.preventDefault();
         onClick(stream.id);
       }}
-      className="h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc]"
+      className={`h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc] ${stream.id === streamId ? "bg-[#374151]" : ""
+        }`}
     >
       <th className="text-xl text-[#fff] font-bold bg-[#FF4081]">
-        {stream.id}
+        {stream.id.slice(0, 5)}
       </th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.srcIp}</th>
       <th className="text-xl text-[#e2e8f0] font-bold">{stream.srcPort}</th>

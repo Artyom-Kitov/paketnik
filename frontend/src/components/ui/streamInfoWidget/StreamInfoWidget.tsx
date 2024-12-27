@@ -56,7 +56,7 @@ export const StreamInfoWidget: React.FC = () => {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="text-left text-[#fff] text-2xl font-bold mb-[6px]">
-        Stream Info
+        Stream Info ({streamId?.slice(0, 5) ?? "none"})
       </div>
       {data != undefined && data != null && (
         <div className="flex flex-col p-4 bg-[#475569] text-white flex-1 overflow-auto">
