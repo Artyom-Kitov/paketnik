@@ -185,7 +185,8 @@ class TestUploadAgent(unittest.TestCase):
 
         p.send_signal(signal.SIGINT)
         self.assertTrue(p.wait() == 0)
-        p.stdout.close()
+        if p.stdout is not None:
+            p.stdout.close()
 
     def test_dont_upload_incorrect_file(self):
 

@@ -94,10 +94,11 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
         return False
     
     url = FILE_UPLOAD_API_URL.format(dst_ip, dst_port)
-    headers = {'X-File-Name': path_to_pcap.encode('utf-8').hex()}
+    filename = path_to_pcap.encode('utf-8').hex()
+    headers = {'X-File-Name': filename}
     
     logger.info(f'{path_to_pcap} transfer started')
-            
+    
     t_start = time.time()
     try:
         response = requests.post(url, data=upload_in_chunks(path_to_pcap), headers=headers, timeout=TIMEOUT)
@@ -106,7 +107,7 @@ def upload_pcap(path_to_pcap: str, dst_ip: str, dst_port: int) -> bool:
         logger.debug(f'{traceback.format_exc()}')
         return False
     t_end = time.time()
-            
+    
     if response.status_code != 200:
         logger.error(f'{path_to_pcap}: error status code ({response.status_code})')
         return False

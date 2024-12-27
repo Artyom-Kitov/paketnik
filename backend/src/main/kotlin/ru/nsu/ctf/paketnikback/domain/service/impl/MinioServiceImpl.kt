@@ -15,6 +15,9 @@ import org.springframework.web.multipart.MultipartFile
 import ru.nsu.ctf.paketnikback.domain.dto.*
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
+import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
+import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.security.MessageDigest
 import java.util.UUID
@@ -26,6 +29,8 @@ import java.io.IOException
 class MinioServiceImpl(
     private val minioClient: MinioClient,
     private val packetStreamService: PacketStreamService,
+    private val packetStreamRepository: PacketStreamRepository,
+    private val unallocatedPacketRepository: UnallocatedPacketRepository,
 ) : MinioService {
     private var bucketName = "default-bucket"
     private val log = logger()
@@ -136,8 +141,12 @@ class MinioServiceImpl(
         return try {
             removeMinioFile(fileName)
             log.info("File $fileName successfully deleted.")
+            log.info("Attempting delete file streams")
+            packetStreamRepository.deleteByPcapId(fileName)
+            unallocatedPacketRepository.deleteByPcapId(fileName)
+            log.info("File streams succesfully deleted")
             DeleteFileResult("File $fileName successfully deleted.", HttpStatus.OK)
-        } catch (e: MinioException) {
+        } catch (e: Exception) {
             log.error("Error: Unable to delete file. ${e.message}", e)
             DeleteFileResult("Error: Unable to delete file. ${e.message}", HttpStatus.INTERNAL_SERVER_ERROR)
         }
@@ -154,6 +163,12 @@ class MinioServiceImpl(
             if(file == null || file.isEmpty()){
                 log.error("Error: file $fileName is Empty")
                 uploadStatus[fileName] = "ERR: File is Empty"
+                return@forEach
+            }
+            
+            if (file.getSize() == 0L) {
+                log.error("Error: file $fileName is empty")
+                uploadStatus[fileName] = "ERR: File is empty"
                 return@forEach
             }
 
@@ -195,10 +210,10 @@ class MinioServiceImpl(
         return UploadLocalFilesResult(uploadStatus, status)
     }
 
-    override fun uploadRemoteFile(file: MultipartFile, fileName: String): UploadRemoteFileResult {
+    override fun uploadRemoteFile(file: ByteArray, fileName: String, fileSize: Long): UploadRemoteFileResult {
         log.info("Attempting upload remote files")
         val safeFileName = fileName ?: "unknown_${UUID.randomUUID()}"
-        val fileHash = calculateFileHashStreaming(file)
+        val fileHash = calculateFileAsBytesHash(file)
         val fileExtension = getFileExtension(safeFileName)
         val hashFileName = "$fileHash.$fileExtension"
 
@@ -208,7 +223,7 @@ class MinioServiceImpl(
         }
 
         try {
-            loadFileToMinio(file, hashFileName)
+            loadFileAsBytesToMinio(file, hashFileName, fileSize)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
         } catch (e: Exception) {
@@ -242,11 +257,37 @@ class MinioServiceImpl(
                     .bucket(bucketName)
                     .`object`(fileName)
                     .stream(inputStream, file.size, -1)
-                    .contentType(file.contentType)
                     .build(),
             )
         }
         packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun loadFileAsBytesToMinio(file: ByteArray, fileName: String, fileSize: Long) {
+        file.inputStream().use { inputStream ->
+            minioClient.putObject(
+                PutObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .stream(inputStream, file.size.toLong(), -1)
+                    .build(),
+            )
+        }
+        packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun calculateFileAsBytesHash(file: ByteArray): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+
+        file.inputStream().use { inputStream ->
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     private fun calculateFileHashStreaming(file: MultipartFile): String {
@@ -262,8 +303,6 @@ class MinioServiceImpl(
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
-    private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "")
-
     private fun removeMinioFile(fileName: String){
         minioClient.removeObject(
                 RemoveObjectArgs
@@ -274,4 +313,5 @@ class MinioServiceImpl(
         )
     }
 
+    private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "pcap")
 }

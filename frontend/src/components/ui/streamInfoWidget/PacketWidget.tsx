@@ -25,10 +25,11 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   const highlightedSymbols: number[] = setHighlightedSymbols();
 
   const getBody = () => {
+    const decodedBody = window.atob(data.encodedData);
     return (
       <span>
         {" "}
-        {Array.from(data.encodedData).map((part, i) => (
+        {Array.from(decodedBody).map((part, i) => (
           <span
             key={i}
             style={
@@ -109,6 +110,22 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
           <p>Length: {data.layers.udp.length}</p>
           <p>Checksum: {data.layers.udp.checksum}</p>
           <p>Data: {data.layers.udp.data}</p>
+        </div>
+      )}
+      {data.httpInfo && (
+        <div className="text-sm mt-2 whitespace-normal">
+          <p className="font-semibold">Http</p>
+          <p>Method: {data.httpInfo.method}</p>
+          <p>Status code: {data.httpInfo.statusCode}</p>
+          <p>Url: {data.httpInfo.url}</p>
+          {data.httpInfo.headers && <p>Http headers:</p>}
+          {data.httpInfo.headers &&
+            Object.entries(data.httpInfo.headers).map((entry, i) => (
+              <p key={i}>
+                {entry[0]}: {entry[1]}
+              </p>
+            ))}
+          <p>Body: {data.httpInfo.body}</p>
         </div>
       )}
       {data.encodedData && (
