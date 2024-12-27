@@ -89,7 +89,6 @@ export interface Packet {
   httpInfo: HttpInfo;
   tags: string[];
   index: number;
-  httpInfo: HttpInfo;
 }
 
 export interface HttpInfo {

@@ -136,22 +136,22 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
           </div>
         </Section>
         {data.httpInfo && (
-        <div className="inline float-right">
-          <div className="inline mr-2">Export:</div>
-          <button
-            onClick={() => exportRequest(streamId, data.index, "curl")}
-            className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
-          >
-            curl
-          </button>
-          <button
-            onClick={() => exportRequest(streamId, data.index, "python")}
-            className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
-          >
-            python request
-          </button>
-          {status && <div className="mb-4">{status}</div>}
-        </div>
+          <div className="inline float-right">
+            <div className="inline mr-2">Export:</div>
+            <button
+              onClick={() => exportRequest(streamId, data.index, "curl")}
+              className="inline mr-2 bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+            >
+              curl
+            </button>
+            <button
+              onClick={() => exportRequest(streamId, data.index, "python")}
+              className="inline bg-[#4a5568] px-1 rounded hover:bg-[#2d3748] transition-colors"
+            >
+              python request
+            </button>
+            {status && <div className="mb-4">{status}</div>}
+          </div>
         )}
         {data.httpInfo && (
           <Section title="HTTP Layer" defaultOpen={true}>
