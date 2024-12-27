@@ -75,17 +75,17 @@ final class PacketStreamServiceImpl(
     override fun exportHttpRequest(streamId: String, packetIndex: Int, format: String): String {
         log.info("trying to export http info in $format format for stream $streamId, packet $packetIndex")
         val packets = getStreamPackets(streamId)
-        var targetPacket: PacketData? = null
+        var packet: PacketData? = null
         for (p in packets) {
             if (p.index == packetIndex) {
-                targetPacket = p
+                packet = p
             }
         }
-        if (targetPacket == null) {
+        if (packet == null) {
             throw EntityNotFoundException("No packet with index $packetIndex in stream $streamId")
         }
 
-        val packet = packets[packetIndex]
+        // val packet = packets[packetIndex]
         val httpInfo = packet.httpInfo
             ?: throw EntityNotFoundException("Packet at index $packetIndex is not an HTTP packet")
         
