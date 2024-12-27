@@ -175,11 +175,11 @@ export async function getRequest(
 ): Promise<ExportedRequest> {
   return await fetchData<ExportedRequest>(
     "/streams/export-request?streamId=" +
-    streamId +
-    "&packetIndex=" +
-    packetIndex +
-    "&format=" +
-    format,
+      streamId +
+      "&packetIndex=" +
+      packetIndex +
+      "&format=" +
+      format,
     "GET",
     "",
   );
