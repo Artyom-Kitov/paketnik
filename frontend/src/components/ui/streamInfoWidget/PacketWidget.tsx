@@ -6,6 +6,7 @@ import { ChevronDown, ChevronRight, Copy } from "lucide-react";
 type ServerMessageWidgetProps = {
   data: Packet;
   highlights: SearchMatch[];
+  leftSideIp?: string;
 };
 
 type SectionProps = {
@@ -34,6 +35,7 @@ const Section: React.FC<SectionProps> = ({ title, children, defaultOpen = false 
 export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   data,
   highlights,
+  leftSideIp,
 }) => {
   const setHighlightedSymbols = (): number[] => {
     const numbers: number[] = [];
@@ -72,12 +74,17 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
     navigator.clipboard.writeText(text);
   };
 
+  const isLeftSide = leftSideIp && data.layers.ipv4?.srcIp === leftSideIp;
+
   return (
-    <div className="relative bg-[#252c3a] p-4 rounded-lg shadow-md overflow-y-auto h-80 max-h-fit min-h-28 resize-y">
-      <div className="space-y-2">
+    <div
+      className={`relative bg-[#252c3a] p-4 rounded-lg shadow-md overflow-y-auto h-fit max-h-screen min-h-28 resize-y ${isLeftSide ? 'ml-0 mr-auto' : 'ml-auto mr-0'
+        } ${isLeftSide ? 'w-[95%]' : 'w-[95%]'}`}
+    >
+      <div className={`space-y-2 ${!isLeftSide && 'text-right'}`}>
         <Section title="Basic Info" defaultOpen={true}>
           <p>Received at: {data.receivedAt}</p>
-          <div className="flex flex-wrap gap-2 mt-1">
+          <div className={`flex flex-wrap gap-2 mt-1 ${!isLeftSide && 'justify-end'}`}>
             {data.tags.map((tag, i) => (
               <span key={i} className="px-2 py-1 bg-gray-700/50 rounded-full text-xs">
                 {tag}
@@ -87,8 +94,8 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
         </Section>
 
         {data.httpInfo && (
-          <Section title="HTTP Layer">
-            <div className="space-y-2">
+          <Section title="HTTP Layer" defaultOpen={true}>
+            <div className={`space-y-2 ${!isLeftSide && 'text-right'}`}>
               <div className="grid grid-cols-2 gap-2">
                 <p>Method: {data.httpInfo.method}</p>
                 <p>Status: {data.httpInfo.statusCode}</p>
@@ -116,12 +123,13 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
             <div className="relative">
               <button
                 onClick={() => copyToClipboard(window.atob(data.encodedData))}
-                className="absolute right-0 top-0 p-1 hover:bg-gray-700/50 rounded"
+                className={`absolute ${isLeftSide ? 'right-0' : 'left-0'} top-0 p-1 hover:bg-gray-700/50 rounded`}
                 title="Copy body"
               >
                 <Copy className="w-4 h-4" />
               </button>
-              <div className="font-mono text-sm bg-gray-800/30 p-2 rounded mt-2 break-words">
+              <div className={`font-mono text-sm bg-gray-800/30 p-2 rounded mt-2 break-words ${!isLeftSide && 'text-right'
+                }`}>
                 {getBody()}
               </div>
             </div>
@@ -130,14 +138,14 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
 
         {data.layers.ipv4 && (
           <Section title="IPv4 Layer">
-            <div className="grid grid-cols-2 gap-2">
+            <div className={`grid grid-cols-2 gap-2 ${!isLeftSide && 'text-right'}`}>
               <p>Source IP: {data.layers.ipv4.srcIp}</p>
               <p>Destination IP: {data.layers.ipv4.dstIp}</p>
               <p>Version: {data.layers.ipv4.version}</p>
               <p>Total Length: {data.layers.ipv4.length}</p>
               <p>TTL: {data.layers.ipv4.ttl}</p>
               <p>Fragment Offset: {data.layers.ipv4.fragmentOffset}</p>
-              <p>Don't Fragment: {data.layers.ipv4.doNotFragment ? "Yes" : "No"}</p>
+              <p>Don&apos;t Fragment: {data.layers.ipv4.doNotFragment ? "Yes" : "No"}</p>
               <p>More Fragments: {data.layers.ipv4.moreFragments ? "Yes" : "No"}</p>
               <p>Checksum: {data.layers.ipv4.headerChecksum}</p>
             </div>

@@ -5,6 +5,7 @@ import { useAtomValue } from "jotai";
 import { useQuery } from "@tanstack/react-query";
 import { searchResult } from "../searchbar/searchResult";
 import { SearchMatch } from "../../../api";
+import { useMemo } from "react";
 
 export const StreamInfoWidget: React.FC = () => {
   const streamId = useAtomValue(currentStreamId);
@@ -26,7 +27,7 @@ export const StreamInfoWidget: React.FC = () => {
       if (streamId != undefined) {
         const data = await getPackets(streamId);
         if (data == undefined) {
-          throw new Error("An error oqqured while fetching packets");
+          throw new Error("An error occurred while fetching packets");
         } else {
           return data;
         }
@@ -35,6 +36,15 @@ export const StreamInfoWidget: React.FC = () => {
       }
     },
   });
+
+  // Determine the left side IP by finding the first packet with IPv4 layer
+  const leftSideIp = useMemo(() => {
+    if (!data?.length) { return undefined; }
+
+    const firstPacketWithIp = data.find((packet) => packet.layers.ipv4);
+    return firstPacketWithIp?.layers.ipv4?.srcIp;
+  }, [data]);
+
   if (isPending) {
     return (
       <div className="w-full h-full flex flex-col">
@@ -66,6 +76,7 @@ export const StreamInfoWidget: React.FC = () => {
                 key={index}
                 data={message}
                 highlights={getSearches(message.index)}
+                leftSideIp={leftSideIp}
               />
             ))}
           </div>

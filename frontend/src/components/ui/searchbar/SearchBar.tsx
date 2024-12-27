@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MagnifyingGlassIcon, ChevronDownIcon } from "@radix-ui/react-icons";
-import { getSearchResults, SearchRequest } from "../../../api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getSearchResults, SearchRequest, getPcap } from "../../../api";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { searchResult } from "./searchResult";
 import { useSetAtom } from "jotai";
 
@@ -29,6 +29,11 @@ export const SearchBar: React.FC = () => {
 
   const queryClient = useQueryClient();
 
+  const { data: pcapFiles } = useQuery({
+    queryKey: ["pcaps"],
+    queryFn: getPcap,
+  });
+
   const searchRegexMutation = useMutation({
     mutationFn: getSearchResults,
     onSuccess: (data) => {
@@ -43,9 +48,6 @@ export const SearchBar: React.FC = () => {
     },
   });
 
-  const getIsRuleNameValid = () => {
-    return filters.filename != undefined && filters.filename.length <= 69;
-  };
   const getIsRegexValid = () => {
     try {
       new RegExp(query);
@@ -58,18 +60,16 @@ export const SearchBar: React.FC = () => {
 
   const handleSearch = () => {
     let errorString: string = "Data is incorrect!\n";
-    if (!getIsRuleNameValid()) {
-      errorString = errorString.concat(
-        "Service name shouldn't be empty and shouldn't be longer than 69 symbols\n",
-      );
+    if (!filters.filename) {
+      errorString = errorString.concat("Please select a PCAP file\n");
     }
     if (!getIsRegexValid()) {
       errorString = errorString.concat("Regex is invalid\n");
     }
-    if (getIsRuleNameValid() && getIsRegexValid()) {
+    if (filters.filename && getIsRegexValid()) {
       const searchRequest: SearchRequest = {
         regex: query,
-        filename: filters.filename!,
+        filename: filters.filename,
       };
       searchRegexMutation.mutate(searchRequest);
     } else {
@@ -184,25 +184,27 @@ export const SearchBar: React.FC = () => {
               </select>
             </div>
             <div className="flex flex-col">
-              <label className="text-sm">Filename:</label>
-              <input
-                type="text"
-                placeholder="example.pcap"
+              <select
                 value={filters.filename || ""}
-                onChange={(e) =>
-                  setFilters({ ...filters, filename: e.target.value })
-                }
-                className="px-4 py-2 bg-gray-500 text-gray-200 rounded"
-              />
+                onChange={(e) => setFilters({ ...filters, filename: e.target.value })}
+                className="px-4 py-3 bg-[#475569] text-gray-100 outline-none focus:ring-0 border-l border-gray-600"
+              >
+                <option value="">Select PCAP file</option>
+                {pcapFiles?.map((file) => (
+                  <option key={file.id} value={file.id}>
+                    {file.id}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
       </div>
       {error && (
-        <span className="text-red-500 ml-4 font-semibold">{error}</span>
+        <span className="text-red-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">{error}</span>
       )}
       {success && (
-        <span className="text-green-500 ml-4 font-semibold">{success}</span>
+        <span className="text-green-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">{success}</span>
       )}
     </div>
   );
