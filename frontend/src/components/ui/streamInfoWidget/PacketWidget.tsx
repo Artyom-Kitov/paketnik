@@ -68,7 +68,7 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
     try {
       await navigator.clipboard.writeText(text);
     } catch (error) {
-      setStatus((error as Error).message)
+      setStatus((error as Error).message);
       console.error("Failed to copy to clipboard");
     }
   };
