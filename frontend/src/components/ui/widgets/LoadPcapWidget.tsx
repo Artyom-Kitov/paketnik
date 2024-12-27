@@ -4,7 +4,8 @@ import { postPcapRemote, getPcap, Pcap } from "../../../api";
 
 export function LoadPcapWidget() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [serverAnswer, setAnswer] = useState<string | undefined>(undefined);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["pcaps"],
@@ -16,11 +17,16 @@ export function LoadPcapWidget() {
     mutationFn: postPcapRemote,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["pcaps"] });
-      setAnswer("Ok : file successfully upload");
+      await queryClient.invalidateQueries({ queryKey: ["streams"] });
+      setTimeout(async () => {
+        await queryClient.invalidateQueries({ queryKey: ["streams"] });
+      }, 1000);
+      setUploadSuccess(true);
+      setUploadError(null);
     },
     onError: (error: Error) => {
-      setAnswer("Error:" + error.message);
-      console.error("Error uploading file:", error);
+      setUploadSuccess(false);
+      setUploadError(error.message);
     },
   });
 
@@ -30,13 +36,22 @@ export function LoadPcapWidget() {
     }
   };
 
+  function getExtention(fileName: string) {
+    return fileName.split(".").pop();
+  }
+
   const handleLoadAndAnalyze = () => {
-    if (selectedFile) {
+    if (
+      selectedFile &&
+      getExtention(selectedFile.name)?.toLocaleLowerCase() === "pcap"
+    ) {
       const pcap: Pcap = {
         id: selectedFile.name,
         content: selectedFile,
       };
       loadAndAnalyzeMutation(pcap);
+    } else {
+      setUploadError("That is not pcap file");
     }
   };
 
@@ -72,10 +87,19 @@ export function LoadPcapWidget() {
                 <input
                   type="file"
                   className="w-full p-2 rounded bg-[#1e293b] border border-[#4a5568]"
-                  accept=".pcap,.pcapng"
+                  accept=".pcap"
                   onChange={handleFileChange}
                 />
-                <div>{serverAnswer}</div>
+                {uploadSuccess && (
+                  <div className="p-2 bg-green-600 bg-opacity-25 border border-green-500 rounded text-green-400">
+                    File successfully uploaded
+                  </div>
+                )}
+                {uploadError && (
+                  <div className="p-2 bg-red-600 bg-opacity-25 border border-red-500 rounded text-red-400">
+                    {uploadError}
+                  </div>
+                )}
                 <button
                   className="w-full bg-[#4a5568] px-4 py-2 rounded hover:bg-[#2d3748] transition-colors"
                   onClick={handleLoadAndAnalyze}

@@ -13,16 +13,21 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
+import ru.nsu.ctf.paketnikback.utils.logger
 
 @RestController
 @RequestMapping("/minio-api")
 class FileUploadController(
     private val minioService: MinioService,
 ) {
+    private val log = logger()
+
     @Operation(
         summary = "Create new bucket and set 'currently in use' to it",
         description = "Try create bucket and return status code",
@@ -132,13 +137,21 @@ class FileUploadController(
     )
     @PostMapping(
         path = ["/upload/remote"],
-        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        consumes = [MediaType.APPLICATION_OCTET_STREAM_VALUE],
     )
     fun uploadRemoteFile(
-        @RequestPart("file") file: MultipartFile,
+        @RequestBody file: ByteArrayResource,
         @RequestHeader("X-File-Name") fileName: String,
     ): ResponseEntity<String> {
-        val result = minioService.uploadRemoteFile(file, fileName)
+        val fileData = file.getByteArray()
+        val fileSize = file.contentLength()
+        
+        if (fileSize == 0L) {
+            log.info("ERR: File $fileName is empty")
+            return ResponseEntity.badRequest().body("File $fileName is empty")
+        }
+
+        val result = minioService.uploadRemoteFile(fileData, fileName, fileSize)
         return ResponseEntity(result.message, result.status)
     }
 }

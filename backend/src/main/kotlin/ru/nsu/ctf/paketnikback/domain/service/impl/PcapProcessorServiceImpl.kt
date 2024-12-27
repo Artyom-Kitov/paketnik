@@ -93,7 +93,7 @@ class PcapProcessorServiceImpl(
         if (rule.type == RuleType.REGEX) {
             val regex = rule.regex.toRegex()
             val decodedData = Base64.decode(packet.encodedData)
-            val text = decodedData.toString(Charsets.UTF_8)
+            val text = decodedData.toString(Charsets.US_ASCII)
 
             val items = regex.findAll(text).toList()
             return !items.isEmpty()
@@ -138,7 +138,7 @@ class PcapProcessorServiceImpl(
 
         packets.forEach { packet -> 
             val decodedData = Base64.decode(packet.encodedData)
-            val text = decodedData.toString(Charsets.UTF_8)
+            val text = decodedData.toString(Charsets.US_ASCII)
 
             val items = regex.findAll(text)
             items.forEach { item -> 

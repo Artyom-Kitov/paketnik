@@ -9,7 +9,7 @@ object RuleMatcher {
     @OptIn(ExperimentalEncodingApi::class)
     fun checkPacketMatch(rule: Rule, packet: PacketData): Boolean {
         val decodedData = Base64.decode(packet.encodedData)
-        val text = decodedData.toString(Charsets.UTF_8)
+        val text = decodedData.toString(Charsets.US_ASCII)
         return rule.regex.matcher(text).matches()
     }
 } 

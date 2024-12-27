@@ -4,7 +4,6 @@ import { ServiceRegistrationWidget } from "../serviceRegistration/ServiceRegistr
 import { StreamsListWidget } from "../streamsList/StreamsListWidget";
 import { Sidebar } from "../sidebar/sidebar";
 import { RulesWidget } from "../rulesList/RulesWidget";
-import { ConfigWidget } from "../widgets/ConfigWidget";
 import { FilesWidget } from "../widgets/FilesWidget";
 import { LoadPcapWidget } from "../widgets/LoadPcapWidget";
 import { StreamInfoWidget } from "../streamInfoWidget/StreamInfoWidget";
@@ -24,8 +23,6 @@ export function MainScreen() {
         return <RulesWidget />;
       case "Files":
         return <FilesWidget />;
-      case "Config":
-        return <ConfigWidget />;
       case "Load PCAP":
         return <LoadPcapWidget />;
       default:
