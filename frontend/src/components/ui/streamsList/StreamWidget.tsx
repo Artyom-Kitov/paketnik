@@ -21,8 +21,9 @@ const StreamWidget = ({ data, onContextMenu, onClick }: Props) => {
         e.preventDefault();
         onClick(stream.id);
       }}
-      className={`h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc] ${stream.id === streamId ? "bg-[#374151]" : ""
-        }`}
+      className={`h-[50px] bg-[#1e293b] border-t-2 hover:bg-[#2d3748] border-[#ccc] ${
+        stream.id === streamId ? "bg-[#374151]" : ""
+      }`}
     >
       <th className="text-xl text-[#fff] font-bold bg-[#FF4081]">
         {stream.id.slice(0, 5)}

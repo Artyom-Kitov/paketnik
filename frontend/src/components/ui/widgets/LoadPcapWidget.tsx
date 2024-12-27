@@ -20,7 +20,7 @@ export function LoadPcapWidget() {
       await queryClient.invalidateQueries({ queryKey: ["streams"] });
       setTimeout(async () => {
         await queryClient.invalidateQueries({ queryKey: ["streams"] });
-      }, 1000)
+      }, 1000);
       setUploadSuccess(true);
       setUploadError(null);
     },

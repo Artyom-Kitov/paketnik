@@ -103,15 +103,17 @@ export const SearchBar: React.FC = () => {
           className="bg-[#475569] text-white px-4 py-4 flex items-center"
         >
           <ChevronDownIcon
-            className={`transition-transform duration-300 ${filtersVisible ? "rotate-180" : "rotate-0"
-              }`}
+            className={`transition-transform duration-300 ${
+              filtersVisible ? "rotate-180" : "rotate-0"
+            }`}
           />
         </button>
       </div>
 
       <div
-        className={`overflow-hidden transition-max-h duration-300 ${filtersVisible ? "max-h-[400px]" : "max-h-0"
-          }`}
+        className={`overflow-hidden transition-max-h duration-300 ${
+          filtersVisible ? "max-h-[400px]" : "max-h-0"
+        }`}
       >
         <div className="bg-[#1e293b] border border-gray-600 text-gray-100 rounded shadow-lg p-4 mt-2">
           <div className="grid grid-cols-2 gap-4">
@@ -186,7 +188,9 @@ export const SearchBar: React.FC = () => {
             <div className="flex flex-col">
               <select
                 value={filters.filename || ""}
-                onChange={(e) => setFilters({ ...filters, filename: e.target.value })}
+                onChange={(e) =>
+                  setFilters({ ...filters, filename: e.target.value })
+                }
                 className="px-4 py-3 bg-[#475569] text-gray-100 outline-none focus:ring-0 border-l border-gray-600"
               >
                 <option value="">Select PCAP file</option>
@@ -201,10 +205,14 @@ export const SearchBar: React.FC = () => {
         </div>
       </div>
       {error && (
-        <span className="text-red-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">{error}</span>
+        <span className="text-red-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">
+          {error}
+        </span>
       )}
       {success && (
-        <span className="text-green-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">{success}</span>
+        <span className="text-green-500 ml-4 font-semibold bg-[#475569] px-4 py-2 w-full">
+          {success}
+        </span>
       )}
     </div>
   );

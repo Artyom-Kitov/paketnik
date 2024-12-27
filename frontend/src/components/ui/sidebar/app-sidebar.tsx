@@ -1,9 +1,4 @@
-import {
-  CheckSquare,
-  Download,
-  FileText,
-  Server
-} from "lucide-react";
+import { CheckSquare, Download, FileText, Server } from "lucide-react";
 
 import {
   Sidebar,

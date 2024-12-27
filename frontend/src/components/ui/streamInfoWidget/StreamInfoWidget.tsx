@@ -39,7 +39,9 @@ export const StreamInfoWidget: React.FC = () => {
 
   // Determine the left side IP by finding the first packet with IPv4 layer
   const leftSideIp = useMemo(() => {
-    if (!data?.length) { return undefined; }
+    if (!data?.length) {
+      return undefined;
+    }
 
     const firstPacketWithIp = data.find((packet) => packet.layers.ipv4);
     return firstPacketWithIp?.layers.ipv4?.srcIp;
