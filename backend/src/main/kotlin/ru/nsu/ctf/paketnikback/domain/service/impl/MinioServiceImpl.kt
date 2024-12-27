@@ -21,6 +21,9 @@ import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.utils.logger
 import java.security.MessageDigest
 import java.util.UUID
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 
 @Service
 class MinioServiceImpl(
@@ -136,13 +139,7 @@ class MinioServiceImpl(
             return DeleteFileResult("Error: File $fileName not found.", HttpStatus.NOT_FOUND)
         }
         return try {
-            minioClient.removeObject(
-                RemoveObjectArgs
-                    .builder()
-                    .bucket(bucketName)
-                    .`object`(fileName)
-                    .build(),
-            )
+            removeMinioFile(fileName)
             log.info("File $fileName successfully deleted.")
             log.info("Attempting delete file streams")
             packetStreamRepository.deleteByPcapId(fileName)
@@ -162,6 +159,12 @@ class MinioServiceImpl(
 
         files.forEach { file ->
             val fileName = file.originalFilename ?: "unknown_${UUID.randomUUID()}"
+
+            if(file == null || file.isEmpty()){
+                log.error("Error: file $fileName is Empty")
+                uploadStatus[fileName] = "ERR: File is Empty"
+                return@forEach
+            }
             
             if (file.getSize() == 0L) {
                 log.error("Error: file $fileName is empty")
@@ -183,8 +186,9 @@ class MinioServiceImpl(
                 loadFileToMinio(file, hashFileName)
                 log.info("File $fileName successfully load, hash name is $hashFileName")
                 uploadStatus[fileName] = "OK_status, hash name is $hashFileName"
-            } catch (e: MinioException) {
+            } catch (e: Exception) {
                 log.error("Error: unable to load file $fileName: ${e.message}", e)
+                removeMinioFile(hashFileName)
                 uploadStatus[fileName] = "ERR: ${e.message}"
             }
         }
@@ -222,8 +226,9 @@ class MinioServiceImpl(
             loadFileAsBytesToMinio(file, hashFileName, fileSize)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
-        } catch (e: MinioException) {
+        } catch (e: Exception) {
             log.error("Error: upload remote file $safeFileName: ${e.message}", e)
+            removeMinioFile(hashFileName)
             return UploadRemoteFileResult("ERR: ${e.message}", HttpStatus.BAD_REQUEST)
         }
     }
@@ -296,6 +301,16 @@ class MinioServiceImpl(
             }
         }
         return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    private fun removeMinioFile(fileName: String){
+        minioClient.removeObject(
+                RemoveObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .build()
+        )
     }
 
     private fun getFileExtension(fileName: String): String = fileName.substringAfterLast(".", "pcap")
