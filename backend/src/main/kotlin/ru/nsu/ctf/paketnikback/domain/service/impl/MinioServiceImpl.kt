@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile
 import ru.nsu.ctf.paketnikback.domain.dto.*
 import ru.nsu.ctf.paketnikback.domain.service.MinioService
 import ru.nsu.ctf.paketnikback.domain.service.PacketStreamService
+import ru.nsu.ctf.paketnikback.exception.InvalidEntityException
 import ru.nsu.ctf.paketnikback.domain.repository.PacketStreamRepository
 import ru.nsu.ctf.paketnikback.domain.repository.UnallocatedPacketRepository
 import ru.nsu.ctf.paketnikback.utils.logger
@@ -161,6 +162,13 @@ class MinioServiceImpl(
 
         files.forEach { file ->
             val fileName = file.originalFilename ?: "unknown_${UUID.randomUUID()}"
+            
+            if (file.getSize() == 0L) {
+                log.error("Error: file $fileName is empty")
+                uploadStatus[fileName] = "ERR: File is empty"
+                return@forEach
+            }
+
             val fileHash = calculateFileHashStreaming(file)
             val fileExtension = getFileExtension(fileName)
             val hashFileName = "$fileHash.$fileExtension"
@@ -198,10 +206,10 @@ class MinioServiceImpl(
         return UploadLocalFilesResult(uploadStatus, status)
     }
 
-    override fun uploadRemoteFile(file: MultipartFile, fileName: String): UploadRemoteFileResult {
+    override fun uploadRemoteFile(file: ByteArray, fileName: String, fileSize: Long): UploadRemoteFileResult {
         log.info("Attempting upload remote files")
         val safeFileName = fileName ?: "unknown_${UUID.randomUUID()}"
-        val fileHash = calculateFileHashStreaming(file)
+        val fileHash = calculateFileAsBytesHash(file)
         val fileExtension = getFileExtension(safeFileName)
         val hashFileName = "$fileHash.$fileExtension"
 
@@ -211,7 +219,7 @@ class MinioServiceImpl(
         }
 
         try {
-            loadFileToMinio(file, hashFileName)
+            loadFileAsBytesToMinio(file, hashFileName, fileSize)
             log.info("File $safeFileName successfully upload, hash name is $hashFileName")
             return UploadRemoteFileResult("File successfully upload, hash name is $hashFileName", HttpStatus.OK)
         } catch (e: MinioException) {
@@ -244,11 +252,37 @@ class MinioServiceImpl(
                     .bucket(bucketName)
                     .`object`(fileName)
                     .stream(inputStream, file.size, -1)
-                    .contentType(file.contentType)
                     .build(),
             )
         }
         packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun loadFileAsBytesToMinio(file: ByteArray, fileName: String, fileSize: Long) {
+        file.inputStream().use { inputStream ->
+            minioClient.putObject(
+                PutObjectArgs
+                    .builder()
+                    .bucket(bucketName)
+                    .`object`(fileName)
+                    .stream(inputStream, file.size.toLong(), -1)
+                    .build(),
+            )
+        }
+        packetStreamService.createStreamsFromPcap(bucketName, fileName)
+    }
+
+    private fun calculateFileAsBytesHash(file: ByteArray): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+
+        file.inputStream().use { inputStream ->
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
     }
 
     private fun calculateFileHashStreaming(file: MultipartFile): String {
