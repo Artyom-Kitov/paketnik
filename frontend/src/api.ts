@@ -80,7 +80,7 @@ export interface Packet {
   };
   tags: string[];
   index: number;
-  httpInfo: HttpInfo | null;
+  httpInfo: HttpInfo;
 }
 
 export interface HttpInfo {
