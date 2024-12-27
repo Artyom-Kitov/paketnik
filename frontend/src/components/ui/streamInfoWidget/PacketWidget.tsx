@@ -25,11 +25,10 @@ export const PacketWidget: React.FC<ServerMessageWidgetProps> = ({
   const highlightedSymbols: number[] = setHighlightedSymbols();
 
   const getBody = () => {
-    const decodedBody = window.atob(data.encodedData);
     return (
       <span>
         {" "}
-        {Array.from(decodedBody).map((part, i) => (
+        {Array.from(data.encodedData).map((part, i) => (
           <span
             key={i}
             style={
