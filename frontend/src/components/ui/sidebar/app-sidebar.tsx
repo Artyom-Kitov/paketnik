@@ -1,10 +1,4 @@
-import {
-  Server,
-  Download,
-  Settings,
-  FileText,
-  CheckSquare,
-} from "lucide-react";
+import { CheckSquare, Download, FileText, Server } from "lucide-react";
 
 import {
   Sidebar,
@@ -36,10 +30,6 @@ export function AppSidebar({
     {
       title: "Files",
       icon: FileText,
-    },
-    {
-      title: "Config",
-      icon: Settings,
     },
     {
       title: "Load PCAP",
